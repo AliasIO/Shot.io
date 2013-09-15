@@ -1,0 +1,10 @@
+db/db.sdb
+log/exceptions.log
+public/photos/**/.jpg
+public/photos/**/.png
+public/photos/**/.bmp
+public/photos/**/.gif
+tags
+.DS_Store
+.idea/
+.sass-cache

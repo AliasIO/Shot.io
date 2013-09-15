@@ -1,0 +1,133 @@
+$body-bg: #111 !default
+$body-font-color: #eee !default
+
+$base-font-size: 13px
+
+$em-base: $base-font-size
+
+$form-label-font-color: darken(#eee, 30%)
+
+$fieldset-bg: #333
+$fieldset-border-color: #333
+
+@import "compass"
+
+// Global Foundation Settings
+@import "settings"
+
+// Comment out this import if you don't want to use normalize
+@import "normalize"
+
+// Comment out this import if you are customizing you imports below
+@import "foundation"
+
+// Import specific parts of Foundation by commenting the import "foundation"
+// and uncommenting what you want below. You must uncomment the following if customizing
+
+// @import "foundation/components/global" // *always required
+// @import "foundation/components/grid"
+
+//
+// Use this grid if you want to start using the new Foundation 5 grid early.
+// It will change breakpoints to min-width: 640px and 1024px.
+//
+// @import "foundation/components/grid-5"
+//
+
+// @import "foundation/components/visibility"
+// @import "foundation/components/block-grid"
+// @import "foundation/components/type"
+// @import "foundation/components/buttons"
+// @import "foundation/components/forms" // *requires components/buttons
+// @import "foundation/components/custom-forms" // *requires components/buttons, components/forms
+// @import "foundation/components/button-groups" // *requires components/buttons
+// @import "foundation/components/dropdown-buttons" // *requires components/buttons
+// @import "foundation/components/split-buttons" // *requires components/buttons
+// @import "foundation/components/flex-video"
+// @import "foundation/components/section"
+// @import "foundation/components/top-bar"  // *requires components/grid
+// @import "foundation/components/orbit"
+// @import "foundation/components/reveal"
+// @import "foundation/components/joyride"
+// @import "foundation/components/clearing"
+// @import "foundation/components/alert-boxes"
+// @import "foundation/components/breadcrumbs"
+// @import "foundation/components/keystrokes"
+// @import "foundation/components/labels" 
+// @import "foundation/components/inline-lists"
+// @import "foundation/components/pagination"
+// @import "foundation/components/panels"
+// @import "foundation/components/pricing-tables"
+// @import "foundation/components/progress-bars"
+// @import "foundation/components/side-nav"
+// @import "foundation/components/sub-nav"
+// @import "foundation/components/switch"
+// @import "foundation/components/magellan"
+// @import "foundation/components/tables"
+// @import "foundation/components/thumbs"
+// @import "foundation/components/tooltips"
+// @import "foundation/components/dropdown"
+
+html
+	background-color: $body-bg
+
+h1, h2, h3, h4, h5, h6
+	color: $body-font-color
+
+fieldset
+	background: $fieldset-bg
+
+.row
+	min-width: 100% !important 
+
+#thumbnail-grid
+
+	li
+		overflow: hidden
+
+		&:nth-child(5n+6)
+			clear: left
+
+		.container
+			background-color: #000
+			background-position: center center
+			background-size: cover
+			height: 0
+			padding-bottom: 100%
+			position: relative
+
+.processing
+	background:
+		color: #000
+		image: image-url('processing.gif')
+		repeat: no-repeat
+		position: center center
+	height: 100%
+	+opacity(.5)
+	position: absolute
+	width: 100%
+
+.progressbar-wrap
+	position: absolute
+	width: 100%
+
+	.progressbar
+		background: $primary-color
+		@include background(linear-gradient(top left, darken($primary-color, 20%), $primary-color))
+		height: 3px
+		margin-bottom: -3px
+		width: 0
+
+.title-wrap
+	display: none
+	+opacity(.8)
+	position: absolute
+	width: 100%
+
+	.title
+		background: #000
+		color: #fff
+		height: 30px
+		line-height: 30px
+		overflow: hidden
+		padding: 0 .5em
