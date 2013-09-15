@@ -107,11 +107,38 @@ var Shot;
                 _super.call(this, file, thumbnailGrid);
                 this.file = file;
                 this.thumbnailGrid = thumbnailGrid;
+                this.thumbnailSize = 480;
 
                 var self = this, reader = new FileReader();
 
                 reader.onload = function (e) {
-                    self.thumbnail.find('.container').css({ backgroundImage: 'url(' + e.target.result + ')' });
+                    var image = document.createElement('img'), canvas = document.createElement('canvas');
+
+                    $(image).on('load', function () {
+                        var size = { x: this.width, y: this.height }, ctx = canvas.getContext('2d'), dataUrl = '';
+
+                        if (size.x > size.y) {
+                            size.x = Math.round(size.x *= self.thumbnailSize / size.y);
+                            size.y = self.thumbnailSize;
+                        } else {
+                            size.y = Math.round(size.y *= self.thumbnailSize / size.x);
+                            size.x = self.thumbnailSize;
+                        }
+
+                        canvas.width = size.x;
+                        canvas.height = size.y;
+
+                        ctx.drawImage(image, 0, 0, size.x, size.y);
+
+                        dataUrl = canvas.toDataURL('image/png');
+
+                        $(image).remove();
+                        $(canvas).remove();
+
+                        self.thumbnail.find('.container').css({ backgroundImage: 'url(' + dataUrl + ')' });
+                    });
+
+                    image.src = e.target.result;
                 };
 
                 reader.readAsDataURL(file);
