@@ -26,12 +26,6 @@ class Upload extends \Swiftlet\Controller
 		);
 
 	/**
-	 * Upload path
-	 * @var string
-	 */
-	static $uploadPath = 'public/photos/';
-
-	/**
 	 * Default action
 	 */
 	public function index()
@@ -74,24 +68,9 @@ class Upload extends \Swiftlet\Controller
 
 					$filename = sha1(uniqid(mt_rand(), true)) . self::$fileTypes[$file['type']];
 
-					move_uploaded_file($file['tmp_name'], self::$uploadPath . $filename);
+					move_uploaded_file($file['tmp_name'], \Shot\Models\Image::$imagePath . $filename);
 
-					$image = new \Imagick(self::$uploadPath . $filename);
-
-					$imageLib = $this->app->getLibrary('image');
-
-					$imageLib->autoRotate($image);
-
-					$sizes      = $imageLib->exportSizes($image);
-					$thumbnails = $imageLib->exportThumbnails($image);
-
-					foreach ( $sizes as $path => $image ) {
-						$image->writeimage(self::$uploadPath . $path . $filename);
-					}
-
-					foreach ( $thumbnails as $path => $image ) {
-						$image->writeimage(self::$uploadPath . $path . $filename);
-					}
+					$image = $this->app->getModel('image')->create($filename);
 
 					echo json_encode(array('filename' => $filename));
 

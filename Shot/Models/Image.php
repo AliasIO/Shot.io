@@ -1,17 +1,35 @@
 <?php
 
-namespace Shot\Libraries;
+namespace Shot\Models;
 
 /**
- * Image library
+ * Image model
  */
-class Image extends \Swiftlet\Library
+class Image extends \Swiftlet\Model
 {
+	/**
+	 * Image
+	 * @var \Imagick
+	 */
+	protected $image;
+
+	/**
+	 * Filename
+	 * @var string
+	 */
+	protected $filename;
+
+	/**
+	 * Upload path
+	 * @var string
+	 */
+	public static $imagePath = 'public/photos/';
+
 	/**
 	 * Image sizes
 	 * @var array
 	 */
-	static $imageSizes = array(
+	public static $imageSizes = array(
 		2048,
 		1600,
 		1024
@@ -21,71 +39,84 @@ class Image extends \Swiftlet\Library
 	 * Thumbnail size
 	 * @var integer
 	 */
-	static $thumbnailSize = 480;
+	public static $thumbnailSize = 480;
+
+	/**
+	 * Create a new image object
+	 * @param string $filename
+	 */
+	public function create($filename)
+	{
+		$this->filename = $filename;
+
+		$this->image = new \Imagick(self::$imagePath . $filename);
+
+		$this
+			->autoRotate()
+			->exportSizes()
+			->exportThumbnails()
+			;
+	}
 
 	/**
 	 * Auto rotate image based on EXIF data
 	 * @param \Imagick $image
 	 */
-	public function autoRotate(\Imagick $image)
+	protected function autoRotate()
 	{
-		$orientation = $image->getImageOrientation();
+		$orientation = $this->image->getImageOrientation();
 
 		switch ( $orientation ) {
 			case \Imagick::ORIENTATION_BOTTOMRIGHT:
-				$image->rotateimage('#000', 180);
+				$this->image->rotateimage('#000', 180);
 
 				break;
 			case \Imagick::ORIENTATION_RIGHTTOP:
-				$image->rotateimage('#000', 90);
+				$this->image->rotateimage('#000', 90);
 
 				break;
 			case \Imagick::ORIENTATION_LEFTBOTTOM:
-				$image->rotateimage('#000', -90);
+				$this->image->rotateimage('#000', -90);
 
 				break;
 		}
 
-		$image->setImageOrientation(\Imagick::ORIENTATION_TOPLEFT);
+		$this->image->setImageOrientation(\Imagick::ORIENTATION_TOPLEFT);
+
+		return $this;
 	}
 
 	/**
 	 * Generate various file sizes
-	 * @param \Imagick $image
-	 * @param string $filename
-	 * @return array $sizes
+	 * @return \Imagick
 	 */
-	public function exportSizes(\Imagick $image)
+	protected function exportSizes()
 	{
-		$sizes = array();
-
-		$geometry = $image->getImageGeometry();
+		$geometry = $this->image->getImageGeometry();
 
 		foreach ( self::$imageSizes as $imageSize ) {
-			$copy = clone($image);
+			$image = clone($this->image);
 
 			if ( $geometry['width'] < $imageSize && $geometry['height'] < $imageSize ) {
 				break;
 			}
 
-			$copy->resizeImage($imageSize, $imageSize, \Imagick::FILTER_LANCZOS, 0.9, true);
+			$image->resizeImage($imageSize, $imageSize, \Imagick::FILTER_LANCZOS, 0.9, true);
 
-			$sizes[$imageSize . '/'] = $copy;
+			$image->writeimage(self::$imagePath . $imageSize . '/' . $this->filename);
 		}
 
-		return $sizes;
+		return $this;
 	}
 
 	/**
 	 * Generate thumbnails
-	 * @param \Imagick $image
-	 * @param string $filename
 	 */
-	public function exportThumbnails(\Imagick $image)
+	protected function exportThumbnails()
 	{
 		$thumbnails = [];
 
-		$thumbnail = clone($image);
+		$thumbnail = clone($this->image);
 
 		$geometry = $thumbnail->getImageGeometry();
 
@@ -159,9 +190,9 @@ class Image extends \Swiftlet\Library
 			$thumbnail->cropImage(self::$thumbnailSize, self::$thumbnailSize, 0, $offset * $sliceSize);
 		}
 
-		$thumbnails['thumb/smart/'] = $thumbnail;
+		$thumbnail->writeimage(self::$imagePath . 'thumb/smart/' . $this->filename);
 
-		return $thumbnails;
+		return $this;
 	}
 
 	/**
