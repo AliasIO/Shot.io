@@ -79,7 +79,7 @@ module Shot {
 				}, 'json')
 				.done(function(data) {
 					self.progressBar.set(100, function() {
-						self.thumbnail.find('.container').css({ backgroundImage: 'url(' + SHOT.rootPath + 'photos/480/' + data.filename + ')'});
+						self.thumbnail.find('.container').css({ backgroundImage: 'url(' + SHOT.rootPath + 'photos/thumb/smart/' + data.filename + ')'});
 
 						self.thumbnail.find('.processing').css({ backgroundImage: 'none' }).fadeOut(1000);
 
