@@ -79,11 +79,21 @@ module Shot {
 				}, 'json')
 				.done(function(data) {
 					self.progressBar.set(100, function() {
-						self.thumbnail.find('.container').css({ backgroundImage: 'url(' + SHOT.rootPath + 'photos/thumb/smart/' + data.filename + ')'});
+						var image = $('<img/>');
 
-						self.thumbnail.find('.processing').css({ backgroundImage: 'none' }).fadeOut(1000);
+						image
+							.hide()
+							.on('load', function() { 
+								self.thumbnail.find('.temporary').fadeOut('fast', function() {
+									$(this).remove();
+								});
 
-						console.log('done');
+								self.thumbnail.find('.processing').fadeOut('fast');
+
+								$(this).fadeIn('fast');
+							})
+							.prependTo(self.thumbnail.find('.container'))
+							.prop('src', SHOT.rootPath + 'photos/thumb/smart/' + data.filename);
 					});
 				})
 				.fail(function(e) {
@@ -112,9 +122,9 @@ module Shot {
 
 					$(image).on('load', function() {
 						var 
-							size    = { x: this.width, y: this.height },
-							ctx     = canvas.getContext('2d'),
-							dataUrl = '';
+							size      = { x: this.width, y: this.height },
+							thumbnail = $('<img>'),
+							ctx       = canvas.getContext('2d');
 
 						if ( size.x > size.y ) {
 							size.x = Math.round(size.x *= self.thumbnailSize / size.y);
@@ -124,22 +134,22 @@ module Shot {
 							size.x = self.thumbnailSize;
 						}
 
-						canvas.width  = size.x;
-						canvas.height = size.y;
+						canvas.width  = self.thumbnailSize;
+						canvas.height = self.thumbnailSize;
 
-						ctx.drawImage(image, 0, 0, size.x, size.y);
+						ctx.drawImage(image, ( self.thumbnailSize - size.x ) / 2, ( self.thumbnailSize - size.y ) / 2, size.x, size.y);
 
-						dataUrl = canvas.toDataURL('image/png');
+						thumbnail
+							.css({ opacity: 0 })
+							.on('load', function() { $(this).animate({ opacity: .5 }, 'fast'); })
+							.prop('src', canvas.toDataURL('image/png'))
+							.addClass('temporary')
+							.prependTo(self.thumbnail.find('.container'));
 
-						$(image).remove();
-						$(canvas).remove();
-
-						self.thumbnail.find('.container').css({ backgroundImage: 'url(' + dataUrl + ')' });
+						$(image, canvas).remove();
 					});
 
 					image.src = e.target.result;
-
-					//self.thumbnail.find('.container').css({ backgroundImage: 'url(' + e.target.result + ')' });
 				}
 
 				reader.readAsDataURL(file);

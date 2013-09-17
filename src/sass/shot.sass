@@ -1,14 +1,14 @@
-$body-bg: #111 !default
-$body-font-color: #eee !default
+$body-bg: #fff !default
+$body-font-color: #333 !default
 
 $base-font-size: 13px
 
 $em-base: $base-font-size
 
-$form-label-font-color: darken(#eee, 30%)
+$form-label-font-color: darken($body-font-color, 30%)
 
-$fieldset-bg: #333
-$fieldset-border-color: #333
+$fieldset-bg: #fff
+$fieldset-border-color: #ddd
 
 @import "compass"
 
@@ -89,45 +89,44 @@ fieldset
 			clear: left
 
 		.container
-			background-color: #000
-			background-position: center center
-			background-size: cover
+			background: #111
 			height: 0
 			padding-bottom: 100%
 			position: relative
 
-.processing
-	background:
-		color: #000
-		image: image-url('processing.gif')
-		repeat: no-repeat
-		position: center center
-	height: 100%
-	+opacity(.5)
-	position: absolute
-	width: 100%
+	img
+		position: absolute
 
-.progressbar-wrap
-	position: absolute
-	width: 100%
+	.processing
+		background:
+			image: image-url('processing.gif')
+			repeat: no-repeat
+			position: center center
+		height: 100%
+		+opacity(.8)
+		position: absolute
+		width: 100%
 
-	.progressbar
-		background: $primary-color
-		@include background(linear-gradient(top left, darken($primary-color, 20%), $primary-color))
-		height: 3px
-		margin-bottom: -3px
-		width: 0
+	.progressbar-wrap
+		position: absolute
+		width: 100%
 
-.title-wrap
-	display: none
-	+opacity(.8)
-	position: absolute
-	width: 100%
+		.progressbar
+			background: $primary-color
+			@include background(linear-gradient(top left, darken($primary-color, 20%), $primary-color))
+			height: 3px
+			margin-bottom: -3px
+			width: 0
 
-	.title
-		background: #000
-		color: #fff
-		height: 30px
-		line-height: 30px
-		overflow: hidden
-		padding: 0 .5em
+	.title-wrap
+		+opacity(.8)
+		position: absolute
+		width: 100%
+
+		.title
+			background: #000
+			color: #fff
+			height: 30px
+			line-height: 30px
+			overflow: hidden
+			padding: 0 .5em

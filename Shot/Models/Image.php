@@ -56,6 +56,8 @@ class Image extends \Swiftlet\Model
 			->exportSizes()
 			->exportThumbnails()
 			;
+
+		$properties = $this->image->getImageProperties();
 	}
 
 	/**
@@ -113,6 +115,15 @@ class Image extends \Swiftlet\Model
 	 * Generate thumbnails
 	 */
 	protected function exportThumbnails()
+	{
+		$this->exportSmartThumbnail();
+		//$this->exportCenteredThumbnail();
+	}
+
+	/**
+	 * Generate smart thumbnail
+	 */
+	protected function exportSmartThumbnail()
 	{
 		$thumbnails = [];
 
