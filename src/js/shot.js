@@ -119,6 +119,8 @@ var Shot;
                 }).fail(function (e) {
                     self.progressBar.set(0);
 
+                    self.thumbnail.find('.container').addClass('error');
+
                     console.log('fail');
                 });
             }

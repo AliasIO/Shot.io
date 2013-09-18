@@ -31,7 +31,7 @@ class Install extends \Swiftlet\Controller
 
 				chmod('db/db.sdb', 0666);
 
-				$dbh = $this->app->getSingleton('pdo')->getHandle();
+				$dbh = $this->app->getLibrary('pdo')->getHandle();
 
 				$sql = file_get_contents('db/schema.sql');
 

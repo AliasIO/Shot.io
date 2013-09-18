@@ -18,6 +18,6 @@ class Admin extends \Swiftlet\Controller
 	 */
 	public function index()
 	{
-		$dbh = $this->app->getSingleton('pdo')->getHandle();
+		$dbh = $this->app->getLibrary('pdo')->getHandle();
 	}
 }

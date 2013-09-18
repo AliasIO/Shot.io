@@ -58,6 +58,29 @@ class Image extends \Swiftlet\Model
 			;
 
 		$properties = $this->image->getImageProperties();
+
+		$dbh = $this->app->getLibrary('pdo')->getHandle();
+
+		$sth = $dbh->prepare('
+			INSERT INTO photos (
+				filename,
+				width,
+				height,
+				properties
+			) VALUES (
+				:filename,
+				:width,
+				:height,
+				:properties
+			)
+			');
+
+		$imageProperties = serialize($properties);
+
+		$sth->bindParam('filename', $filename);
+		$sth->bindParam('width', $properties['width'], \PDO::PARAM_INT);
+		$sth->bindParam('height', $properties['height'], \PDO::PARAM_INT);
+		$sth->bindParam('properties', $imageProperties);
 	}
 
 	/**
