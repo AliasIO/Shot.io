@@ -5,7 +5,7 @@ module Shot {
 		constructor() {
 			switch (SHOT.controller) {
 				case 'Admin':
-					var ajaxUpload = new AjaxUpload.Form($('#files'), $('#thumbnail-grid'));
+					new AjaxUpload.Form($('#files'), $('#thumbnail-grid'));
 
 					break;
 			}
@@ -23,17 +23,36 @@ module Shot {
 
 		export class Form {
 			private files = [];
+			private thumbnailQueue = [];
 
 			constructor(private input, private thumbnailGrid) {
 				var self = this;
 
 				input.change(function() {
 					$.each(this.files, function() {
+						var image;
+
 						if ( this.name && $.inArray(this.type, fileTypes) !== -1 ) {
-							self.files.push(new Image(this, self.thumbnailGrid));
+							image = new Image(this, self.thumbnailGrid);
+
+							self.files.push(image);
+							self.thumbnailQueue.push(image);
 						}
 					});
+
+					self.nextThumbnail();
 				});
+			}
+
+			/**
+			 * Create next thumbnail in queue
+			 */
+			nextThumbnail() {
+				if ( this.thumbnailQueue.length ) {
+					this.thumbnailQueue.shift().createThumbnail(() => this.nextThumbnail());
+				}
+
+				return this;
 			}
 		}
 
@@ -43,7 +62,7 @@ module Shot {
 
 			constructor(public file, public thumbnailGrid) {
 				var 
-					self     = this,
+					self = this,
 					formData = new FormData();
 				
 				formData.append('image', file);
@@ -63,12 +82,12 @@ module Shot {
 					processData: false,
 					contentType: false,
 					cache: false,
-					xhr: function() {
+					xhr: () => {
 						var xhr = $.ajaxSettings.xhr();
 
 						// Track upload progress
 						if ( xhr.upload ) {
-							xhr.upload.addEventListener('progress', function(e) {
+							xhr.upload.addEventListener('progress', (e) => {
 								if ( e.lengthComputable ) {
 									self.progressBar.set(( e.loaded / e.total ) * 100);
 								}
@@ -78,7 +97,7 @@ module Shot {
 						return xhr;
 					}
 				}, 'json')
-				.done(function(data) {
+				.done((data) => {
 					self.progressBar.set(100, function() {
 						var image = $('<img/>');
 
@@ -100,7 +119,7 @@ module Shot {
 							.prop('src', SHOT.rootPath + 'photos/thumb/smart/' + data.filename);
 					});
 				})
-				.fail(function(e) {
+				.fail((e) => {
 					self.progressBar.set(0);
 
 					console.log('fail');
@@ -109,25 +128,31 @@ module Shot {
 		}
 
 		class Image extends File {
-			thumbnailSize = 480;
+			thumbnailSize:number = 480;
 
 			constructor(public file, public thumbnailGrid) {
 				super(file, thumbnailGrid);
 
+				return this;
+			}
+
+			createThumbnail(callback: () => void) {
 				var
-					self   = this,
+					self = this,
 					reader = new FileReader();
 
+				callback = typeof callback === 'function' ? callback : () => {};
+
 				// Generate temporary thumbnail
-				reader.onload = function(e) {
+				reader.onload = (e) => {
 					var image = $('<img/>');
 
 					image.on('load', function() {
 						var
 							thumbnail = $('<img/>'),
-							canvas    = $('<canvas/>').get(0),
-							ctx       = canvas.getContext('2d'),
-							size      = { 
+							canvas = $('<canvas/>').get(0),
+							ctx = canvas.getContext('2d'),
+							size = { 
 								x: this.width  < this.height ? self.thumbnailSize : this.width  * self.thumbnailSize / this.height,
 								y: this.height < this.width  ? self.thumbnailSize : this.height * self.thumbnailSize / this.width
 								};
@@ -146,19 +171,25 @@ module Shot {
 							.prependTo(self.thumbnail.find('.container'));
 
 						$(image, canvas).remove();
+
+						callback();
 					});
 
-					$(image).prop('src', e.target.result);
+					image.on('error', () => callback());
+
+					image.prop('src', e.target.result);
 				}
 
-				reader.readAsDataURL(file);
+				reader.onerror = () => callback();
+
+				reader.readAsDataURL(this.file);
 
 				return this;
 			}
 		}
 
 		class ProgressBar {
-			el;
+			el: any;
 
 			constructor(public thumbnail) {
 				var wrap = $('<div class="progressbar-wrap"/>');
@@ -170,7 +201,7 @@ module Shot {
 				thumbnail.find('.container').append(wrap);
 			}
 
-			set(percentage, callback) {
+			set(percentage: number, callback: () => void) {
 				var self = this;
 
 				this.el.stop(true, true).animate({ width: percentage + '%' }, 200, function() {
@@ -182,6 +213,8 @@ module Shot {
 						callback();
 					}
 				});
+
+				return this;
 			}
 		}
 	}

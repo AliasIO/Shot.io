@@ -21,8 +21,8 @@ class Install extends \Swiftlet\Controller
 		$complete = true;
 
 		$folders = array(
-			'log'     => true,
-			'uploads' => true
+			'log'           => true,
+			'public/photos' => true
 			);
 
 		if ( !file_exists('db/db.sdb') ) {

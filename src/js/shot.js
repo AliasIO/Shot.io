@@ -10,7 +10,7 @@ var Shot;
         function App() {
             switch (SHOT.controller) {
                 case 'Admin':
-                    var ajaxUpload = new AjaxUpload.Form($('#files'), $('#thumbnail-grid'));
+                    new AjaxUpload.Form($('#files'), $('#thumbnail-grid'));
 
                     break;
             }
@@ -34,16 +34,34 @@ var Shot;
                 this.input = input;
                 this.thumbnailGrid = thumbnailGrid;
                 this.files = [];
+                this.thumbnailQueue = [];
                 var self = this;
 
                 input.change(function () {
                     $.each(this.files, function () {
+                        var image;
+
                         if (this.name && $.inArray(this.type, fileTypes) !== -1) {
-                            self.files.push(new Image(this, self.thumbnailGrid));
+                            image = new Image(this, self.thumbnailGrid);
+
+                            self.files.push(image);
+                            self.thumbnailQueue.push(image);
                         }
                     });
+
+                    self.nextThumbnail();
                 });
             }
+            Form.prototype.nextThumbnail = function () {
+                var _this = this;
+                if (this.thumbnailQueue.length) {
+                    this.thumbnailQueue.shift().createThumbnail(function () {
+                        return _this.nextThumbnail();
+                    });
+                }
+
+                return this;
+            };
             return Form;
         })();
         AjaxUpload.Form = Form;
@@ -115,7 +133,13 @@ var Shot;
                 this.thumbnailGrid = thumbnailGrid;
                 this.thumbnailSize = 480;
 
+                return this;
+            }
+            Image.prototype.createThumbnail = function (callback) {
                 var self = this, reader = new FileReader();
+
+                callback = typeof callback === 'function' ? callback : function () {
+                };
 
                 reader.onload = function (e) {
                     var image = $('<img/>');
@@ -136,15 +160,25 @@ var Shot;
                         }).prop('src', canvas.toDataURL('image/png')).addClass('temporary').prependTo(self.thumbnail.find('.container'));
 
                         $(image, canvas).remove();
+
+                        callback();
                     });
 
-                    $(image).prop('src', e.target.result);
+                    image.on('error', function () {
+                        return callback();
+                    });
+
+                    image.prop('src', e.target.result);
                 };
 
-                reader.readAsDataURL(file);
+                reader.onerror = function () {
+                    return callback();
+                };
+
+                reader.readAsDataURL(this.file);
 
                 return this;
-            }
+            };
             return Image;
         })(File);
 
@@ -171,6 +205,8 @@ var Shot;
                         callback();
                     }
                 });
+
+                return this;
             };
             return ProgressBar;
         })();

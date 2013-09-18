@@ -105,7 +105,7 @@ class Image extends \Swiftlet\Model
 
 			$image->resizeImage($imageSize, $imageSize, \Imagick::FILTER_LANCZOS, 0.9, true);
 
-			$image->writeimage(self::$imagePath . $imageSize . '/' . $this->filename);
+			$image->writeImage(self::$imagePath . $imageSize . '/' . $this->filename);
 		}
 
 		return $this;
@@ -117,18 +117,15 @@ class Image extends \Swiftlet\Model
 	protected function exportThumbnails()
 	{
 		$this->exportSmartThumbnail();
-		//$this->exportCenteredThumbnail();
+		$this->exportCenteredThumbnail();
 	}
 
 	/**
-	 * Generate smart thumbnail
+	 * Scale thumbnail
+	 * @param \Imagick $thumbnail
 	 */
-	protected function exportSmartThumbnail()
+	protected function scaleThumbnail(\Imagick $thumbnail)
 	{
-		$thumbnails = [];
-
-		$thumbnail = clone($this->image);
-
 		$geometry = $thumbnail->getImageGeometry();
 
 		if ( $geometry['width'] >= $geometry['height'] ) {
@@ -140,6 +137,16 @@ class Image extends \Swiftlet\Model
 
 			$thumbnail->scaleImage(self::$thumbnailSize, 0);
 		}
+	}
+
+	/**
+	 * Generate smart thumbnail
+	 */
+	protected function exportSmartThumbnail()
+	{
+		$thumbnail = clone($this->image);
+
+		$this->scaleThumbnail($thumbnail);
 
 		$geometry = $thumbnail->getImageGeometry();
 
@@ -148,62 +155,88 @@ class Image extends \Swiftlet\Model
 			'y' => $geometry['height']
 			);
 
-		// Prepare image to improve entropy calculation
-		$temporary = clone($thumbnail);
+		if ( $size['x'] != $size['y'] ) {
+			$orientation = $size['x'] > $size['y'] ? 'x' : 'y';
 
-		// Greyscale
-		$temporary->modulateImage(100, 0, 100);
+			// Prepare image to improve entropy calculation
+			$temporary = clone($thumbnail);
 
-		// Blur
-		$temporary->blurImage(3, 2);
+			// Greyscale
+			$temporary->modulateImage(100, 0, 100);
 
-		// Slice image
-		$sliceCount = 25;
+			// Blur
+			$temporary->blurImage(3, 2);
 
-		$sliceSize = floor($size[$orientation] / $sliceCount);
+			// Slice image
+			$sliceCount = 25;
 
-		$entropy = array();
+			$sliceSize = floor($size[$orientation] / $sliceCount);
 
-		// Obtain entropy value for each slice
-		for ( $i = 0; $i < $sliceCount; $i ++ ) {
-			$slice = clone($temporary);
+			$entropy = array();
+
+			// Obtain entropy value for each slice
+			for ( $i = 0; $i < $sliceCount; $i ++ ) {
+				$slice = clone($temporary);
+
+				if ( $orientation == 'x' ) {
+					$slice->cropImage($sliceSize, $size['x'], $sliceSize * $i, 0);
+				} else {
+					$slice->cropImage($size['y'], $sliceSize, 0, $sliceSize * $i);
+				}
+
+				$entropy[$i] = $this->getEntropy($slice, $size[$orientation] * $sliceSize) . "\n";
+			}
+
+			$temporary->destroy();
+
+			$thumbnailSliceCount = floor(self::$thumbnailSize / $sliceSize);
+
+			$entropySums = array();
+
+			// For each possible offset, calculate the total entropy value
+			for ( $i = 0; $i < $sliceCount - $thumbnailSliceCount; $i ++ ) {
+				$entropySums[$i] = 0;
+
+				for ( $j = 0; $j < $thumbnailSliceCount; $j ++ ) {
+					$entropySums[$i] += $entropy[$i + $j];
+				}
+			}
+
+			// Choose the offset with the most available entropy
+			$offset = $entropySums ? 0 : array_search(max($entropySums), $entropySums);
 
 			if ( $orientation == 'x' ) {
-				$slice->cropImage($sliceSize, $size['x'], $sliceSize * $i, 0);
+				$thumbnail->cropImage(self::$thumbnailSize, self::$thumbnailSize, $offset * $sliceSize, 0);
 			} else {
-				$slice->cropImage($size['y'], $sliceSize, 0, $sliceSize * $i);
+				$thumbnail->cropImage(self::$thumbnailSize, self::$thumbnailSize, 0, $offset * $sliceSize);
 			}
 
-			$entropy[$i] = $this->getEntropy($slice, $size[$orientation] * $sliceSize) . "\n";
+			$thumbnail->setImagePage(self::$thumbnailSize, self::$thumbnailSize, 0, 0);
 		}
 
-		$temporary->destroy();
-
-		$thumbnailSliceCount = floor(self::$thumbnailSize / $sliceSize);
-
-		$entropySums = array();
-
-		// For each possible offset, calculate the total entropy value
-		for ( $i = 0; $i < $sliceCount - $thumbnailSliceCount; $i ++ ) {
-			$entropySums[$i] = 0;
-
-			for ( $j = 0; $j < $thumbnailSliceCount; $j ++ ) {
-				$entropySums[$i] += $entropy[$i + $j];
-			}
-		}
-
-		// Choose the offset with the most available entropy
-		$offset = array_search(max($entropySums), $entropySums);
-
-		if ( $orientation == 'x' ) {
-			$thumbnail->cropImage(self::$thumbnailSize, self::$thumbnailSize, $offset * $sliceSize, 0);
-		} else {
-			$thumbnail->cropImage(self::$thumbnailSize, self::$thumbnailSize, 0, $offset * $sliceSize);
-		}
-
-		$thumbnail->writeimage(self::$imagePath . 'thumb/smart/' . $this->filename);
+		$thumbnail->writeImage(self::$imagePath . 'thumb/smart/' . $this->filename);
 
 		return $this;
+	}
+
+	/**
+	 * Generate centered thumbnail
+	 */
+	protected function exportCenteredThumbnail()
+	{
+		$thumbnail = clone($this->image);
+
+		$this->scaleThumbnail($thumbnail);
+
+		$geometry = $thumbnail->getImageGeometry();
+
+		if ( $geometry['width'] != $geometry['height'] ) {
+			$thumbnail->cropImage(self::$thumbnailSize, self::$thumbnailSize, ( self::$thumbnailSize - $geometry['width'] ) / 2, ( self::$thumbnailSize - $geometry['height'] ) / 2);
+
+			$thumbnail->setImagePage(self::$thumbnailSize, self::$thumbnailSize, 0, 0);
+		}
+
+		$thumbnail->writeImage(self::$imagePath . 'thumb/centered/' . $this->filename);
 	}
 
 	/**
