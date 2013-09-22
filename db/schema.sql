@@ -3,9 +3,10 @@ DROP TABLE IF EXISTS photos;
 CREATE TABLE photos (
 	id         INTEGER PRIMARY KEY,
 	filename   TEXT    NOT NULL,
+	title      TEXT        NULL,
 	width      INTEGER NOT NULL,
 	height     INTEGER NOT NULL,
-	properties TEXT        NULL
+	properties TEXT        NULL,
 );
 
 CREATE UNIQUE INDEX filename ON photos ( filename );

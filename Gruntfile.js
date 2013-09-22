@@ -7,7 +7,7 @@ module.exports = function(grunt) {
 				tasks: ['typescript']
 			},
 			js: {
-				files: ['src/js/**/*.js'],
+				files: ['public/js/src/**/*.js'],
 				tasks: ['uglify']
 			},
 			sass: {
@@ -18,7 +18,7 @@ module.exports = function(grunt) {
 		typescript: {
 			base: {
 				src: ['src/ts/**/*.ts'],
-				dest: 'src/js',
+				dest: 'public/js/src',
 				options: {
 					base_path: 'scr/ts',
 					module: 'amd',
@@ -28,9 +28,15 @@ module.exports = function(grunt) {
 		},
 		uglify: {
 			my_target: {
+				/*
+				options: {
+					sourceMap: 'public/js/<%= pkg.name %>.map',
+					sourceMapPrefix: 1
+				},
+				*/
 				files: {
 					'public/js/<%= pkg.name %>.min.js': [
-						'src/js/**/*.js'
+						'public/js/src/**/*.js'
 					]
 				}
 			}

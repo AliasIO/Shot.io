@@ -70,6 +70,10 @@ $fieldset-border-color: #ddd
 
 html
 	background-color: $body-bg
+	height: 100%
+
+body
+	min-height: 100%
 
 h1, h2, h3, h4, h5, h6
 	color: $body-font-color
@@ -79,6 +83,48 @@ fieldset
 
 .row
 	min-width: 100% !important 
+
+.carousel
+	bottom: 0
+	padding-bottom: -40px
+	position: absolute
+	top: 45px
+	width: 100%
+
+	.previous, .current, .next
+		height: 100%
+		position: absolute
+		text-align: center
+
+	.previous .image,
+	.current .image,
+	.next .image
+		bottom: 0
+		left: 0
+		max-height: 100%
+		position: absolute
+		right: 0
+		top: 0
+
+	.previous .image img,
+	.current .image img,
+	.next .image img
+		max-height: 100%
+
+	.previous
+		//border: 1px solid #00f
+		left: 0
+		width: 10%
+
+	.next
+		//border: 1px solid #0f0
+		right: 0
+		width: 10%
+
+	.current
+		//border: 1px solid #f00
+		left: 10%
+		width: 80%
 
 #thumbnail-grid
 
@@ -100,8 +146,12 @@ fieldset
 				.processing
 					background-image: none
 
-	img
+	img, canvas
 		position: absolute
+
+	canvas
+		height: auto
+		max-width: 100%
 
 	.processing
 		background:

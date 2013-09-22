@@ -72,6 +72,10 @@ class Upload extends \Swiftlet\Controller
 
 					$image = $this->app->getModel('image')->create($filename);
 
+					//$image->title = basepath($file['tmp_name']);
+
+					//$image->save();
+
 					echo json_encode(array('filename' => $filename));
 
 					exit;

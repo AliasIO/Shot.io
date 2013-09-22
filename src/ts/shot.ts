@@ -8,6 +8,10 @@ module Shot {
 					new AjaxUpload.Form($('#files'), $('#thumbnail-grid'));
 
 					break;
+				case 'Album':
+					new Album.Carousel($('.carousel'), SHOT.images);
+
+					break;
 			}
 		}
 	}
@@ -151,9 +155,7 @@ module Shot {
 
 					image.on('load', function() {
 						var
-							thumbnail = $('<img/>'),
 							canvas = $('<canvas/>').get(0),
-							ctx = canvas.getContext('2d'),
 							size = { 
 								x: this.width  < this.height ? self.thumbnailSize : this.width  * self.thumbnailSize / this.height,
 								y: this.height < this.width  ? self.thumbnailSize : this.height * self.thumbnailSize / this.width
@@ -163,16 +165,15 @@ module Shot {
 						canvas.height = self.thumbnailSize;
 
 						// Center image on canvas
-						ctx.drawImage(image.get(0), ( canvas.width - size.x ) / 2, ( canvas.height - size.y ) / 2, size.x, size.y);
+						canvas
+							.getContext('2d')
+							.drawImage(this, ( canvas.width - size.x ) / 2, ( canvas.height - size.y ) / 2, size.x, size.y);
 
-						thumbnail
+						$(canvas)
 							.css({ opacity: 0 })
-							.on('load', function() { $(this).animate({ opacity: .5 }, 'fast'); })
-							.prop('src', canvas.toDataURL('image/png'))
+							.animate({ opacity: .5 }, 'fast')
 							.addClass('temporary')
 							.prependTo(self.thumbnail.find('.container'));
-
-						$(image, canvas).remove();
 
 						callback();
 					});
@@ -217,6 +218,22 @@ module Shot {
 				});
 
 				return this;
+			}
+		}
+	}
+
+	module Album {
+		export class Carousel {
+			private index = 0;
+
+			constructor(public carousel, public images: any[]) {
+				var current = $('<img/>');
+
+				console.log(this.images[this.index]);
+
+				current.prop('src', this.images[this.index].paths[2048]);
+
+				this.carousel.find('.current .image').html(current);
 			}
 		}
 	}
