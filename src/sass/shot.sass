@@ -85,16 +85,24 @@ fieldset
 	min-width: 100% !important 
 
 .carousel
+	background: #000
 	bottom: 0
+	overflow: hidden
 	padding-bottom: -40px
 	position: absolute
 	top: 45px
 	width: 100%
 
 	.previous, .current, .next
-		height: 100%
 		position: absolute
-		text-align: center
+
+	.previous, .next
+		height: 80%
+		top: 10%
+		width: 100%
+
+		img
+			opacity: .5
 
 	.previous .image,
 	.current .image,
@@ -113,20 +121,22 @@ fieldset
 
 	.previous
 		//border: 1px solid #00f
-		left: 0
-		width: 10%
+		left: -95%
+		text-align: right
 
 	.next
 		//border: 1px solid #0f0
-		right: 0
-		width: 10%
+		left: 95%
 
 	.current
 		//border: 1px solid #f00
+		height: 100%
 		left: 10%
+		text-align: center
+		top: 0
 		width: 80%
 
-#thumbnail-grid
+.thumbnail-grid
 
 	li
 		overflow: hidden

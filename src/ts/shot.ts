@@ -3,9 +3,15 @@ declare var SHOT, $;
 module Shot {
 	export class App {
 		constructor() {
+			// Prevent dragging of ghost image in Firefox
+			$(document)
+				.on('dragstart', 'img', (e) => {
+					e.preventDefault();
+				});
+
 			switch (SHOT.controller) {
 				case 'Admin':
-					new AjaxUpload.Form($('#files'), $('#thumbnail-grid'));
+					new AjaxUpload.Form($('#files'), $('.thumbnail-grid'));
 
 					break;
 				case 'Album':
@@ -224,16 +230,27 @@ module Shot {
 
 	module Album {
 		export class Carousel {
-			private index = 0;
+			private index = 1;
 
 			constructor(public carousel, public images: any[]) {
-				var current = $('<img/>');
-
-				console.log(this.images[this.index]);
+				var 
+					previous = $('<img/>'),
+					current = $('<img/>'),
+					next = $('<img/>');
 
 				current.prop('src', this.images[this.index].paths[2048]);
 
+				if ( this.index > 0 ) {
+					previous.prop('src', this.images[this.index - 1].paths[2048]);
+				}
+
+				if ( this.images.length > this.index + 1 ) {
+					next.prop('src', this.images[this.index + 1].paths[2048]);
+				}
+
+				this.carousel.find('.previous .image').html(previous);
 				this.carousel.find('.current .image').html(current);
+				this.carousel.find('.next .image').html(next);
 			}
 		}
 	}

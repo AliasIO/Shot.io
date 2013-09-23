@@ -20,7 +20,7 @@
 
 <div class="row">
 	<div class="large-12 columns">
-		<ul id="thumbnail-grid" class="small-block-grid-5">
+		<ul class="thumbnail-grid small-block-grid-5">
 		</ul>
 	</div>
 </div>
