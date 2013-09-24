@@ -221,29 +221,58 @@ var Shot;
     var Album;
     (function (Album) {
         var Carousel = (function () {
-            function Carousel(carousel, images) {
+            function Carousel(carousel, imagesData) {
                 this.carousel = carousel;
-                this.images = images;
                 this.index = 1;
-                var previous = $('<img/>'), current = $('<img/>'), next = $('<img/>');
+                this.images = [];
+                var self = this, previous = $('<img/>'), current = $('<img/>'), next = $('<img/>'), resizeTimeout;
 
-                current.prop('src', this.images[this.index].paths[2048]);
+                $(window).on('resize', function () {
+                    clearTimeout(resizeTimeout);
+
+                    resizeTimeout = setTimeout(function () {
+                        return self.onResize();
+                    }, 10);
+                }).trigger('resize');
+
+                $.each(imagesData, function () {
+                    self.images.push(new Image(this));
+                });
+
+                current.prop('src', this.images[this.index].getFilePath(2048));
 
                 if (this.index > 0) {
-                    previous.prop('src', this.images[this.index - 1].paths[2048]);
+                    previous.prop('src', this.images[this.index - 1].getFilePath(2048));
                 }
 
                 if (this.images.length > this.index + 1) {
-                    next.prop('src', this.images[this.index + 1].paths[2048]);
+                    next.prop('src', this.images[this.index + 1].getFilePath(2048));
                 }
 
                 this.carousel.find('.previous .image').html(previous);
                 this.carousel.find('.current .image').html(current);
                 this.carousel.find('.next .image').html(next);
             }
+            Carousel.prototype.onResize = function () {
+                this.carousel.find('.image img').each(function () {
+                    var el = $(this);
+
+                    el.stop().animate({ marginTop: Math.max(0, (el.parent().height() - el.height()) / 2) }, 'fast');
+                });
+            };
             return Carousel;
         })();
         Album.Carousel = Carousel;
+
+        var Image = (function () {
+            function Image(data) {
+                this.data = data;
+            }
+            Image.prototype.getFilePath = function (size) {
+                return this.data.paths[size] ? this.data.paths[size] : this.data.paths['original'];
+            };
+            return Image;
+        })();
     })(Album || (Album = {}));
 })(Shot || (Shot = {}));
 

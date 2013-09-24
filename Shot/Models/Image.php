@@ -144,6 +144,8 @@ class Image extends \Swiftlet\Model
 
 		$this->title    = $result->title;
 		$this->filename = $result->filename;
+		$this->width    = $result->width;
+		$this->height   = $result->height;
 
 		return $this;
 	}
@@ -179,7 +181,7 @@ class Image extends \Swiftlet\Model
 	 */
 	public function getFilePath($size = null)
 	{
-		if ( $size && in_array($size, self::$imageSizes) && ( $size > $this->width || $size > $this->height ) ) {
+		if ( $size && in_array($size, self::$imageSizes) && ( $size < $this->width && $size < $this->height ) ) {
 			return $this->app->getRootPath() . 'photos/' . $size . '/' . $this->filename;
 		}
 

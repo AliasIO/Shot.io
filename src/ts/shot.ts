@@ -231,26 +231,60 @@ module Shot {
 	module Album {
 		export class Carousel {
 			private index = 1;
+			private images = [];
 
-			constructor(public carousel, public images: any[]) {
+			constructor(public carousel, imagesData: any[]) {
 				var 
+					self = this,
 					previous = $('<img/>'),
 					current = $('<img/>'),
-					next = $('<img/>');
+					next = $('<img/>'),
+					resizeTimeout;
 
-				current.prop('src', this.images[this.index].paths[2048]);
+				$(window).on('resize', () => {
+					clearTimeout(resizeTimeout);
+
+					resizeTimeout = setTimeout(() => self.onResize(), 10);
+				})
+				.trigger('resize');
+
+				$.each(imagesData, function() {
+					self.images.push(new Image(this));
+				});
+
+				current.prop('src', this.images[this.index].getFilePath(2048));
 
 				if ( this.index > 0 ) {
-					previous.prop('src', this.images[this.index - 1].paths[2048]);
+					previous.prop('src', this.images[this.index - 1].getFilePath(2048));
 				}
 
 				if ( this.images.length > this.index + 1 ) {
-					next.prop('src', this.images[this.index + 1].paths[2048]);
+					next.prop('src', this.images[this.index + 1].getFilePath(2048));
 				}
 
 				this.carousel.find('.previous .image').html(previous);
 				this.carousel.find('.current .image').html(current);
 				this.carousel.find('.next .image').html(next);
+			}
+
+			/**
+			 * On window resize
+			 */
+			onResize() {
+				this.carousel.find('.image img').each(function() {
+					var el = $(this);
+
+					el.stop().animate({ marginTop: Math.max(0, ( el.parent().height() - el.height() ) / 2) }, 'fast');
+				});
+			}
+		}
+
+		class Image {
+			constructor(private data) {
+			}
+
+			getFilePath(size) {
+				return this.data.paths[size] ? this.data.paths[size] : this.data.paths['original'];
 			}
 		}
 	}

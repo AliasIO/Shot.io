@@ -39,7 +39,9 @@ class Album extends \Swiftlet\Controller
 			try {
 				$image = $this->app->getModel('image')->load($result->id);
 
-				$paths = array();
+				$paths = array(
+					'original' => $image->getFilePath()
+					);
 
 				foreach ( $image::$imageSizes as $imageSize ) {
 					$paths[$imageSize] = $image->getFilePath($imageSize);
