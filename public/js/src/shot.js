@@ -225,41 +225,30 @@ var Shot;
                 this.carousel = carousel;
                 this.index = 1;
                 this.images = [];
-                var self = this, previous = $('<img/>'), current = $('<img/>'), next = $('<img/>'), resizeTimeout;
-
-                $(window).on('resize', function () {
-                    clearTimeout(resizeTimeout);
-
-                    resizeTimeout = setTimeout(function () {
-                        return self.onResize();
-                    }, 10);
-                }).trigger('resize');
+                var self = this, previous, current, next;
 
                 $.each(imagesData, function () {
                     self.images.push(new Image(this));
                 });
 
-                current.prop('src', this.images[this.index].getFilePath(2048));
+                current = this.images[this.index];
 
                 if (this.index > 0) {
-                    previous.prop('src', this.images[this.index - 1].getFilePath(2048));
+                    previous = this.images[this.index - 1];
                 }
 
                 if (this.images.length > this.index + 1) {
-                    next.prop('src', this.images[this.index + 1].getFilePath(2048));
+                    next = this.images[this.index + 1];
                 }
 
-                this.carousel.find('.previous .image').html(previous);
-                this.carousel.find('.current .image').html(current);
-                this.carousel.find('.next .image').html(next);
-            }
-            Carousel.prototype.onResize = function () {
-                this.carousel.find('.image img').each(function () {
-                    var el = $(this);
+                previous.setSize(2048);
+                current.setSize(2048);
+                next.setSize(2048);
 
-                    el.stop().animate({ marginTop: Math.max(0, (el.parent().height() - el.height()) / 2) }, 'fast');
-                });
-            };
+                this.carousel.find('.previous .image').html(previous.image);
+                this.carousel.find('.current .image').html(current.image);
+                this.carousel.find('.next .image').html(next.image);
+            }
             return Carousel;
         })();
         Album.Carousel = Carousel;
@@ -267,9 +256,27 @@ var Shot;
         var Image = (function () {
             function Image(data) {
                 this.data = data;
+                var self = this, resizeTimeout;
+                ;
+
+                this.image = $('<img/>');
+
+                this.image.on('load', function () {
+                    $(window).on('resize', function () {
+                        clearTimeout(resizeTimeout);
+
+                        resizeTimeout = setTimeout(function () {
+                            return self.onWindowResize();
+                        }, 10);
+                    }).trigger('resize');
+                });
             }
-            Image.prototype.getFilePath = function (size) {
-                return this.data.paths[size] ? this.data.paths[size] : this.data.paths['original'];
+            Image.prototype.setSize = function (size) {
+                this.image.prop('src', this.data.paths[size] ? this.data.paths[size] : this.data.paths['original']);
+            };
+
+            Image.prototype.onWindowResize = function () {
+                this.image.stop().animate({ marginTop: Math.max(0, (this.image.parent().height() - this.image.height()) / 2) }, 'fast');
             };
             return Image;
         })();

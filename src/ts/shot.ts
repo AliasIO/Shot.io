@@ -36,7 +36,7 @@ module Shot {
 			private thumbnailQueue = [];
 
 			constructor(private input, private thumbnailGrid) {
-				var self = this;
+				var self:Form = this;
 
 				input.change(function() {
 					$.each(this.files, function() {
@@ -72,7 +72,7 @@ module Shot {
 
 			constructor(public file, public thumbnailGrid) {
 				var 
-					self = this,
+					self:File = this,
 					formData = new FormData();
 				
 				formData.append('image', file);
@@ -150,7 +150,7 @@ module Shot {
 
 			createThumbnail(callback: () => void) {
 				var
-					self = this,
+					self:Image = this,
 					reader = new FileReader();
 
 				callback = typeof callback === 'function' ? callback : () => {};
@@ -198,7 +198,7 @@ module Shot {
 		}
 
 		class ProgressBar {
-			el: any;
+			el;
 
 			constructor(public thumbnail) {
 				var wrap = $('<div class="progressbar-wrap"/>');
@@ -211,7 +211,7 @@ module Shot {
 			}
 
 			set(percentage: number, callback: () => void) {
-				var self = this;
+				var self:ProgressBar = this;
 
 				this.el.stop(true, true).animate({ width: percentage + '%' }, 200, function() {
 					if ( percentage === 100 ) {
@@ -235,56 +235,65 @@ module Shot {
 
 			constructor(public carousel, imagesData: any[]) {
 				var 
-					self = this,
-					previous = $('<img/>'),
-					current = $('<img/>'),
-					next = $('<img/>'),
-					resizeTimeout;
-
-				$(window).on('resize', () => {
-					clearTimeout(resizeTimeout);
-
-					resizeTimeout = setTimeout(() => self.onResize(), 10);
-				})
-				.trigger('resize');
+					self:Carousel = this,
+					previous:Image,
+					current:Image,
+					next:Image
 
 				$.each(imagesData, function() {
 					self.images.push(new Image(this));
 				});
 
-				current.prop('src', this.images[this.index].getFilePath(2048));
+				current = this.images[this.index];
 
 				if ( this.index > 0 ) {
-					previous.prop('src', this.images[this.index - 1].getFilePath(2048));
+					previous = this.images[this.index - 1];
 				}
 
 				if ( this.images.length > this.index + 1 ) {
-					next.prop('src', this.images[this.index + 1].getFilePath(2048));
+					next = this.images[this.index + 1];
 				}
 
-				this.carousel.find('.previous .image').html(previous);
-				this.carousel.find('.current .image').html(current);
-				this.carousel.find('.next .image').html(next);
+				previous.setSize(2048);
+				current.setSize(2048);
+				next.setSize(2048);
+
+				this.carousel.find('.previous .image').html(previous.image);
+				this.carousel.find('.current .image').html(current.image);
+				this.carousel.find('.next .image').html(next.image);
+			}
+		}
+
+		class Image {
+			public image;
+
+			constructor(private data) {
+				var 
+					self:Image = this,
+					resizeTimeout;
+					;
+
+				this.image = $('<img/>');
+
+				this.image.on('load', function() {
+					$(window).on('resize', () => {
+						clearTimeout(resizeTimeout);
+
+						resizeTimeout = setTimeout(() => self.onWindowResize(), 10);
+					})
+					.trigger('resize');
+				});
+			}
+
+			setSize(size:number) {
+				this.image.prop('src', this.data.paths[size] ? this.data.paths[size] : this.data.paths['original']);
 			}
 
 			/**
 			 * On window resize
 			 */
-			onResize() {
-				this.carousel.find('.image img').each(function() {
-					var el = $(this);
-
-					el.stop().animate({ marginTop: Math.max(0, ( el.parent().height() - el.height() ) / 2) }, 'fast');
-				});
-			}
-		}
-
-		class Image {
-			constructor(private data) {
-			}
-
-			getFilePath(size) {
-				return this.data.paths[size] ? this.data.paths[size] : this.data.paths['original'];
+			onWindowResize() {
+				this.image.stop().animate({ marginTop: Math.max(0, ( this.image.parent().height() - this.image.height() ) / 2) }, 'fast');
 			}
 		}
 	}
