@@ -6,7 +6,9 @@
 
 <div class="carousel">
 	<div class="previous">
-		<div class="image"></div>
+		<a>
+			<div class="image"></div>
+		</a>
 	</div>
 
 	<div class="current">
@@ -14,7 +16,9 @@
 	</div>
 
 	<div class="next">
-		<div class="image"></div>
+		<a>
+			<div class="image"></div>
+		</a>
 	</div>
 </div>
 

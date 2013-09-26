@@ -72,7 +72,7 @@ fieldset
 	min-width: 100% !important 
 
 .carousel
-	background: #000
+	background: darken(#252833, 10%)
 	bottom: 0
 	overflow: hidden
 	padding-bottom: -40px
@@ -81,7 +81,13 @@ fieldset
 	width: 100%
 
 	.previous, .current, .next
+		line-height: 100%
 		position: absolute
+
+		.vertical-align
+			display: inline-block
+			height: 100%
+			vertical-align: middle
 
 	.previous, .next
 		height: 80%
@@ -89,7 +95,7 @@ fieldset
 		width: 100%
 
 		img
-			opacity: .5
+			+opacity(.3)
 
 	.previous .image,
 	.current .image,

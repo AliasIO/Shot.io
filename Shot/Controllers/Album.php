@@ -48,6 +48,7 @@ class Album extends \Swiftlet\Controller
 				}
 
 				$images[] = (object) array(
+					'id'       => $image->getId(),
 					'filename' => $image->getFilename(),
 					'title'    => $image->getTitle(),
 					'width'    => $image->getWidth(),

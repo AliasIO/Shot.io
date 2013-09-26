@@ -16,6 +16,12 @@ class Image extends \Swiftlet\Model
 	protected $image;
 
 	/**
+	 * ID
+	 * @var integer
+	 */
+	protected $id;
+
+	/**
 	 * Filename
 	 * @var string
 	 */
@@ -142,12 +148,21 @@ class Image extends \Swiftlet\Model
 			throw new \Swiftlet\Exception('Image does not exist', self::EXCEPTION_NOT_FOUND);
 		}
 
+		$this->id       = $result->id;
 		$this->title    = $result->title;
 		$this->filename = $result->filename;
 		$this->width    = $result->width;
 		$this->height   = $result->height;
 
 		return $this;
+	}
+
+	/**
+	 * Get ID
+	 */
+	public function getId()
+	{
+		return $this->id;
 	}
 
 	/**

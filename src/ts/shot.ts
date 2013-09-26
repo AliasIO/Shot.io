@@ -258,9 +258,11 @@ module Shot {
 				current.setSize(2048);
 				next.setSize(2048);
 
-				this.carousel.find('.previous .image').html(previous.image);
-				this.carousel.find('.current .image').html(current.image);
-				this.carousel.find('.next .image').html(next.image);
+				this.carousel.find('.image').append('<div class="vertical-align"/>');
+
+				this.carousel.find('.previous .image').append(previous.image);
+				this.carousel.find('.current .image').append(current.image);
+				this.carousel.find('.next .image').append(next.image);
 			}
 		}
 
@@ -293,7 +295,7 @@ module Shot {
 			 * On window resize
 			 */
 			onWindowResize() {
-				this.image.stop().animate({ marginTop: Math.max(0, ( this.image.parent().height() - this.image.height() ) / 2) }, 'fast');
+				//this.image.stop().animate({ marginTop: Math.max(0, ( this.image.parent().height() - this.image.height() ) / 2) }, 'fast');
 			}
 		}
 	}
