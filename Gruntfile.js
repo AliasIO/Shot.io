@@ -28,14 +28,13 @@ module.exports = function(grunt) {
 		},
 		uglify: {
 			my_target: {
-				/*
 				options: {
-					sourceMap: 'public/js/<%= pkg.name %>.map',
-					sourceMapPrefix: 1
+					//sourceMap: 'public/js/<%= pkg.name %>.map',
+					//sourceMapPrefix: 1
 				},
-				*/
 				files: {
 					'public/js/<%= pkg.name %>.min.js': [
+						'public/js/src/lib/jquery.js',
 						'public/js/src/**/*.js'
 					]
 				}
@@ -59,4 +58,6 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-compass');
 	grunt.loadNpmTasks('grunt-typescript');
+
+	grunt.registerTask('default', ['typescript', 'uglify', 'compass', 'watch']);
 };

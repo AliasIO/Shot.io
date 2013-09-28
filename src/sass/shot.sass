@@ -87,25 +87,36 @@ fieldset
 		width: 300%
 
 	.previous, .current, .next
-		line-height: 100%
 		position: absolute
 
-		.vertical-align
+		.valign
 			display: inline-block
 			height: 100%
 			vertical-align: middle
 
 	.previous, .next
-		height: 80%
-		top: 10%
-		width: ( 80% / 3 )
+		height: 90%
+		top: 5%
+		width: ( 86% / 3 )
 
-		img
-			+opacity(.3)
+	.previous
+		//border: 1px solid #00f
+		left: ( 18% / 3 )
+		text-align: right
 
-	.previous .image,
-	.current .image,
-	.next .image
+	.next
+		//border: 1px solid #0f0
+		left: ( 196% / 3 )
+
+	.current
+		//border: 1px solid #f00
+		height: 100%
+		left: ( 107% / 3 )
+		text-align: center
+		top: 0
+		width: ( 86% / 3 )
+
+	.image
 		bottom: 0
 		left: 0
 		max-height: 100%
@@ -113,27 +124,14 @@ fieldset
 		right: 0
 		top: 0
 
-	.previous .image img,
-	.current .image img,
-	.next .image img
-		max-height: 100%
+		img
+			max-height: 100%
+			+box-shadow(0 0 5px #000)
 
-	.previous
-		//border: 1px solid #00f
-		left: ( 29% / 3 )
-		text-align: right
-
-	.next
-		//border: 1px solid #0f0
-		left: ( 191% / 3 )
-
-	.current
-		//border: 1px solid #f00
-		height: 100%
-		left: ( 110% / 3 )
-		text-align: center
-		top: 0
-		width: ( 80% / 3 )
+	&.animating
+		.image
+			img
+				+box-shadow(none)
 
 .thumbnail-grid
 

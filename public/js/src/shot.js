@@ -223,13 +223,23 @@ var Shot;
         var Carousel = (function () {
             function Carousel(carousel, imagesData) {
                 this.carousel = carousel;
-                this.index = 1;
+                this.index = 0;
                 this.images = [];
-                var self = this, previous, current, next, dragStart = { x: 0, y: 0 }, offset = 0, wrap = $(carousel).find('.wrap'), cutOff = $(window).width() / 2;
+                var self = this, dragStart = { x: 0, y: 0 }, offset = 0, wrap = $('<div class="wrap"/>'), cutOff = $(window).width() / 2;
+
+                $.each(['previous', 'current', 'next'], function () {
+                    wrap.append('<div class="' + this + '"><a class="image"><div class="valign"/></a></div>');
+                });
+
+                wrap.appendTo(carousel);
 
                 $(carousel).swipe(function (e, swipe) {
+                    var opacity, destination, distance, duration;
+
                     if (e === 'start') {
                         offset = wrap.position().left;
+
+                        carousel.addClass('animating');
                     }
 
                     if (e === 'move') {
@@ -237,18 +247,24 @@ var Shot;
                     }
 
                     if (e === 'end') {
-                        if (swipe.distance < 100 || swipe.speed < cutOff) {
-                            wrap.stop().animate({ opacity: 1, left: '-100%' });
+                        if (swipe.distance < 50 || swipe.speed < cutOff) {
+                            wrap.stop().animate({ opacity: 1, left: '-100%' }, 'normal', 'easeOutQuad', function () {
+                                carousel.removeClass('animating');
+                            });
                         } else {
-                            var destination = offset + (swipe.direction === 'right' ? cutOff : -cutOff);
+                            destination = offset + (swipe.direction === 'right' ? cutOff : -cutOff);
+                            distance = Math.abs(destination - wrap.position().left);
+                            duration = distance / swipe.speed * 1000;
 
-                            var distance = Math.abs(destination) - Math.abs(wrap.position().left);
+                            wrap.animate({ opacity: 0, left: destination }, duration, 'easeOutQuad', function () {
+                                wrap.css({ left: '-100%' }).animate({ opacity: 1 }, 'normal', 'easeInQuad');
 
-                            var duration = distance / swipe.speed * 1000;
+                                self.index += swipe.direction === 'right' ? -1 : 1;
 
-                            console.log(duration);
+                                self.render();
 
-                            wrap.animate({ opacity: 0, left: destination }, duration);
+                                carousel.removeClass('animating');
+                            });
                         }
                     }
                 });
@@ -257,26 +273,35 @@ var Shot;
                     self.images.push(new Image(this));
                 });
 
+                this.render();
+            }
+            Carousel.prototype.render = function () {
+                var previous, current, next;
+
+                this.carousel.find('.image img').remove();
+
                 current = this.images[this.index];
+
+                current.setSize(2048);
+
+                this.carousel.find('.current .image').append(current.image);
 
                 if (this.index > 0) {
                     previous = this.images[this.index - 1];
+
+                    previous.setSize(2048);
+
+                    this.carousel.find('.previous .image').append(previous.image);
                 }
 
                 if (this.images.length > this.index + 1) {
                     next = this.images[this.index + 1];
+
+                    next.setSize(2048);
+
+                    this.carousel.find('.next .image').append(next.image);
                 }
-
-                previous.setSize(2048);
-                current.setSize(2048);
-                next.setSize(2048);
-
-                this.carousel.find('.image').append('<div class="vertical-align"/>');
-
-                this.carousel.find('.previous .image').append(previous.image);
-                this.carousel.find('.current .image').append(current.image);
-                this.carousel.find('.next .image').append(next.image);
-            }
+            };
             return Carousel;
         })();
         Album.Carousel = Carousel;
