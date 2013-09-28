@@ -5,20 +5,22 @@
 </script>
 
 <div class="carousel">
-	<div class="previous">
-		<a>
-			<div class="image"></div>
-		</a>
-	</div>
+	<div class="wrap">
+		<div class="previous">
+			<a>
+				<div class="image"></div>
+			</a>
+		</div>
 
-	<div class="current">
-		<div class="image"></div>
-	</div>
-
-	<div class="next">
-		<a>
+		<div class="current">
 			<div class="image"></div>
-		</a>
+		</div>
+
+		<div class="next">
+			<a>
+				<div class="image"></div>
+			</a>
+		</div>
 	</div>
 </div>
 

@@ -80,6 +80,12 @@ fieldset
 	top: 45px
 	width: 100%
 
+	.wrap
+		height: 100%
+		left: -100%
+		position: absolute
+		width: 300%
+
 	.previous, .current, .next
 		line-height: 100%
 		position: absolute
@@ -92,7 +98,7 @@ fieldset
 	.previous, .next
 		height: 80%
 		top: 10%
-		width: 100%
+		width: ( 80% / 3 )
 
 		img
 			+opacity(.3)
@@ -114,20 +120,20 @@ fieldset
 
 	.previous
 		//border: 1px solid #00f
-		left: -95%
+		left: ( 29% / 3 )
 		text-align: right
 
 	.next
 		//border: 1px solid #0f0
-		left: 95%
+		left: ( 191% / 3 )
 
 	.current
 		//border: 1px solid #f00
 		height: 100%
-		left: 10%
+		left: ( 110% / 3 )
 		text-align: center
 		top: 0
-		width: 80%
+		width: ( 80% / 3 )
 
 .thumbnail-grid
 

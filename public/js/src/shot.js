@@ -225,7 +225,33 @@ var Shot;
                 this.carousel = carousel;
                 this.index = 1;
                 this.images = [];
-                var self = this, previous, current, next;
+                var self = this, previous, current, next, dragStart = { x: 0, y: 0 }, offset = 0, wrap = $(carousel).find('.wrap'), cutOff = $(window).width() / 2;
+
+                $(carousel).swipe(function (e, swipe) {
+                    if (e === 'start') {
+                        offset = wrap.position().left;
+                    }
+
+                    if (e === 'move') {
+                        wrap.css({ opacity: (cutOff - Math.min(cutOff, Math.abs(swipe.x))) / cutOff, left: offset - Math.min(cutOff, Math.max(-cutOff, swipe.x)) });
+                    }
+
+                    if (e === 'end') {
+                        if (swipe.distance < 100 || swipe.speed < cutOff) {
+                            wrap.stop().animate({ opacity: 1, left: '-100%' });
+                        } else {
+                            var destination = offset + (swipe.direction === 'right' ? cutOff : -cutOff);
+
+                            var distance = Math.abs(destination) - Math.abs(wrap.position().left);
+
+                            var duration = distance / swipe.speed * 1000;
+
+                            console.log(duration);
+
+                            wrap.animate({ opacity: 0, left: destination }, duration);
+                        }
+                    }
+                });
 
                 $.each(imagesData, function () {
                     self.images.push(new Image(this));
