@@ -5,7 +5,7 @@ module Shot {
 		constructor() {
 			// Prevent dragging of ghost image in Firefox
 			$(document)
-				.on('dragstart', 'img', (e) => {
+				.on('dragstart', 'img, a', (e) => {
 					e.preventDefault();
 				});
 
@@ -238,6 +238,10 @@ module Shot {
 		export class Carousel {
 			private index = 0;
 			private images = [];
+			private animating = false;
+			private previous;
+			private current;
+			private next;
 
 			constructor(public carousel, imagesData: any[]) {
 				var 
@@ -253,7 +257,29 @@ module Shot {
 				.trigger('resize');
 
 				$.each([ 'previous', 'current', 'next' ], function() {
-					wrap.append('<div class="' + this + '"><a class="image"><div class="valign"/></a></div>');
+					self[this] = $('<div class="' + this + '"><div class="image"><a><div class="valign"/></a></div></div>');
+
+					wrap.append(self[this]);
+				});
+
+				wrap.find('.image a').on('click', function(e) {
+					e.preventDefault();
+
+					if ( !self.animating ) {
+						// Clicked Previous image
+						if ( self.previous.has(e.target).length ) {
+							self.index --;
+
+							self.render();
+						}
+
+						// Clicked Next image
+						if ( self.next.has(e.target).length ) {
+							self.index ++;
+
+							self.render();
+						}
+					}
 				});
 
 				$(carousel).swipe(function(e, swipe) {
@@ -267,11 +293,15 @@ module Shot {
 						wrap.stop();
 
 						offset = wrap.position().left;
-
-						carousel.addClass('animating');
 					}
 
 					if ( e === 'move' ) {
+						if ( !self.animating ) {
+							carousel.addClass('animating');
+
+							self.animating = true;
+						}
+
 						wrap.css({ opacity: ( cutOff - Math.min(cutOff, Math.abs(swipe.x)) ) / cutOff, left: offset - Math.min(cutOff, Math.max(- cutOff, swipe.x)) });
 					}
 
@@ -280,6 +310,8 @@ module Shot {
 							// Cancel animation
 							wrap.stop().animate({ opacity: 1, left: '-100%' }, 'normal', 'easeOutQuad', function() {
 								carousel.removeClass('animating');
+
+								self.animating = false;
 							});
 						} else {
 							// Finish animation
@@ -298,6 +330,8 @@ module Shot {
 								self.render();
 
 								carousel.removeClass('animating');
+
+								self.animating = false;
 							});
 						}
 					}
@@ -316,35 +350,40 @@ module Shot {
 
 			render() {
 				var
-					previous:Image,
-					current:Image,
-					next:Image;
+					self:Carousel = this,
+					images = { previous: null, current: null, next: null };
 
 				this.index = Math.max(0, Math.min(this.images.length - 1, this.index));
 
 				this.carousel.find('.image img').remove();
 
-				current = this.images[this.index];
-
-				current
-					.appendTo(this.carousel.find('.current .image'))
-					.render(2048);
+				images.current = this.images[this.index];
 
 				if ( this.index > 0 ) {
-					previous = this.images[this.index - 1];
-
-					previous
-						.appendTo(this.carousel.find('.previous .image'))
-						.render(2048);
+					images.previous = this.images[this.index - 1];
 				}
 
 				if ( this.images.length > this.index + 1 ) {
-					next = this.images[this.index + 1];
-
-					next
-						.appendTo(this.carousel.find('.next .image'))
-						.render(2048);
+					images.next = this.images[this.index + 1];
 				}
+
+				$.each([ 'previous', 'current', 'next' ], function() {
+					var 
+						anchor,
+						image = images[this];
+
+					if ( image instanceof Image ) {
+						anchor = self[this].find('.image a');
+
+						anchor
+							.attr('href', image.data.id)
+							.attr('data-id', image.data.id);
+
+						image
+							.appendTo(anchor)
+							.render(2048);
+					}
+				});
 
 				return this;
 			}
@@ -452,15 +491,11 @@ module Shot {
 			}
 
 			public destroy() {
-				var self:Preview = this;
+				this.el.remove();
 
-				this.el.stop().fadeOut('fast', function() {
-					$(window).off('resize.' + self.id);
+				$(window).off('resize.' + this.id);
 
-					$(this).remove();
-
-					self = null;
-				});
+				self = null;
 			}
 		}
 	}

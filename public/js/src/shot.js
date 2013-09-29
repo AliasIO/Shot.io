@@ -8,7 +8,7 @@ var Shot;
 (function (Shot) {
     var App = (function () {
         function App() {
-            $(document).on('dragstart', 'img', function (e) {
+            $(document).on('dragstart', 'img, a', function (e) {
                 e.preventDefault();
             });
 
@@ -231,6 +231,7 @@ var Shot;
                 this.carousel = carousel;
                 this.index = 0;
                 this.images = [];
+                this.animating = false;
                 var self = this, dragStart = { x: 0, y: 0 }, offset = 0, wrap = $('<div class="wrap"/>'), cutOff;
 
                 $(window).on('resize', function () {
@@ -238,7 +239,27 @@ var Shot;
                 }).trigger('resize');
 
                 $.each(['previous', 'current', 'next'], function () {
-                    wrap.append('<div class="' + this + '"><a class="image"><div class="valign"/></a></div>');
+                    self[this] = $('<div class="' + this + '"><div class="image"><a><div class="valign"/></a></div></div>');
+
+                    wrap.append(self[this]);
+                });
+
+                wrap.find('.image a').on('click', function (e) {
+                    e.preventDefault();
+
+                    if (!self.animating) {
+                        if (self.previous.has(e.target).length) {
+                            self.index--;
+
+                            self.render();
+                        }
+
+                        if (self.next.has(e.target).length) {
+                            self.index++;
+
+                            self.render();
+                        }
+                    }
                 });
 
                 $(carousel).swipe(function (e, swipe) {
@@ -248,11 +269,15 @@ var Shot;
                         wrap.stop();
 
                         offset = wrap.position().left;
-
-                        carousel.addClass('animating');
                     }
 
                     if (e === 'move') {
+                        if (!self.animating) {
+                            carousel.addClass('animating');
+
+                            self.animating = true;
+                        }
+
                         wrap.css({ opacity: (cutOff - Math.min(cutOff, Math.abs(swipe.x))) / cutOff, left: offset - Math.min(cutOff, Math.max(-cutOff, swipe.x)) });
                     }
 
@@ -260,6 +285,8 @@ var Shot;
                         if (swipe.distance < 50 || swipe.speed < cutOff || (swipe.direction === 'right' && self.index === 0) || (swipe.direction === 'left' && self.index === self.images.length - 1)) {
                             wrap.stop().animate({ opacity: 1, left: '-100%' }, 'normal', 'easeOutQuad', function () {
                                 carousel.removeClass('animating');
+
+                                self.animating = false;
                             });
                         } else {
                             destination = offset + (swipe.direction === 'right' ? cutOff : -cutOff);
@@ -274,6 +301,8 @@ var Shot;
                                 self.render();
 
                                 carousel.removeClass('animating');
+
+                                self.animating = false;
                             });
                         }
                     }
@@ -290,27 +319,33 @@ var Shot;
                 return this;
             }
             Carousel.prototype.render = function () {
-                var previous, current, next;
+                var self = this, images = { previous: null, current: null, next: null };
 
                 this.index = Math.max(0, Math.min(this.images.length - 1, this.index));
 
                 this.carousel.find('.image img').remove();
 
-                current = this.images[this.index];
-
-                current.appendTo(this.carousel.find('.current .image')).render(2048);
+                images.current = this.images[this.index];
 
                 if (this.index > 0) {
-                    previous = this.images[this.index - 1];
-
-                    previous.appendTo(this.carousel.find('.previous .image')).render(2048);
+                    images.previous = this.images[this.index - 1];
                 }
 
                 if (this.images.length > this.index + 1) {
-                    next = this.images[this.index + 1];
-
-                    next.appendTo(this.carousel.find('.next .image')).render(2048);
+                    images.next = this.images[this.index + 1];
                 }
+
+                $.each(['previous', 'current', 'next'], function () {
+                    var anchor, image = images[this];
+
+                    if (image instanceof Image) {
+                        anchor = self[this].find('.image a');
+
+                        anchor.attr('href', image.data.id).attr('data-id', image.data.id);
+
+                        image.appendTo(anchor).render(2048);
+                    }
+                });
 
                 return this;
             };
@@ -404,15 +439,11 @@ var Shot;
                 return this;
             }
             Preview.prototype.destroy = function () {
-                var self = this;
+                this.el.remove();
 
-                this.el.stop().fadeOut('fast', function () {
-                    $(window).off('resize.' + self.id);
+                $(window).off('resize.' + this.id);
 
-                    $(this).remove();
-
-                    self = null;
-                });
+                self = null;
             };
             return Preview;
         })();
