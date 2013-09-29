@@ -34,25 +34,23 @@ module Shot {
 		];
 
 		export class Form {
-			private files = [];
-			private thumbnailQueue = [];
+			private files: File[] = [];
+			private thumbnailQueue: Image[] = [];
 
 			constructor(private input, private thumbnailGrid) {
-				var self:Form = this;
-
-				input.change(function() {
-					$.each(this.files, function() {
+				input.on('change', (e) => {
+					$.each(e.target.files, (i, file) => {
 						var image;
 
-						if ( this.name && $.inArray(this.type, fileTypes) !== -1 ) {
-							image = new Image(this, self.thumbnailGrid);
+						if ( file.name && $.inArray(file.type, fileTypes) !== -1 ) {
+							image = new Image(file, this.thumbnailGrid);
 
-							self.files.push(image);
-							self.thumbnailQueue.push(image);
+							this.files.push(image);
+							this.thumbnailQueue.push(image);
 						}
 					});
 
-					self.nextThumbnail();
+					this.nextThumbnail();
 				});
 
 				return this;
@@ -61,7 +59,7 @@ module Shot {
 			/**
 			 * Create next thumbnail in queue
 			 */
-			nextThumbnail() {
+			nextThumbnail(): Form {
 				if ( this.thumbnailQueue.length ) {
 					this.thumbnailQueue.shift().createThumbnail(() => this.nextThumbnail());
 				}
@@ -75,9 +73,7 @@ module Shot {
 			progressBar;
 
 			constructor(public file, public thumbnailGrid) {
-				var 
-					self:File = this,
-					formData = new FormData();
+				var formData = new FormData();
 				
 				formData.append('image', file);
 
@@ -103,7 +99,7 @@ module Shot {
 						if ( xhr.upload ) {
 							xhr.upload.addEventListener('progress', (e) => {
 								if ( e.lengthComputable ) {
-									self.progressBar.set(( e.loaded / e.total ) * 100);
+									this.progressBar.set(( e.loaded / e.total ) * 100);
 								}
 							}, false);
 						}
@@ -112,31 +108,31 @@ module Shot {
 					}
 				}, 'json')
 				.done((data) => {
-					self.progressBar.set(100, function() {
+					this.progressBar.set(100, () => {
 						var image = $('<img/>');
 
 						image
 							.hide()
-							.on('load', function() { 
+							.on('load', (e) => { 
 								// Replace temporary thumbnail with processed image
-								self.thumbnail.find('.temporary').fadeOut('fast', function() {
+								this.thumbnail.find('.temporary').fadeOut('fast', function() {
 									$(this).remove();
 								});
 
 								// Remove processing indicator
-								self.thumbnail.find('.processing').fadeOut('fast');
+								this.thumbnail.find('.processing').fadeOut('fast');
 
 								// Reveal the processed image
-								$(this).fadeIn('fast');
+								$(e.target).fadeIn('fast');
 							})
-							.prependTo(self.thumbnail.find('.container'))
+							.prependTo(this.thumbnail.find('.container'))
 							.prop('src', SHOT.rootPath + 'photos/thumb/smart/' + data.filename);
 					});
 				})
 				.fail((e) => {
-					self.progressBar.set(0);
+					this.progressBar.set(0);
 
-					self.thumbnail.find('.container').addClass('error');
+					this.thumbnail.find('.container').addClass('error');
 
 					console.log('fail');
 				});
@@ -146,7 +142,7 @@ module Shot {
 		}
 
 		class Image extends File {
-			thumbnailSize:number = 480;
+			thumbnailSize = 480;
 
 			constructor(public file, public thumbnailGrid) {
 				super(file, thumbnailGrid);
@@ -154,10 +150,8 @@ module Shot {
 				return this;
 			}
 
-			createThumbnail(callback: () => void) {
-				var
-					self:Image = this,
-					reader = new FileReader();
+			createThumbnail(callback: () => void): File {
+				var reader = new FileReader();
 
 				callback = typeof callback === 'function' ? callback : () => {};
 
@@ -165,27 +159,27 @@ module Shot {
 				reader.onload = (e) => {
 					var image = $('<img/>');
 
-					image.on('load', function() {
+					image.on('load', (e) => {
 						var
 							canvas = $('<canvas/>').get(0),
 							size = { 
-								x: this.width  < this.height ? self.thumbnailSize : this.width  * self.thumbnailSize / this.height,
-								y: this.height < this.width  ? self.thumbnailSize : this.height * self.thumbnailSize / this.width
+								x: e.target.width  < e.target.height ? this.thumbnailSize : e.target.width  * this.thumbnailSize / e.target.height,
+								y: e.target.height < e.target.width  ? this.thumbnailSize : e.target.height * this.thumbnailSize / e.target.width
 								};
 
-						canvas.width  = self.thumbnailSize;
-						canvas.height = self.thumbnailSize;
+						canvas.width  = this.thumbnailSize;
+						canvas.height = this.thumbnailSize;
 
 						// Center image on canvas
 						canvas
 							.getContext('2d')
-							.drawImage(this, ( canvas.width - size.x ) / 2, ( canvas.height - size.y ) / 2, size.x, size.y);
+							.drawImage(e.target, ( canvas.width - size.x ) / 2, ( canvas.height - size.y ) / 2, size.x, size.y);
 
 						$(canvas)
 							.css({ opacity: 0 })
 							.animate({ opacity: .5 }, 'fast')
 							.addClass('temporary')
-							.prependTo(self.thumbnail.find('.container'));
+							.prependTo(this.thumbnail.find('.container'));
 
 						callback();
 					});
@@ -216,12 +210,10 @@ module Shot {
 				thumbnail.find('.container').append(wrap);
 			}
 
-			set(percentage: number, callback: () => void) {
-				var self:ProgressBar = this;
-
-				this.el.stop(true, true).animate({ width: percentage + '%' }, 200, function() {
+			set(percentage: number, callback: () => void): ProgressBar {
+				this.el.stop(true, true).animate({ width: percentage + '%' }, 200, () => {
 					if ( percentage === 100 ) {
-						self.el.fadeOut('fast');
+						this.el.fadeOut('fast');
 					}
 
 					if ( typeof callback === 'function' ) {
@@ -237,7 +229,7 @@ module Shot {
 	module Album {
 		export class Carousel {
 			private index = 0;
-			private images = [];
+			private images: Image[] = [];
 			private animating = false;
 			private previous;
 			private current;
@@ -245,49 +237,47 @@ module Shot {
 
 			constructor(public carousel, imagesData: any[]) {
 				var 
-					self:Carousel = this,
-					dragStart = { x: 0, y: 0 },
 					offset = 0,
 					wrap = $('<div class="wrap"/>'),
-					cutOff:number;
+					cutOff: number;
 
 				$(window).on('resize', function() {
 					cutOff = $(window).width() / 2;
 				})
 				.trigger('resize');
 
-				$.each([ 'previous', 'current', 'next' ], function() {
-					self[this] = $('<div class="' + this + '"><div class="image"><a><div class="valign"/></a></div></div>');
+				$.each([ 'previous', 'current', 'next' ], (i, container) => {
+					this[container] = $('<div class="' + container + '"><div class="image"><a><div class="valign"/></a></div></div>');
 
-					wrap.append(self[this]);
+					wrap.append(this[container]);
 				});
 
-				wrap.find('.image a').on('click', function(e) {
+				wrap.find('.image a').on('click', (e) => {
 					e.preventDefault();
 
-					if ( !self.animating ) {
+					if ( !this.animating ) {
 						// Clicked Previous image
-						if ( self.previous.has(e.target).length ) {
-							self.index --;
+						if ( this.previous.has(e.target).length ) {
+							this.index --;
 
-							self.render();
+							this.render();
 						}
 
 						// Clicked Next image
-						if ( self.next.has(e.target).length ) {
-							self.index ++;
+						if ( this.next.has(e.target).length ) {
+							this.index ++;
 
-							self.render();
+							this.render();
 						}
 					}
 				});
 
-				$(carousel).swipe(function(e, swipe) {
+				$(carousel).swipe((e, swipe) => {
 					var
-						opacity,
-						destination,
-						distance,
-						duration;
+						opacity: number,
+						destination: number,
+						distance: number,
+						duration: number;
 
 					if ( e === 'start' ) {
 						wrap.stop();
@@ -296,22 +286,22 @@ module Shot {
 					}
 
 					if ( e === 'move' ) {
-						if ( !self.animating ) {
+						if ( !this.animating ) {
 							carousel.addClass('animating');
 
-							self.animating = true;
+							this.animating = true;
 						}
 
 						wrap.css({ opacity: ( cutOff - Math.min(cutOff, Math.abs(swipe.x)) ) / cutOff, left: offset - Math.min(cutOff, Math.max(- cutOff, swipe.x)) });
 					}
 
 					if ( e === 'end' ) {
-						if ( swipe.distance < 50 || swipe.speed < cutOff || ( swipe.direction === 'right' && self.index === 0 ) || ( swipe.direction === 'left' && self.index === self.images.length - 1 ) ) {
+						if ( swipe.distance < 50 || swipe.speed < cutOff || ( swipe.direction === 'right' && this.index === 0 ) || ( swipe.direction === 'left' && this.index === this.images.length - 1 ) ) {
 							// Cancel animation
-							wrap.stop().animate({ opacity: 1, left: '-100%' }, 'normal', 'easeOutQuad', function() {
+							wrap.stop().animate({ opacity: 1, left: '-100%' }, 'normal', 'easeOutQuad', () => {
 								carousel.removeClass('animating');
 
-								self.animating = false;
+								this.animating = false;
 							});
 						} else {
 							// Finish animation
@@ -319,26 +309,26 @@ module Shot {
 							distance = Math.abs(destination - wrap.position().left);
 							duration = distance / swipe.speed * 1000;
 
-							wrap.stop().animate({ opacity: 0, left: destination }, duration, 'easeOutQuad', function() {
+							wrap.stop().animate({ opacity: 0, left: destination }, duration, 'easeOutQuad', () => {
 								wrap
 									.stop()
 									.css({ left: '-100%'})
 									.animate({ opacity: 1 }, duration / 2, 'easeInQuad');
 
-								self.index += swipe.direction === 'right' ? -1 : 1;
+								this.index += swipe.direction === 'right' ? -1 : 1;
 
-								self.render();
+								this.render();
 
 								carousel.removeClass('animating');
 
-								self.animating = false;
+								this.animating = false;
 							});
 						}
 					}
 				});
 
-				$.each(imagesData, function() {
-					self.images.push(new Image(this));
+				$.each(imagesData, (i, data) => {
+					this.images.push(new Image(data));
 				});
 
 				wrap.appendTo(carousel);
@@ -348,10 +338,8 @@ module Shot {
 				return this;
 			}
 
-			render() {
-				var
-					self:Carousel = this,
-					images = { previous: null, current: null, next: null };
+			render(): Carousel {
+				var images = { previous: null, current: null, next: null };
 
 				this.index = Math.max(0, Math.min(this.images.length - 1, this.index));
 
@@ -367,13 +355,13 @@ module Shot {
 					images.next = this.images[this.index + 1];
 				}
 
-				$.each([ 'previous', 'current', 'next' ], function() {
+				$.each([ 'previous', 'current', 'next' ], (i, container) => {
 					var 
 						anchor,
-						image = images[this];
+						image = images[container];
 
 					if ( image instanceof Image ) {
-						anchor = self[this].find('.image a');
+						anchor = this[container].find('.image a');
 
 						anchor
 							.attr('href', image.data.id)
@@ -391,19 +379,15 @@ module Shot {
 
 		class Image {
 			el;
-			preview:Preview;
+			preview: Preview;
 
 			constructor(private data) {
-				var self:Image = this;
-
 				this.el = $('<img/>');
 
 				return this;
 			}
 
-			appendTo(parent) {
-				var self:Image = this;
-
+			appendTo(parent): Image {
 				this.preview = new Preview({ x: this.data.width, y: this.data.height }, parent, this.data.paths.preview);
 
 				this.el.appendTo(parent);
@@ -411,20 +395,18 @@ module Shot {
 				return this;
 			}
 
-			render(size:number) {
-				var 
-					self:Image = this,
-					el = $('<img/>');
+			render(size: number): Image {
+				var el = $('<img/>');
 
 				el.prop('src', this.data.paths[size] ? this.data.paths[size] : this.data.paths['original']);
 
-				el.on('load', function() {
+				el.on('load', (e) => {
 					// Replace previously rendered image
-					self.el.replaceWith(this);
+					this.el.replaceWith($(e.target));
 
 					// Remove preview image
-					if ( self.preview ) {
-						self.preview.destroy();
+					if ( this.preview ) {
+						this.preview.destroy();
 					}
 				});
 
@@ -434,18 +416,15 @@ module Shot {
 
 		class Preview {
 			private el;
-
-			private id;
+			private id: number;
 
 			constructor(size, parent, filePath) {
-				var self = this;
-
 				this.id = new Date().getTime() + Math.round(Math.random() * 999);
 
 				this.el = $('<img/>');
 
 				// Render pre-load image in place of the actual image
-				$(window).on('resize.' + this.id, function() {
+				$(window).on('resize.' + this.id, () => {
 					var parentSize = { x: parent.width(), y: parent.height() };
 
 					if ( size.x > parentSize.x ) {
@@ -458,7 +437,7 @@ module Shot {
 						size.y  = parentSize.y;
 					}
 
-					self.el.css({
+					this.el.css({
 						position: 'absolute',
 						top: ( parentSize.y / 2 ) - ( size.y / 2 ),
 						height: size.y,
@@ -467,15 +446,15 @@ module Shot {
 
 					switch ( parent.css('textAlign') ) {
 						case 'start':
-							self.el.css({ left: 0 });
+							this.el.css({ left: 0 });
 
 							break;
 						case 'center':
-							self.el.css({ left: ( parentSize.x / 2 ) - ( size.x / 2 ) });
+							this.el.css({ left: ( parentSize.x / 2 ) - ( size.x / 2 ) });
 
 							break;
 						case 'right':
-							self.el.css({ right: 0 });
+							this.el.css({ right: 0 });
 
 							break;
 					}
@@ -490,12 +469,10 @@ module Shot {
 				return this;
 			}
 
-			public destroy() {
+			public destroy(): void {
 				this.el.remove();
 
 				$(window).off('resize.' + this.id);
-
-				self = null;
 			}
 		}
 	}

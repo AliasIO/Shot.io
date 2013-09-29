@@ -41,25 +41,24 @@ var Shot;
 
         var Form = (function () {
             function Form(input, thumbnailGrid) {
+                var _this = this;
                 this.input = input;
                 this.thumbnailGrid = thumbnailGrid;
                 this.files = [];
                 this.thumbnailQueue = [];
-                var self = this;
-
-                input.change(function () {
-                    $.each(this.files, function () {
+                input.on('change', function (e) {
+                    $.each(e.target.files, function (i, file) {
                         var image;
 
-                        if (this.name && $.inArray(this.type, fileTypes) !== -1) {
-                            image = new Image(this, self.thumbnailGrid);
+                        if (file.name && $.inArray(file.type, fileTypes) !== -1) {
+                            image = new Image(file, _this.thumbnailGrid);
 
-                            self.files.push(image);
-                            self.thumbnailQueue.push(image);
+                            _this.files.push(image);
+                            _this.thumbnailQueue.push(image);
                         }
                     });
 
-                    self.nextThumbnail();
+                    _this.nextThumbnail();
                 });
 
                 return this;
@@ -80,9 +79,10 @@ var Shot;
 
         var File = (function () {
             function File(file, thumbnailGrid) {
+                var _this = this;
                 this.file = file;
                 this.thumbnailGrid = thumbnailGrid;
-                var self = this, formData = new FormData();
+                var formData = new FormData();
 
                 formData.append('image', file);
 
@@ -107,7 +107,7 @@ var Shot;
                         if (xhr.upload) {
                             xhr.upload.addEventListener('progress', function (e) {
                                 if (e.lengthComputable) {
-                                    self.progressBar.set((e.loaded / e.total) * 100);
+                                    _this.progressBar.set((e.loaded / e.total) * 100);
                                 }
                             }, false);
                         }
@@ -115,23 +115,23 @@ var Shot;
                         return xhr;
                     }
                 }, 'json').done(function (data) {
-                    self.progressBar.set(100, function () {
+                    _this.progressBar.set(100, function () {
                         var image = $('<img/>');
 
-                        image.hide().on('load', function () {
-                            self.thumbnail.find('.temporary').fadeOut('fast', function () {
+                        image.hide().on('load', function (e) {
+                            _this.thumbnail.find('.temporary').fadeOut('fast', function () {
                                 $(this).remove();
                             });
 
-                            self.thumbnail.find('.processing').fadeOut('fast');
+                            _this.thumbnail.find('.processing').fadeOut('fast');
 
-                            $(this).fadeIn('fast');
-                        }).prependTo(self.thumbnail.find('.container')).prop('src', SHOT.rootPath + 'photos/thumb/smart/' + data.filename);
+                            $(e.target).fadeIn('fast');
+                        }).prependTo(_this.thumbnail.find('.container')).prop('src', SHOT.rootPath + 'photos/thumb/smart/' + data.filename);
                     });
                 }).fail(function (e) {
-                    self.progressBar.set(0);
+                    _this.progressBar.set(0);
 
-                    self.thumbnail.find('.container').addClass('error');
+                    _this.thumbnail.find('.container').addClass('error');
 
                     console.log('fail');
                 });
@@ -152,7 +152,8 @@ var Shot;
                 return this;
             }
             Image.prototype.createThumbnail = function (callback) {
-                var self = this, reader = new FileReader();
+                var _this = this;
+                var reader = new FileReader();
 
                 callback = typeof callback === 'function' ? callback : function () {
                 };
@@ -160,18 +161,18 @@ var Shot;
                 reader.onload = function (e) {
                     var image = $('<img/>');
 
-                    image.on('load', function () {
+                    image.on('load', function (e) {
                         var canvas = $('<canvas/>').get(0), size = {
-                            x: this.width < this.height ? self.thumbnailSize : this.width * self.thumbnailSize / this.height,
-                            y: this.height < this.width ? self.thumbnailSize : this.height * self.thumbnailSize / this.width
+                            x: e.target.width < e.target.height ? _this.thumbnailSize : e.target.width * _this.thumbnailSize / e.target.height,
+                            y: e.target.height < e.target.width ? _this.thumbnailSize : e.target.height * _this.thumbnailSize / e.target.width
                         };
 
-                        canvas.width = self.thumbnailSize;
-                        canvas.height = self.thumbnailSize;
+                        canvas.width = _this.thumbnailSize;
+                        canvas.height = _this.thumbnailSize;
 
-                        canvas.getContext('2d').drawImage(this, (canvas.width - size.x) / 2, (canvas.height - size.y) / 2, size.x, size.y);
+                        canvas.getContext('2d').drawImage(e.target, (canvas.width - size.x) / 2, (canvas.height - size.y) / 2, size.x, size.y);
 
-                        $(canvas).css({ opacity: 0 }).animate({ opacity: .5 }, 'fast').addClass('temporary').prependTo(self.thumbnail.find('.container'));
+                        $(canvas).css({ opacity: 0 }).animate({ opacity: .5 }, 'fast').addClass('temporary').prependTo(_this.thumbnail.find('.container'));
 
                         callback();
                     });
@@ -206,11 +207,10 @@ var Shot;
                 thumbnail.find('.container').append(wrap);
             }
             ProgressBar.prototype.set = function (percentage, callback) {
-                var self = this;
-
+                var _this = this;
                 this.el.stop(true, true).animate({ width: percentage + '%' }, 200, function () {
                     if (percentage === 100) {
-                        self.el.fadeOut('fast');
+                        _this.el.fadeOut('fast');
                     }
 
                     if (typeof callback === 'function') {
@@ -228,36 +228,37 @@ var Shot;
     (function (Album) {
         var Carousel = (function () {
             function Carousel(carousel, imagesData) {
+                var _this = this;
                 this.carousel = carousel;
                 this.index = 0;
                 this.images = [];
                 this.animating = false;
-                var self = this, dragStart = { x: 0, y: 0 }, offset = 0, wrap = $('<div class="wrap"/>'), cutOff;
+                var offset = 0, wrap = $('<div class="wrap"/>'), cutOff;
 
                 $(window).on('resize', function () {
                     cutOff = $(window).width() / 2;
                 }).trigger('resize');
 
-                $.each(['previous', 'current', 'next'], function () {
-                    self[this] = $('<div class="' + this + '"><div class="image"><a><div class="valign"/></a></div></div>');
+                $.each(['previous', 'current', 'next'], function (i, container) {
+                    _this[container] = $('<div class="' + container + '"><div class="image"><a><div class="valign"/></a></div></div>');
 
-                    wrap.append(self[this]);
+                    wrap.append(_this[container]);
                 });
 
                 wrap.find('.image a').on('click', function (e) {
                     e.preventDefault();
 
-                    if (!self.animating) {
-                        if (self.previous.has(e.target).length) {
-                            self.index--;
+                    if (!_this.animating) {
+                        if (_this.previous.has(e.target).length) {
+                            _this.index--;
 
-                            self.render();
+                            _this.render();
                         }
 
-                        if (self.next.has(e.target).length) {
-                            self.index++;
+                        if (_this.next.has(e.target).length) {
+                            _this.index++;
 
-                            self.render();
+                            _this.render();
                         }
                     }
                 });
@@ -272,21 +273,21 @@ var Shot;
                     }
 
                     if (e === 'move') {
-                        if (!self.animating) {
+                        if (!_this.animating) {
                             carousel.addClass('animating');
 
-                            self.animating = true;
+                            _this.animating = true;
                         }
 
                         wrap.css({ opacity: (cutOff - Math.min(cutOff, Math.abs(swipe.x))) / cutOff, left: offset - Math.min(cutOff, Math.max(-cutOff, swipe.x)) });
                     }
 
                     if (e === 'end') {
-                        if (swipe.distance < 50 || swipe.speed < cutOff || (swipe.direction === 'right' && self.index === 0) || (swipe.direction === 'left' && self.index === self.images.length - 1)) {
+                        if (swipe.distance < 50 || swipe.speed < cutOff || (swipe.direction === 'right' && _this.index === 0) || (swipe.direction === 'left' && _this.index === _this.images.length - 1)) {
                             wrap.stop().animate({ opacity: 1, left: '-100%' }, 'normal', 'easeOutQuad', function () {
                                 carousel.removeClass('animating');
 
-                                self.animating = false;
+                                _this.animating = false;
                             });
                         } else {
                             destination = offset + (swipe.direction === 'right' ? cutOff : -cutOff);
@@ -296,20 +297,20 @@ var Shot;
                             wrap.stop().animate({ opacity: 0, left: destination }, duration, 'easeOutQuad', function () {
                                 wrap.stop().css({ left: '-100%' }).animate({ opacity: 1 }, duration / 2, 'easeInQuad');
 
-                                self.index += swipe.direction === 'right' ? -1 : 1;
+                                _this.index += swipe.direction === 'right' ? -1 : 1;
 
-                                self.render();
+                                _this.render();
 
                                 carousel.removeClass('animating');
 
-                                self.animating = false;
+                                _this.animating = false;
                             });
                         }
                     }
                 });
 
-                $.each(imagesData, function () {
-                    self.images.push(new Image(this));
+                $.each(imagesData, function (i, data) {
+                    _this.images.push(new Image(data));
                 });
 
                 wrap.appendTo(carousel);
@@ -319,7 +320,8 @@ var Shot;
                 return this;
             }
             Carousel.prototype.render = function () {
-                var self = this, images = { previous: null, current: null, next: null };
+                var _this = this;
+                var images = { previous: null, current: null, next: null };
 
                 this.index = Math.max(0, Math.min(this.images.length - 1, this.index));
 
@@ -335,11 +337,11 @@ var Shot;
                     images.next = this.images[this.index + 1];
                 }
 
-                $.each(['previous', 'current', 'next'], function () {
-                    var anchor, image = images[this];
+                $.each(['previous', 'current', 'next'], function (i, container) {
+                    var anchor, image = images[container];
 
                     if (image instanceof Image) {
-                        anchor = self[this].find('.image a');
+                        anchor = _this[container].find('.image a');
 
                         anchor.attr('href', image.data.id).attr('data-id', image.data.id);
 
@@ -356,15 +358,11 @@ var Shot;
         var Image = (function () {
             function Image(data) {
                 this.data = data;
-                var self = this;
-
                 this.el = $('<img/>');
 
                 return this;
             }
             Image.prototype.appendTo = function (parent) {
-                var self = this;
-
                 this.preview = new Preview({ x: this.data.width, y: this.data.height }, parent, this.data.paths.preview);
 
                 this.el.appendTo(parent);
@@ -373,15 +371,16 @@ var Shot;
             };
 
             Image.prototype.render = function (size) {
-                var self = this, el = $('<img/>');
+                var _this = this;
+                var el = $('<img/>');
 
                 el.prop('src', this.data.paths[size] ? this.data.paths[size] : this.data.paths['original']);
 
-                el.on('load', function () {
-                    self.el.replaceWith(this);
+                el.on('load', function (e) {
+                    _this.el.replaceWith($(e.target));
 
-                    if (self.preview) {
-                        self.preview.destroy();
+                    if (_this.preview) {
+                        _this.preview.destroy();
                     }
                 });
 
@@ -392,8 +391,7 @@ var Shot;
 
         var Preview = (function () {
             function Preview(size, parent, filePath) {
-                var self = this;
-
+                var _this = this;
                 this.id = new Date().getTime() + Math.round(Math.random() * 999);
 
                 this.el = $('<img/>');
@@ -411,7 +409,7 @@ var Shot;
                         size.y = parentSize.y;
                     }
 
-                    self.el.css({
+                    _this.el.css({
                         position: 'absolute',
                         top: (parentSize.y / 2) - (size.y / 2),
                         height: size.y,
@@ -420,15 +418,15 @@ var Shot;
 
                     switch (parent.css('textAlign')) {
                         case 'start':
-                            self.el.css({ left: 0 });
+                            _this.el.css({ left: 0 });
 
                             break;
                         case 'center':
-                            self.el.css({ left: (parentSize.x / 2) - (size.x / 2) });
+                            _this.el.css({ left: (parentSize.x / 2) - (size.x / 2) });
 
                             break;
                         case 'right':
-                            self.el.css({ right: 0 });
+                            _this.el.css({ right: 0 });
 
                             break;
                     }
@@ -442,8 +440,6 @@ var Shot;
                 this.el.remove();
 
                 $(window).off('resize.' + this.id);
-
-                self = null;
             };
             return Preview;
         })();
