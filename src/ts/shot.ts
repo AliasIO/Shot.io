@@ -19,6 +19,8 @@ module Shot {
 
 					break;
 			}
+
+			return this;
 		}
 	}
 
@@ -52,6 +54,8 @@ module Shot {
 
 					self.nextThumbnail();
 				});
+
+				return this;
 			}
 
 			/**
@@ -136,6 +140,8 @@ module Shot {
 
 					console.log('fail');
 				});
+
+				return this;
 			}
 		}
 
@@ -239,14 +245,16 @@ module Shot {
 					dragStart = { x: 0, y: 0 },
 					offset = 0,
 					wrap = $('<div class="wrap"/>'),
-					cutOff = $(window).width() / 2
-					;
+					cutOff:number;
+
+				$(window).on('resize', function() {
+					cutOff = $(window).width() / 2;
+				})
+				.trigger('resize');
 
 				$.each([ 'previous', 'current', 'next' ], function() {
 					wrap.append('<div class="' + this + '"><a class="image"><div class="valign"/></a></div>');
 				});
-
-				wrap.appendTo(carousel);
 
 				$(carousel).swipe(function(e, swipe) {
 					var
@@ -256,6 +264,8 @@ module Shot {
 						duration;
 
 					if ( e === 'start' ) {
+						wrap.stop();
+
 						offset = wrap.position().left;
 
 						carousel.addClass('animating');
@@ -266,7 +276,7 @@ module Shot {
 					}
 
 					if ( e === 'end' ) {
-						if ( swipe.distance < 50 || swipe.speed < cutOff ) {
+						if ( swipe.distance < 50 || swipe.speed < cutOff || ( swipe.direction === 'right' && self.index === 0 ) || ( swipe.direction === 'left' && self.index === self.images.length - 1 ) ) {
 							// Cancel animation
 							wrap.stop().animate({ opacity: 1, left: '-100%' }, 'normal', 'easeOutQuad', function() {
 								carousel.removeClass('animating');
@@ -277,10 +287,11 @@ module Shot {
 							distance = Math.abs(destination - wrap.position().left);
 							duration = distance / swipe.speed * 1000;
 
-							wrap.animate({ opacity: 0, left: destination }, duration, 'easeOutQuad', function() {
+							wrap.stop().animate({ opacity: 0, left: destination }, duration, 'easeOutQuad', function() {
 								wrap
+									.stop()
 									.css({ left: '-100%'})
-									.animate({ opacity: 1 }, 'normal', 'easeInQuad');
+									.animate({ opacity: 1 }, duration / 2, 'easeInQuad');
 
 								self.index += swipe.direction === 'right' ? -1 : 1;
 
@@ -296,7 +307,11 @@ module Shot {
 					self.images.push(new Image(this));
 				});
 
+				wrap.appendTo(carousel);
+
 				this.render();
+
+				return this;
 			}
 
 			render() {
@@ -305,62 +320,147 @@ module Shot {
 					current:Image,
 					next:Image;
 
+				this.index = Math.max(0, Math.min(this.images.length - 1, this.index));
+
 				this.carousel.find('.image img').remove();
 
 				current = this.images[this.index];
 
-				current.setSize(2048);
-
-				this.carousel.find('.current .image').append(current.image);
+				current
+					.appendTo(this.carousel.find('.current .image'))
+					.render(2048);
 
 				if ( this.index > 0 ) {
 					previous = this.images[this.index - 1];
 
-					previous.setSize(2048);
-
-					this.carousel.find('.previous .image').append(previous.image);
+					previous
+						.appendTo(this.carousel.find('.previous .image'))
+						.render(2048);
 				}
 
 				if ( this.images.length > this.index + 1 ) {
 					next = this.images[this.index + 1];
 
-					next.setSize(2048);
-
-					this.carousel.find('.next .image').append(next.image);
+					next
+						.appendTo(this.carousel.find('.next .image'))
+						.render(2048);
 				}
+
+				return this;
 			}
 		}
 
 		class Image {
-			public image;
+			el;
+			preview:Preview;
 
 			constructor(private data) {
+				var self:Image = this;
+
+				this.el = $('<img/>');
+
+				return this;
+			}
+
+			appendTo(parent) {
+				var self:Image = this;
+
+				this.preview = new Preview({ x: this.data.width, y: this.data.height }, parent, this.data.paths.preview);
+
+				this.el.appendTo(parent);
+
+				return this;
+			}
+
+			render(size:number) {
 				var 
 					self:Image = this,
-					resizeTimeout;
-					;
+					el = $('<img/>');
 
-				this.image = $('<img/>');
+				el.prop('src', this.data.paths[size] ? this.data.paths[size] : this.data.paths['original']);
 
-				this.image.on('load', function() {
-					$(window).on('resize', () => {
-						clearTimeout(resizeTimeout);
+				el.on('load', function() {
+					// Replace previously rendered image
+					self.el.replaceWith(this);
 
-						resizeTimeout = setTimeout(() => self.onWindowResize(), 10);
-					})
-					.trigger('resize');
+					// Remove preview image
+					if ( self.preview ) {
+						self.preview.destroy();
+					}
 				});
+
+				return this;
+			}
+		}
+
+		class Preview {
+			private el;
+
+			private id;
+
+			constructor(size, parent, filePath) {
+				var self = this;
+
+				this.id = new Date().getTime() + Math.round(Math.random() * 999);
+
+				this.el = $('<img/>');
+
+				// Render pre-load image in place of the actual image
+				$(window).on('resize.' + this.id, function() {
+					var parentSize = { x: parent.width(), y: parent.height() };
+
+					if ( size.x > parentSize.x ) {
+						size.y *= parentSize.x / size.x;
+						size.x  = parentSize.x;
+					}
+
+					if ( size.y > parentSize.y ) {
+						size.x *= parentSize.y / size.y;
+						size.y  = parentSize.y;
+					}
+
+					self.el.css({
+						position: 'absolute',
+						top: ( parentSize.y / 2 ) - ( size.y / 2 ),
+						height: size.y,
+						width: size.x
+					});
+
+					switch ( parent.css('textAlign') ) {
+						case 'start':
+							self.el.css({ left: 0 });
+
+							break;
+						case 'center':
+							self.el.css({ left: ( parentSize.x / 2 ) - ( size.x / 2 ) });
+
+							break;
+						case 'right':
+							self.el.css({ right: 0 });
+
+							break;
+					}
+				})
+				.trigger('resize');
+
+				this.el
+					.addClass('preview')
+					.prop('src', filePath)
+					.appendTo(parent);
+
+				return this;
 			}
 
-			setSize(size:number) {
-				this.image.prop('src', this.data.paths[size] ? this.data.paths[size] : this.data.paths['original']);
-			}
+			public destroy() {
+				var self:Preview = this;
 
-			/**
-			 * On window resize
-			 */
-			onWindowResize() {
-				//this.image.stop().animate({ marginTop: Math.max(0, ( this.image.parent().height() - this.image.height() ) / 2) }, 'fast');
+				this.el.stop().fadeOut('fast', function() {
+					$(window).off('resize.' + self.id);
+
+					$(this).remove();
+
+					self = null;
+				});
 			}
 		}
 	}

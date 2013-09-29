@@ -6,7 +6,7 @@ CREATE TABLE photos (
 	title      TEXT        NULL,
 	width      INTEGER NOT NULL,
 	height     INTEGER NOT NULL,
-	properties TEXT        NULL,
+	properties TEXT        NULL
 );
 
 CREATE UNIQUE INDEX filename ON photos ( filename );

@@ -40,7 +40,8 @@ class Album extends \Swiftlet\Controller
 				$image = $this->app->getModel('image')->load($result->id);
 
 				$paths = array(
-					'original' => $image->getFilePath()
+					'original' => $image->getFilePath(),
+					'preview'  => $image->getFilePath('thumb/preview')
 					);
 
 				foreach ( $image::$imageSizes as $imageSize ) {

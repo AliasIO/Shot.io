@@ -22,6 +22,8 @@ var Shot;
 
                     break;
             }
+
+            return this;
         }
         return App;
     })();
@@ -59,6 +61,8 @@ var Shot;
 
                     self.nextThumbnail();
                 });
+
+                return this;
             }
             Form.prototype.nextThumbnail = function () {
                 var _this = this;
@@ -131,6 +135,8 @@ var Shot;
 
                     console.log('fail');
                 });
+
+                return this;
             }
             return File;
         })();
@@ -225,18 +231,22 @@ var Shot;
                 this.carousel = carousel;
                 this.index = 0;
                 this.images = [];
-                var self = this, dragStart = { x: 0, y: 0 }, offset = 0, wrap = $('<div class="wrap"/>'), cutOff = $(window).width() / 2;
+                var self = this, dragStart = { x: 0, y: 0 }, offset = 0, wrap = $('<div class="wrap"/>'), cutOff;
+
+                $(window).on('resize', function () {
+                    cutOff = $(window).width() / 2;
+                }).trigger('resize');
 
                 $.each(['previous', 'current', 'next'], function () {
                     wrap.append('<div class="' + this + '"><a class="image"><div class="valign"/></a></div>');
                 });
 
-                wrap.appendTo(carousel);
-
                 $(carousel).swipe(function (e, swipe) {
                     var opacity, destination, distance, duration;
 
                     if (e === 'start') {
+                        wrap.stop();
+
                         offset = wrap.position().left;
 
                         carousel.addClass('animating');
@@ -247,7 +257,7 @@ var Shot;
                     }
 
                     if (e === 'end') {
-                        if (swipe.distance < 50 || swipe.speed < cutOff) {
+                        if (swipe.distance < 50 || swipe.speed < cutOff || (swipe.direction === 'right' && self.index === 0) || (swipe.direction === 'left' && self.index === self.images.length - 1)) {
                             wrap.stop().animate({ opacity: 1, left: '-100%' }, 'normal', 'easeOutQuad', function () {
                                 carousel.removeClass('animating');
                             });
@@ -256,8 +266,8 @@ var Shot;
                             distance = Math.abs(destination - wrap.position().left);
                             duration = distance / swipe.speed * 1000;
 
-                            wrap.animate({ opacity: 0, left: destination }, duration, 'easeOutQuad', function () {
-                                wrap.css({ left: '-100%' }).animate({ opacity: 1 }, 'normal', 'easeInQuad');
+                            wrap.stop().animate({ opacity: 0, left: destination }, duration, 'easeOutQuad', function () {
+                                wrap.stop().css({ left: '-100%' }).animate({ opacity: 1 }, duration / 2, 'easeInQuad');
 
                                 self.index += swipe.direction === 'right' ? -1 : 1;
 
@@ -273,34 +283,36 @@ var Shot;
                     self.images.push(new Image(this));
                 });
 
+                wrap.appendTo(carousel);
+
                 this.render();
+
+                return this;
             }
             Carousel.prototype.render = function () {
                 var previous, current, next;
+
+                this.index = Math.max(0, Math.min(this.images.length - 1, this.index));
 
                 this.carousel.find('.image img').remove();
 
                 current = this.images[this.index];
 
-                current.setSize(2048);
-
-                this.carousel.find('.current .image').append(current.image);
+                current.appendTo(this.carousel.find('.current .image')).render(2048);
 
                 if (this.index > 0) {
                     previous = this.images[this.index - 1];
 
-                    previous.setSize(2048);
-
-                    this.carousel.find('.previous .image').append(previous.image);
+                    previous.appendTo(this.carousel.find('.previous .image')).render(2048);
                 }
 
                 if (this.images.length > this.index + 1) {
                     next = this.images[this.index + 1];
 
-                    next.setSize(2048);
-
-                    this.carousel.find('.next .image').append(next.image);
+                    next.appendTo(this.carousel.find('.next .image')).render(2048);
                 }
+
+                return this;
             };
             return Carousel;
         })();
@@ -309,28 +321,100 @@ var Shot;
         var Image = (function () {
             function Image(data) {
                 this.data = data;
-                var self = this, resizeTimeout;
-                ;
+                var self = this;
 
-                this.image = $('<img/>');
+                this.el = $('<img/>');
 
-                this.image.on('load', function () {
-                    $(window).on('resize', function () {
-                        clearTimeout(resizeTimeout);
-
-                        resizeTimeout = setTimeout(function () {
-                            return self.onWindowResize();
-                        }, 10);
-                    }).trigger('resize');
-                });
+                return this;
             }
-            Image.prototype.setSize = function (size) {
-                this.image.prop('src', this.data.paths[size] ? this.data.paths[size] : this.data.paths['original']);
+            Image.prototype.appendTo = function (parent) {
+                var self = this;
+
+                this.preview = new Preview({ x: this.data.width, y: this.data.height }, parent, this.data.paths.preview);
+
+                this.el.appendTo(parent);
+
+                return this;
             };
 
-            Image.prototype.onWindowResize = function () {
+            Image.prototype.render = function (size) {
+                var self = this, el = $('<img/>');
+
+                el.prop('src', this.data.paths[size] ? this.data.paths[size] : this.data.paths['original']);
+
+                el.on('load', function () {
+                    self.el.replaceWith(this);
+
+                    if (self.preview) {
+                        self.preview.destroy();
+                    }
+                });
+
+                return this;
             };
             return Image;
+        })();
+
+        var Preview = (function () {
+            function Preview(size, parent, filePath) {
+                var self = this;
+
+                this.id = new Date().getTime() + Math.round(Math.random() * 999);
+
+                this.el = $('<img/>');
+
+                $(window).on('resize.' + this.id, function () {
+                    var parentSize = { x: parent.width(), y: parent.height() };
+
+                    if (size.x > parentSize.x) {
+                        size.y *= parentSize.x / size.x;
+                        size.x = parentSize.x;
+                    }
+
+                    if (size.y > parentSize.y) {
+                        size.x *= parentSize.y / size.y;
+                        size.y = parentSize.y;
+                    }
+
+                    self.el.css({
+                        position: 'absolute',
+                        top: (parentSize.y / 2) - (size.y / 2),
+                        height: size.y,
+                        width: size.x
+                    });
+
+                    switch (parent.css('textAlign')) {
+                        case 'start':
+                            self.el.css({ left: 0 });
+
+                            break;
+                        case 'center':
+                            self.el.css({ left: (parentSize.x / 2) - (size.x / 2) });
+
+                            break;
+                        case 'right':
+                            self.el.css({ right: 0 });
+
+                            break;
+                    }
+                }).trigger('resize');
+
+                this.el.addClass('preview').prop('src', filePath).appendTo(parent);
+
+                return this;
+            }
+            Preview.prototype.destroy = function () {
+                var self = this;
+
+                this.el.stop().fadeOut('fast', function () {
+                    $(window).off('resize.' + self.id);
+
+                    $(this).remove();
+
+                    self = null;
+                });
+            };
+            return Preview;
         })();
     })(Album || (Album = {}));
 })(Shot || (Shot = {}));

@@ -81,16 +81,16 @@ class Image extends \Swiftlet\Model
 
 		$this->properties = $this->image->getImageProperties();
 
-		$geometry = $this->image->getImageGeometry();
-
-		$this->width  = $geometry['width'];
-		$this->height = $geometry['height'];
-
 		$this
 			->autoRotate()
 			->exportSizes()
 			->exportThumbnails()
 			;
+
+		$geometry = $this->image->getImageGeometry();
+
+		$this->width  = $geometry['width'];
+		$this->height = $geometry['height'];
 
 		$dbh = $this->app->getLibrary('pdo')->getHandle();
 
@@ -196,8 +196,14 @@ class Image extends \Swiftlet\Model
 	 */
 	public function getFilePath($size = null)
 	{
-		if ( $size && in_array($size, self::$imageSizes) && ( $size < $this->width && $size < $this->height ) ) {
-			return $this->app->getRootPath() . 'photos/' . $size . '/' . $this->filename;
+		if ( $size ) {
+			if ( in_array($size, self::$imageSizes) && ( $size < $this->width && $size < $this->height ) ) {
+				return $this->app->getRootPath() . 'photos/' . $size . '/' . $this->filename;
+			}
+
+			if ( in_array($size, array('thumb/centered', 'thumb/smart', 'thumb/preview')) ) {
+				return $this->app->getRootPath() . 'photos/' . $size . '/' . $this->filename;
+			}
 		}
 
 		return $this->app->getRootPath() . 'photos/' . $this->filename;
@@ -259,6 +265,7 @@ class Image extends \Swiftlet\Model
 	 */
 	protected function exportThumbnails()
 	{
+		$this->exportPreviewThumbnail();
 		$this->exportSmartThumbnail();
 		$this->exportCenteredThumbnail();
 	}
@@ -266,20 +273,35 @@ class Image extends \Swiftlet\Model
 	/**
 	 * Scale thumbnail
 	 * @param \Imagick $thumbnail
+	 * @param integer $size
 	 */
-	protected function scaleThumbnail(\Imagick $thumbnail)
+	protected function scaleThumbnail(\Imagick $thumbnail, $size = null)
 	{
+		$size = $size ?: self::$thumbnailSize;
+
 		$geometry = $thumbnail->getImageGeometry();
 
 		if ( $geometry['width'] >= $geometry['height'] ) {
-			$orientation = 'x';
-
-			$thumbnail->scaleImage(0, self::$thumbnailSize);
+			$thumbnail->scaleImage(0, $size);
 		} else {
-			$orientation = 'y';
-
-			$thumbnail->scaleImage(self::$thumbnailSize, 0);
+			$thumbnail->scaleImage($size, 0);
 		}
+	}
+
+	/**
+	 * Generate preview thumbnail
+	 */
+	protected function exportPreviewThumbnail()
+	{
+		$thumbnail = clone($this->image);
+
+		$thumbnail->setImageCompressionQuality(80);
+
+		$this->scaleThumbnail($thumbnail, 100);
+
+		$thumbnail->writeImage(self::$imagePath . 'thumb/preview/' . $this->filename);
+
+		return $this;
 	}
 
 	/**
