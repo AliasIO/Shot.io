@@ -155,6 +155,10 @@ fieldset
 		top: 0
 
 		img
+			background:
+				color: lighten($body-bg, 5%)
+				image: image-url('checkers.png')
+				repeat: repeat
 			max-height: 100%
 			+box-shadow(0 0 5px #000)
 
@@ -167,10 +171,13 @@ fieldset
 	@include block-grid(5, 10px, true)
 
 	li
-		overflow: hidden
 
 		.container
-			background: #111
+			background:
+				color: lighten($body-bg, 5%)
+				image: image-url('checkers.png')
+				repeat: repeat
+			+box-shadow(0 0 5px #000)
 			height: 0
 			padding-bottom: 100%
 			position: relative
@@ -190,11 +197,10 @@ fieldset
 
 	.processing
 		background:
-			image: image-url('processing.gif')
+			image: image-url('time.png')
 			repeat: no-repeat
 			position: center center
 		height: 100%
-		+opacity(.8)
 		position: absolute
 		width: 100%
 
@@ -210,13 +216,13 @@ fieldset
 			width: 0
 
 	.title-wrap
-		+opacity(.8)
+		+opacity(.7)
 		position: absolute
 		width: 100%
 
 		.title
-			background: #000
-			color: #fff
+			background: #fff
+			color: #000
 			height: 30px
 			line-height: 30px
 			overflow: hidden
@@ -224,15 +230,15 @@ fieldset
 
 @media #{$screen}
 	.thumbnail-grid
-		@include block-grid(2, 10px, true)
+		@include block-grid(2, 15px, true)
 
 @media #{$small}
 	.thumbnail-grid
-		@include block-grid(3, 10px, true)
+		@include block-grid(3, 15px, true)
 
 @media #{$large}
 	.thumbnail-grid
-		@include block-grid(5, 10px, true)
+		@include block-grid(5, 15px, true)
 
 .button.upload
 

@@ -6,7 +6,7 @@
 				<div class="row">
 					<div class="large-12 columns">
 						<div class="button small upload">
-							<i class="icon-picture"></i>&nbsp;Upload photos
+							<i class="icon-picture"></i>&nbsp;Upload images
 							<input id="files" name="files" type="file" multiple>
 						</div>
 					</div>

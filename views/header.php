@@ -48,7 +48,7 @@
 			<section class="top-bar-section">
 				<ul class="right">
 					<li class="divider"></li>
-					<li><a href="<?= $this->app->getRootPath() ?>admin"><i class="icon-cog"></i>&nbsp;Admin</a></li>
+					<li><a href="<?= $this->app->getRootPath() ?>admin"><i class="icon-wrench"></i>&nbsp;Admin</a></li>
 				</ul>
 			</section>
 		</nav>

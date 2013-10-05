@@ -368,7 +368,7 @@ class Image extends \Swiftlet\Model
 			}
 
 			// Choose the offset with the most available entropy
-			$offset = $entropySums ? 0 : array_search(max($entropySums), $entropySums);
+			$offset = !$entropySums ? 0 : array_search(max($entropySums), $entropySums);
 
 			if ( $orientation == 'x' ) {
 				$thumbnail->cropImage(self::$thumbnailSize, self::$thumbnailSize, $offset * $sliceSize, 0);

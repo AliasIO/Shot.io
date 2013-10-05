@@ -104,6 +104,11 @@ module Shot {
 					e.preventDefault();
 
 					if ( !this.animating ) {
+						// Clicked Current image
+						if ( this.current.has(e.target).length ) {
+							location = $(e.target).parent().attr('href');
+						}
+
 						// Clicked Previous image
 						if ( this.previous.has(e.target).length ) {
 							this.index --;
@@ -240,9 +245,11 @@ module Shot {
 					if ( image instanceof Image ) {
 						anchor = this[container].find('.image a');
 
-						anchor
-							.attr('href', SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + image.data.id)
-							.attr('data-id', image.data.id);
+						if ( container === 'current' ) {
+							anchor.attr('href', SHOT.rootPath + 'image/fullscreen/' + image.data.id)
+						} else {
+							anchor.attr('href', SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + image.data.id)
+						}
 
 						image
 							.appendTo(anchor)

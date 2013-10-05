@@ -291,6 +291,10 @@ var Shot;
                     e.preventDefault();
 
                     if (!_this.animating) {
+                        if (_this.current.has(e.target).length) {
+                            location = $(e.target).parent().attr('href');
+                        }
+
                         if (_this.previous.has(e.target).length) {
                             _this.index--;
 
@@ -405,7 +409,11 @@ var Shot;
                     if (image instanceof Image) {
                         anchor = _this[container].find('.image a');
 
-                        anchor.attr('href', SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + image.data.id).attr('data-id', image.data.id);
+                        if (container === 'current') {
+                            anchor.attr('href', SHOT.rootPath + 'image/fullscreen/' + image.data.id);
+                        } else {
+                            anchor.attr('href', SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + image.data.id);
+                        }
 
                         image.appendTo(anchor).render(2048);
                     }
