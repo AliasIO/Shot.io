@@ -188,45 +188,57 @@ fieldset
 				.processing
 					background-image: none
 
+			.processing
+				background:
+					image: image-url('time.png')
+					repeat: no-repeat
+					position: center center
+				height: 100%
+				position: absolute
+				width: 100%
+
+			.progressbar-wrap
+				position: absolute
+				width: 100%
+
+				.progressbar
+					background: $primary-color
+					@include background(linear-gradient(top left, darken($primary-color, 20%), $primary-color))
+					height: 3px
+					margin-bottom: -3px
+					width: 0
+
+			.title-wrap
+				position: absolute
+				width: 100%
+
+				&:before
+					background: #fff
+					bottom: 0
+					content: ''
+					display: block
+					left: 0
+					+opacity(.5)
+					position: absolute
+					right: 0
+					top: 0
+
+				.title
+					+box-shadow(0 0 5px rgba(0, 0, 0, .5))
+					color: #000
+					height: 35px
+					line-height: 35px
+					overflow: hidden
+					+opacity(.999)
+					padding: 0 10px
+					white-space: nowrap
+
 	img, canvas
 		position: absolute
 
 	canvas
 		height: auto
 		max-width: 100%
-
-	.processing
-		background:
-			image: image-url('time.png')
-			repeat: no-repeat
-			position: center center
-		height: 100%
-		position: absolute
-		width: 100%
-
-	.progressbar-wrap
-		position: absolute
-		width: 100%
-
-		.progressbar
-			background: $primary-color
-			@include background(linear-gradient(top left, darken($primary-color, 20%), $primary-color))
-			height: 3px
-			margin-bottom: -3px
-			width: 0
-
-	.title-wrap
-		+opacity(.7)
-		position: absolute
-		width: 100%
-
-		.title
-			background: #fff
-			color: #000
-			height: 30px
-			line-height: 30px
-			overflow: hidden
-			padding: 0 .5em
 
 @media #{$screen}
 	.thumbnail-grid

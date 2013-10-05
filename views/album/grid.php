@@ -8,6 +8,11 @@
 			<li>
 				<div class="container">
 					<a href="<?= $this->app->getRootPath() ?>album/carousel/<?= $this->album->id ?>/<?= $image->id ?>"><img src="<?= $image->paths['thumb'] ?>"></a>
+					<div class="title-wrap">
+						<div class="title">
+							<i class="icon-picture"></i>&nbsp;<?= $image->title ?>
+						</div>
+					</div>
 				</div>
 			</li>
 			<?php endforeach ?>

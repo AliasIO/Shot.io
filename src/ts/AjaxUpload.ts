@@ -166,8 +166,8 @@ module Shot {
 							.drawImage(e.target, ( canvas.width - size.x ) / 2, ( canvas.height - size.y ) / 2, size.x, size.y);
 
 						$(canvas)
-							.css({ opacity: 0 })
-							.animate({ opacity: .5 }, 'fast')
+							.hide()
+							.fadeIn('fast')
 							.addClass('temporary')
 							.prependTo(this.thumbnail.find('.container'));
 

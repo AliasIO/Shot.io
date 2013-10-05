@@ -148,7 +148,7 @@ var Shot;
 
                         canvas.getContext('2d').drawImage(e.target, (canvas.width - size.x) / 2, (canvas.height - size.y) / 2, size.x, size.y);
 
-                        $(canvas).css({ opacity: 0 }).animate({ opacity: .5 }, 'fast').addClass('temporary').prependTo(_this.thumbnail.find('.container'));
+                        $(canvas).hide().fadeIn('fast').addClass('temporary').prependTo(_this.thumbnail.find('.container'));
 
                         callback();
                     });
