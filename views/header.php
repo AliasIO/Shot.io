@@ -24,19 +24,31 @@
 		<nav class="top-bar">
 			<ul class="title-area">
 				<li class="name">
-					<h1><a href="#"><?= $this->htmlEncode($this->app->getConfig('siteName')) ?></a></h1>
+					<h1><a href="<?= $this->app->getRootPath() ?>"><i class="icon-camera"></i>&nbsp;<?= $this->htmlEncode($this->app->getConfig('siteName')) ?></a></h1>
 				</li>
 				<li class="toggle-topbar menu-icon"><a href="#"><span></span></a></li>
 			</ul>
 
-			<!--
+			<section class="top-bar-section">
+				<ul class="left breadcrumbs">
+					<li class="divider"></li>
+					<?php if ( $this->breadcrumbs ): ?>
+					<?php foreach ( $this->breadcrumbs as $breadcrumb ): ?>
+					<li>
+						<a href="<?= $this->app->getRootPath() . $breadcrumb->path ?>">
+							<?php if ( $breadcrumb->icon ): ?><i class="icon-<?= $breadcrumb->icon ?>"></i><?php endif ?>&nbsp;<?= $breadcrumb->title ?>
+						</a>
+					</li>
+					<li class="divider"></li>
+					<?php endforeach ?>
+					<?php endif ?>
+				</ul>
+			</section>
+
 			<section class="top-bar-section">
 				<ul class="right">
 					<li class="divider"></li>
-					<li class="active"><a href="#">Main Item 1</a></li>
-					<li class="divider"></li>
-					<li><a href="#">Main Item 2</a></li>
+					<li><a href="<?= $this->app->getRootPath() ?>admin"><i class="icon-cog"></i>&nbsp;Admin</a></li>
 				</ul>
 			</section>
-			-->
 		</nav>

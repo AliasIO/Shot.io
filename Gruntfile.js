@@ -11,14 +11,14 @@ module.exports = function(grunt) {
 				tasks: ['uglify']
 			},
 			sass: {
-				files: ['src/sass/**/*.sass'],
+				files: ['src/sass/**/*.sass', 'src/sass/**/*.scss'],
 				tasks: ['compass']
 			},
 		},
 		typescript: {
 			base: {
 				src: ['src/ts/**/*.ts'],
-				dest: 'public/js/src',
+				dest: 'public/js/src/shot.js',
 				options: {
 					base_path: 'scr/ts',
 					module: 'amd',

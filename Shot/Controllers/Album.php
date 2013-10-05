@@ -18,7 +18,9 @@ class Album extends \Swiftlet\Controller
 	 */
 	public function index()
 	{
-		$albumId = $this->app->getArgs(1);
+		$this->view->name = 'album/grid';
+
+		$albumId = $this->app->getArgs(0);
 
 		$dbh = $this->app->getLibrary('pdo')->getHandle();
 
@@ -41,7 +43,8 @@ class Album extends \Swiftlet\Controller
 
 				$paths = array(
 					'original' => $image->getFilePath(),
-					'preview'  => $image->getFilePath('thumb/preview')
+					'preview'  => $image->getFilePath('thumb/preview'),
+					'thumb'    => $image->getFilePath('thumb/smart')
 					);
 
 				foreach ( $image::$imageSizes as $imageSize ) {
@@ -49,11 +52,11 @@ class Album extends \Swiftlet\Controller
 				}
 
 				$images[] = (object) array(
-					'id'       => $image->getId(),
+					'id'       => (int) $image->getId(),
 					'filename' => $image->getFilename(),
 					'title'    => $image->getTitle(),
-					'width'    => $image->getWidth(),
-					'height'   => $image->getHeight(),
+					'width'    => (int) $image->getWidth(),
+					'height'   => (int) $image->getHeight(),
 					'paths'    => $paths
 					);
 			} catch ( \Swiftlet\Exception $e ) {
@@ -61,5 +64,34 @@ class Album extends \Swiftlet\Controller
 		}
 
 		$this->view->images = $images;
+
+		$this->view->album = (object) array(
+			'title' => 'Album title',
+			'id'    => (int) $albumId
+			);
+
+		$this->view->breadcrumbs = array((object) array(
+			'path'  => 'album/grid/' . $albumId,
+			'title' => 'Album title',
+			'icon'  => 'th'
+			));
+	}
+
+	/**
+	 * Grid action
+	 */
+	public function grid()
+	{
+		$this->index();
+	}
+
+	/**
+	 * Carousel action
+	 */
+	public function carousel()
+	{
+		$this->index();
+
+		$this->view->name = 'album/carousel';
 	}
 }

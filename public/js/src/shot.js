@@ -6,30 +6,6 @@ var __extends = this.__extends || function (d, b) {
 };
 var Shot;
 (function (Shot) {
-    var App = (function () {
-        function App() {
-            $(document).on('dragstart', 'img, a', function (e) {
-                e.preventDefault();
-            });
-
-            switch (SHOT.controller) {
-                case 'Admin':
-                    new AjaxUpload.Form($('#files'), $('.thumbnail-grid'));
-
-                    break;
-                case 'Album':
-                    new Album.Carousel($('.carousel'), SHOT.images);
-
-                    break;
-            }
-
-            return this;
-        }
-        return App;
-    })();
-    Shot.App = App;
-
-    var AjaxUpload;
     (function (AjaxUpload) {
         var fileTypes = [
             'image/jpg',
@@ -222,9 +198,11 @@ var Shot;
             };
             return ProgressBar;
         })();
-    })(AjaxUpload || (AjaxUpload = {}));
-
-    var Album;
+    })(Shot.AjaxUpload || (Shot.AjaxUpload = {}));
+    var AjaxUpload = Shot.AjaxUpload;
+})(Shot || (Shot = {}));
+var Shot;
+(function (Shot) {
     (function (Album) {
         var Carousel = (function () {
             function Carousel(carousel, imagesData) {
@@ -235,9 +213,73 @@ var Shot;
                 this.animating = false;
                 var offset = 0, wrap = $('<div class="wrap"/>'), cutOff;
 
+                this.currentId = parseInt(location.pathname.replace(/^\/album\/carousel\/[0-9]+\/([0-9]+)/, function (match, a) {
+                    return a;
+                }));
+
+                $(window).on('popstate', function (e) {
+                    _this.render(e.originalEvent.state.id);
+                });
+
                 $(window).on('resize', function () {
                     cutOff = $(window).width() / 2;
                 }).trigger('resize');
+
+                $(document).on('keydown', function (e) {
+                    switch (e.keyCode) {
+                        case 35:
+                            e.preventDefault();
+
+                            if (_this.index < _this.images.length - 1) {
+                                _this.index = _this.images.length - 1;
+
+                                _this.render();
+                            }
+
+                            break;
+                        case 36:
+                            e.preventDefault();
+
+                            if (_this.index > 0) {
+                                _this.index = 0;
+
+                                _this.render();
+                            }
+
+                            break;
+                        case 33:
+                        case 37:
+                        case 38:
+                            e.preventDefault();
+
+                            if (_this.index > 0) {
+                                _this.index--;
+
+                                _this.render();
+                            }
+
+                            break;
+                        case 32:
+                        case 34:
+                        case 39:
+                        case 40:
+                            e.preventDefault();
+
+                            if (_this.index < _this.images.length - 1) {
+                                _this.index++;
+
+                                _this.render();
+                            }
+
+                            break;
+                    }
+                });
+
+                this.breadcrumb = $('<a/>');
+
+                $('<li/>').append(this.breadcrumb).appendTo('.top-bar .breadcrumbs');
+
+                $('.top-bar .breadcrumbs').append('<li class="divider"/>');
 
                 $.each(['previous', 'current', 'next'], function (i, container) {
                     _this[container] = $('<div class="' + container + '"><div class="image"><a><div class="valign"/></a></div></div>');
@@ -315,19 +357,39 @@ var Shot;
 
                 wrap.appendTo(carousel);
 
-                this.render();
+                this.render(this.currentId);
 
                 return this;
             }
-            Carousel.prototype.render = function () {
+            Carousel.prototype.render = function (id) {
                 var _this = this;
                 var images = { previous: null, current: null, next: null };
 
+                if (id !== undefined) {
+                    this.currentId = id;
+
+                    $.each(this.images, function (i, image) {
+                        if (image.data.id === _this.currentId) {
+                            _this.index = i;
+                        }
+                    });
+                }
+
                 this.index = Math.max(0, Math.min(this.images.length - 1, this.index));
 
-                this.carousel.find('.image img').remove();
-
                 images.current = this.images[this.index];
+
+                if (this.currentId === images.current.data.id) {
+                    history.replaceState({ id: this.currentId }, '');
+                } else {
+                    this.currentId = images.current.data.id;
+
+                    history.pushState({ id: this.currentId }, '', '/album/carousel/' + SHOT.album.id + '/' + images.current.data.id);
+                }
+
+                this.breadcrumb.prop('href', SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + images.current.data.id).html('<i class="icon-picture"/>&nbsp;' + images.current.data.title);
+
+                this.carousel.find('.image img').remove();
 
                 if (this.index > 0) {
                     images.previous = this.images[this.index - 1];
@@ -343,7 +405,7 @@ var Shot;
                     if (image instanceof Image) {
                         anchor = _this[container].find('.image a');
 
-                        anchor.attr('href', image.data.id).attr('data-id', image.data.id);
+                        anchor.attr('href', SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + image.data.id).attr('data-id', image.data.id);
 
                         image.appendTo(anchor).render(2048);
                     }
@@ -443,9 +505,39 @@ var Shot;
             };
             return Preview;
         })();
-    })(Album || (Album = {}));
+    })(Shot.Album || (Shot.Album = {}));
+    var Album = Shot.Album;
 })(Shot || (Shot = {}));
-
 $(function () {
     SHOT.app = new Shot.App();
 });
+
+var Shot;
+(function (Shot) {
+    var App = (function () {
+        function App() {
+            $(document).foundation();
+
+            $(document).on('dragstart', 'img, a', function (e) {
+                e.preventDefault();
+            });
+
+            switch (SHOT.controller) {
+                case 'Admin':
+                    new Shot.AjaxUpload.Form($('#files'), $('.thumbnail-grid'));
+
+                    break;
+                case 'Album':
+                    if (SHOT.action === 'carousel') {
+                        new Shot.Album.Carousel($('.carousel'), SHOT.images);
+                    }
+
+                    break;
+            }
+
+            return this;
+        }
+        return App;
+    })();
+    Shot.App = App;
+})(Shot || (Shot = {}));

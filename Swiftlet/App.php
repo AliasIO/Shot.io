@@ -246,7 +246,7 @@ class App extends SwiftletObject implements Interfaces\App
 	 */
 	public function getArgs($index = null)
 	{
-		if ( $index ) {
+		if ( $index !== null ) {
 			return isset($this->args[$index]) ? $this->args[$index] : null;
 		}
 

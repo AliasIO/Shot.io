@@ -105,7 +105,7 @@ class View extends SwiftletObject implements Interfaces\View
 				}
 
 				break;
-			default:
+			case 'string':
 				$value = htmlentities($value, ENT_QUOTES, 'UTF-8');
 		}
 

@@ -2,18 +2,15 @@
 
 <div class="row">
 	<div class="large-12 columns">
-		<h3>Upload</h3>
-
 		<form id="upload" class="well" method="post" enctype="multipart/form-data">
-			<fieldset>
 				<div class="row">
 					<div class="large-12 columns">
-						<label>Files</label>
-
-						<input id="files" name="files" type="file" multiple>
+						<div class="button small upload">
+							<i class="icon-picture"></i>&nbsp;Upload photos
+							<input id="files" name="files" type="file" multiple>
+						</div>
 					</div>
 				</div>
-			</fieldset>
 		</form>
 	</div>
 </div>

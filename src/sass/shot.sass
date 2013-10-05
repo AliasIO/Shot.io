@@ -1,11 +1,16 @@
-$body-bg: #fff !default
+$primary-color: #ce4b3e
+$secondary-color: #252833
+
+$body-bg: darken($secondary-color, 10%) !default
 $body-font-color: #333 !default
 
 $base-font-size: 13px
 
 $em-base: $base-font-size
 
-$topbar-bg: #252833
+$topbar-bg: $secondary-color
+$topbar-link-color-hover: #fff
+$topbar-breakpoint: 768px
 
 $form-label-font-color: darken($body-font-color, 30%)
 
@@ -53,7 +58,15 @@ $fieldset-border-color: #ddd
 // @import "foundation/components/tables"
 // @import "foundation/components/thumbs"
 // @import "foundation/components/tooltips"
-// @import "foundation/components/dropdown"
+ @import "foundation/components/dropdown"
+
+@import "font-awesome/variables"
+@import "font-awesome/mixins"
+@import "font-awesome/path"
+@import "font-awesome/core"
+@import "font-awesome/bootstrap"
+@import "font-awesome/extras"
+@import "font-awesome/icons"
 
 html
 	background-color: $body-bg
@@ -61,6 +74,23 @@ html
 
 body
 	min-height: 100%
+
+.top-bar
+	z-index: 999
+
+.top-bar-section ul li:first-child.divider
+	display: none
+
+@media #{$small}
+	.top-bar-section ul li:first-child.divider
+		display: inherit
+
+@media #{$medium}
+	.top-bar-section ul li > a
+		color: lighten($topbar-bg, 50%)
+
+.top-bar ul li:hover > a
+	color: $topbar-link-color-hover
 
 h1, h2, h3, h4, h5, h6
 	color: $body-font-color
@@ -71,8 +101,11 @@ fieldset
 .row
 	min-width: 100% !important 
 
+@media #{$medium}
+	.row
+		min-width: 80% !important
+
 .carousel
-	background: darken(#252833, 10%)
 	bottom: 0
 	overflow: hidden
 	padding-bottom: -40px
@@ -100,16 +133,13 @@ fieldset
 		width: ( 86% / 3 )
 
 	.previous
-		//border: 1px solid #00f
 		left: ( 18% / 3 )
 		text-align: right
 
 	.next
-		//border: 1px solid #0f0
 		left: ( 196% / 3 )
 
 	.current
-		//border: 1px solid #f00
 		height: 100%
 		left: ( 107% / 3 )
 		text-align: center
@@ -134,12 +164,10 @@ fieldset
 				+box-shadow(none)
 
 .thumbnail-grid
+	@include block-grid(5, 10px, true)
 
 	li
 		overflow: hidden
-
-		&:nth-child(5n+6)
-			clear: left
 
 		.container
 			background: #111
@@ -193,3 +221,26 @@ fieldset
 			line-height: 30px
 			overflow: hidden
 			padding: 0 .5em
+
+@media #{$screen}
+	.thumbnail-grid
+		@include block-grid(2, 10px, true)
+
+@media #{$small}
+	.thumbnail-grid
+		@include block-grid(3, 10px, true)
+
+@media #{$large}
+	.thumbnail-grid
+		@include block-grid(5, 10px, true)
+
+.button.upload
+
+	input[type=file]
+		cursor: pointer
+		height: 100%
+		left: 0
+		+opacity(0)
+		position: absolute
+		top: 0
+		width: 100%
