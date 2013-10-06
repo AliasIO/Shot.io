@@ -64,7 +64,7 @@ var Shot;
 
                 this.thumbnail = $('<li><div class="container"><div class="processing"/><div class="title-wrap"><div class="title"/></div></div></li>');
 
-                this.thumbnail.find('.title').text(file.name);
+                this.thumbnail.find('.title').html('<i class="icon-picture"/>&nbsp;' + file.name);
 
                 this.progressBar = new ProgressBar(this.thumbnail);
 
@@ -275,6 +275,16 @@ var Shot;
                     }
                 });
 
+                $('.full-screen').on('click', function (e) {
+                    $.each(['c', 'mozC', 'webkitC', 'msC', 'oC'], function (i, prefix) {
+                        var method = prefix + 'ancelFullScreen';
+
+                        if (typeof document[method] === 'function') {
+                            document[method]();
+                        }
+                    });
+                });
+
                 this.breadcrumb = $('<a/>');
 
                 $('<li/>').append(this.breadcrumb).appendTo('.top-bar .breadcrumbs');
@@ -292,7 +302,7 @@ var Shot;
 
                     if (!_this.animating) {
                         if (_this.current.has(e.target).length) {
-                            location = $(e.target).parent().attr('href');
+                            _this.fullScreen(_this.images[_this.index]);
                         }
 
                         if (_this.previous.has(e.target).length) {
@@ -421,6 +431,26 @@ var Shot;
 
                 return this;
             };
+
+            Carousel.prototype.fullScreen = function (image) {
+                var fullScreen = $('.full-screen').get(0), clone = image.el.clone(), el = $('<img/>');
+
+                $(fullScreen).html('<div class="valign"></div>').append(clone);
+
+                el.on('load', function () {
+                    $(fullScreen).find('img').replaceWidth(el);
+                }).prop('src', image.data.paths.original);
+
+                $.each(['r', 'mozR', 'webkitR', 'msR', 'oR'], function (i, prefix) {
+                    var method = prefix + 'equestFullScreen';
+
+                    if (typeof fullScreen[method] === 'function') {
+                        fullScreen[method]();
+
+                        return false;
+                    }
+                });
+            };
             return Carousel;
         })();
         Album.Carousel = Carousel;
@@ -447,7 +477,9 @@ var Shot;
                 el.prop('src', this.data.paths[size] ? this.data.paths[size] : this.data.paths['original']);
 
                 el.on('load', function (e) {
-                    _this.el.replaceWith($(e.target));
+                    _this.el.replaceWith(el);
+
+                    _this.el = el;
 
                     if (_this.preview) {
                         _this.preview.destroy();
@@ -458,6 +490,7 @@ var Shot;
             };
             return Image;
         })();
+        Album.Image = Image;
 
         var Preview = (function () {
             function Preview(size, parent, filePath) {
@@ -513,6 +546,7 @@ var Shot;
             };
             return Preview;
         })();
+        Album.Preview = Preview;
     })(Shot.Album || (Shot.Album = {}));
     var Album = Shot.Album;
 })(Shot || (Shot = {}));

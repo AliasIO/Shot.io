@@ -85,6 +85,17 @@ module Shot {
 					}
 				});
 
+				// Exit full screen
+				$('.full-screen').on('click', (e) => {
+					$.each([ 'c', 'mozC', 'webkitC', 'msC', 'oC' ], (i, prefix) => {
+						var method = prefix + 'ancelFullScreen';
+
+						if ( typeof document[method] === 'function' ) {
+							document[method]();
+						}
+					});
+				});
+
 				// Breadcrumb
 				this.breadcrumb = $('<a/>');
 
@@ -106,7 +117,7 @@ module Shot {
 					if ( !this.animating ) {
 						// Clicked Current image
 						if ( this.current.has(e.target).length ) {
-							location = $(e.target).parent().attr('href');
+							this.fullScreen(this.images[this.index]);
 						}
 
 						// Clicked Previous image
@@ -259,12 +270,41 @@ module Shot {
 
 				return this;
 			}
+
+			/**
+			 * View image full screen
+			 */
+			fullScreen(image: Image) {
+				var
+					fullScreen = $('.full-screen').get(0),
+					clone = image.el.clone(),
+					el = $('<img/>');
+
+				$(fullScreen).html('<div class="valign"></div>').append(clone);
+
+				// Load full size image
+				el
+					.on('load', () => {
+						$(fullScreen).find('img').replaceWidth(el);
+					})
+					.prop('src', image.data.paths.original);
+
+				$.each([ 'r', 'mozR', 'webkitR', 'msR', 'oR' ], (i, prefix) => {
+					var method = prefix + 'equestFullScreen';
+
+					if ( typeof fullScreen[method] === 'function' ) {
+						fullScreen[method]();
+
+						return false;
+					}
+				});
+			}
 		}
 
 		/**
 		 * Album image
 		 */
-		class Image {
+		export class Image {
 			el;
 			preview: Preview;
 
@@ -295,7 +335,9 @@ module Shot {
 
 				el.on('load', (e) => {
 					// Replace previously rendered image
-					this.el.replaceWith($(e.target));
+					this.el.replaceWith(el);
+
+					this.el = el;
 
 					// Remove preview image
 					if ( this.preview ) {
@@ -310,7 +352,7 @@ module Shot {
 		/**
 		 * Album preview image
 		 */
-		class Preview {
+		export class Preview {
 			private el;
 			private id: number;
 

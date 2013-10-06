@@ -63,7 +63,7 @@ module Shot {
 
 				this.thumbnail = $('<li><div class="container"><div class="processing"/><div class="title-wrap"><div class="title"/></div></div></li>');
 
-				this.thumbnail.find('.title').text(file.name);
+				this.thumbnail.find('.title').html('<i class="icon-picture"/>&nbsp;' + file.name);
 
 				this.progressBar = new ProgressBar(this.thumbnail);
 

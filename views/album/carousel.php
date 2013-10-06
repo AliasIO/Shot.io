@@ -7,4 +7,6 @@
 
 <div class="carousel"></div>
 
+<div class="full-screen"></div>
+
 <?php require 'views/footer.php' ?>

@@ -3,14 +3,16 @@
 <div class="row">
 	<div class="large-12 columns">
 		<form id="upload" class="well" method="post" enctype="multipart/form-data">
-				<div class="row">
-					<div class="large-12 columns">
-						<div class="button small upload">
-							<i class="icon-picture"></i>&nbsp;Upload images
-							<input id="files" name="files" type="file" multiple>
-						</div>
+			<div class="row">
+				<div class="large-12 columns">
+					<div class="button small upload">
+						<i class="icon-picture"></i>&nbsp;Upload images
+						<input id="files" name="files" type="file" multiple>
 					</div>
+
+					<div class="progress"></div>
 				</div>
+			</div>
 		</form>
 	</div>
 </div>
