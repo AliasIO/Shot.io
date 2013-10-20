@@ -4,9 +4,9 @@ $secondary-color: #252833
 $body-bg: darken($secondary-color, 10%) !default
 $body-font-color: #fff !default
 
-$base-font-size: 13px
+//$base-font-size: 16px
 
-$em-base: $base-font-size
+//$em-base: $base-font-size
 
 $topbar-bg: $secondary-color
 $topbar-link-color-hover: #fff
@@ -14,8 +14,20 @@ $topbar-breakpoint: 768px
 
 $form-label-font-color: darken($body-font-color, 30%)
 
-$fieldset-bg: #fff
-$fieldset-border-color: #ddd
+// $fieldset-bg: $secondary-color
+// $fieldset-border-color: lighten($secondary-color, 10%)
+$fieldset-bg: transparent
+$fieldset-border-color: transparent
+
+$legend-bg: transparent
+
+$input-border-color: lighten($secondary-color, 30%)
+$input-focus-border-color: lighten($secondary-color, 30%)
+
+$form-label-font-color: lighten($secondary-color, 60%)
+$form-label-bottom-margin: .5em
+
+$shiny-edge-color: rgba(#fff, .3)
 
 @import "compass"
 
@@ -25,13 +37,12 @@ $fieldset-border-color: #ddd
 
 @import "foundation/components/global"
 @import "foundation/components/grid"
-
 // @import "foundation/components/visibility"
 @import "foundation/components/block-grid"
 @import "foundation/components/type"
 @import "foundation/components/buttons"
 @import "foundation/components/forms"
-// @import "foundation/components/custom-forms" // *requires components/buttons, components/forms
+@import "foundation/components/custom-forms"
 // @import "foundation/components/button-groups" // *requires components/buttons
 // @import "foundation/components/dropdown-buttons" // *requires components/buttons
 // @import "foundation/components/split-buttons" // *requires components/buttons
@@ -45,7 +56,7 @@ $fieldset-border-color: #ddd
 // @import "foundation/components/alert-boxes"
 // @import "foundation/components/breadcrumbs"
 // @import "foundation/components/keystrokes"
-// @import "foundation/components/labels" 
+@import "foundation/components/labels"
 // @import "foundation/components/inline-lists"
 // @import "foundation/components/pagination"
 // @import "foundation/components/panels"
@@ -58,7 +69,7 @@ $fieldset-border-color: #ddd
 // @import "foundation/components/tables"
 // @import "foundation/components/thumbs"
 // @import "foundation/components/tooltips"
- @import "foundation/components/dropdown"
+// @import "foundation/components/dropdown"
 
 @import "font-awesome/variables"
 @import "font-awesome/mixins"
@@ -95,11 +106,15 @@ body
 h1, h2, h3, h4, h5, h6
 	color: $body-font-color
 
-fieldset
-	background: $fieldset-bg
+form
+	max-width: 600px
+	margin: 0 auto
+
+input
+	border-width: 0 1px 1px 0
 
 .row
-	min-width: 100% !important 
+	min-width: 100% !important
 
 @media #{$medium}
 	.row
@@ -111,6 +126,12 @@ fieldset
 	vertical-align: middle
 
 .carousel
+	-webkit-touch-callout: none
+	-webkit-user-select: none
+	-khtml-user-select: none
+	-moz-user-select: none
+	-ms-user-select: none
+	user-select: none
 	bottom: 0
 	cursor: grab
 	cursor: -moz-grab
@@ -276,20 +297,20 @@ fieldset
 		max-height: 100%
 		max-width: 100%
 
-	&:full-screen
+	&:fullscreen
 		display: inherit
 
 	&:-moz-full-screen
 		display: inherit
 
 	&:-webkit-full-screen
-		display: inherit 
+		display: inherit
 
 	&:-ms-full-screen
-		display: inherit 
+		display: inherit
 
 	&:-o-full-screen
-		display: inherit 
+		display: inherit
 
 .button.upload
 

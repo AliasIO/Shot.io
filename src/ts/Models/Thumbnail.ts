@@ -1,71 +1,23 @@
 module Shot {
-	/**
-	 * Ajax upload
-	 */
-	export module AjaxUpload {
-		var fileTypes = [
-			'image/jpg',
-			'image/jpeg',
-			'image/png',
-			'image/gif',
-			'image/bmp'
-		];
-
+	export module Models {
 		/**
-		 * Ajax upload form
+		 * Thumbnail model
 		 */
-		export class Form {
-			private files: File[] = [];
-			private thumbnailQueue: Image[] = [];
-
-			constructor(private input, private thumbnailGrid) {
-				input.on('change', (e) => {
-					$.each(e.target.files, (i, file) => {
-						var image;
-
-						if ( file.name && $.inArray(file.type, fileTypes) !== -1 ) {
-							image = new Image(file, this.thumbnailGrid);
-
-							this.files.push(image);
-							this.thumbnailQueue.push(image);
-						}
-					});
-
-					this.nextThumbnail();
-				});
-
-				return this;
-			}
-
-			/**
-			 * Create next thumbnail in queue
-			 */
-			nextThumbnail(): Form {
-				if ( this.thumbnailQueue.length ) {
-					this.thumbnailQueue.shift().createThumbnail(() => this.nextThumbnail());
-				}
-
-				return this;
-			}
-		}
-
-		/**
-		 * Ajax upload file
-		 */
-		class File {
+		export class Thumbnail {
+			thumbnailSize = 480;
 			thumbnail;
 			progressBar;
 
 			constructor(public file, public thumbnailGrid) {
 				var formData = new FormData();
-				
+
 				formData.append('image', file);
 
 				this.thumbnail = $('<li><div class="container"><div class="processing"/><div class="title-wrap"><div class="title"/></div></div></li>');
 
 				this.thumbnail.find('.title').html('<i class="icon-picture"/>&nbsp;' + file.name);
 
-				this.progressBar = new ProgressBar(this.thumbnail);
+				this.progressBar = new Models.ProgressBar(this.thumbnail);
 
 				thumbnailGrid.prepend(this.thumbnail);
 
@@ -97,7 +49,7 @@ module Shot {
 
 						image
 							.hide()
-							.on('load', (e) => { 
+							.on('load', (e) => {
 								// Replace temporary thumbnail with processed image
 								this.thumbnail.find('.temporary').fadeOut('fast', function() {
 									$(this).remove();
@@ -123,24 +75,11 @@ module Shot {
 
 				return this;
 			}
-		}
-
-		/**
-		 * Ajax upload image
-		 */
-		class Image extends File {
-			thumbnailSize = 480;
-
-			constructor(public file, public thumbnailGrid) {
-				super(file, thumbnailGrid);
-
-				return this;
-			}
 
 			/**
 			 * Create temporary thumbnail while uploading file
 			 */
-			createThumbnail(callback: () => void): File {
+			preRender(callback: () => void): Thumbnail {
 				var reader = new FileReader();
 
 				callback = typeof callback === 'function' ? callback : () => {};
@@ -152,7 +91,7 @@ module Shot {
 					image.on('load', (e) => {
 						var
 							canvas = $('<canvas/>').get(0),
-							size = { 
+							size = {
 								x: e.target.width  < e.target.height ? this.thumbnailSize : e.target.width  * this.thumbnailSize / e.target.height,
 								y: e.target.height < e.target.width  ? this.thumbnailSize : e.target.height * this.thumbnailSize / e.target.width
 								};
@@ -182,40 +121,6 @@ module Shot {
 				reader.onerror = () => callback();
 
 				reader.readAsDataURL(this.file);
-
-				return this;
-			}
-		}
-
-		/**
-		 * Ajax upload file progress bar
-		 */
-		class ProgressBar {
-			el;
-
-			constructor(public thumbnail) {
-				var wrap = $('<div class="progressbar-wrap"/>');
-
-				this.el = $('<div class="progressbar"/>');
-
-				wrap.append(this.el);
-
-				thumbnail.find('.container').append(wrap);
-			}
-
-			/**
-			 * Update progress bar value
-			 */
-			set(percentage: number, callback: () => void): ProgressBar {
-				this.el.stop(true, true).animate({ width: percentage + '%' }, 200, () => {
-					if ( percentage === 100 ) {
-						this.el.fadeOut('fast');
-					}
-
-					if ( typeof callback === 'function' ) {
-						callback();
-					}
-				});
 
 				return this;
 			}

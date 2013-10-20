@@ -1,14 +1,11 @@
 module Shot {
-	/**
-	 * Album
-	 */
-	export module Album {
+	export module Models {
 		/**
-		 * Album carousel
+		 * Carousel model
 		 */
 		export class Carousel {
 			private index = 0;
-			private images: Image[] = [];
+			private images: Models.Image[] = [];
 			private animating = false;
 			private previous;
 			private current;
@@ -17,7 +14,7 @@ module Shot {
 			private breadcrumb;
 
 			constructor(public carousel, imagesData: any[]) {
-				var 
+				var
 					offset = 0,
 					wrap = $('<div class="wrap"/>'),
 					cutOff: number;
@@ -26,7 +23,9 @@ module Shot {
 				this.currentId = parseInt(location.pathname.replace(/^\/album\/carousel\/[0-9]+\/([0-9]+)/, (match, a) => { return a; }));
 
 				$(window).on('popstate', (e) => {
-					this.render(e.originalEvent.state.id);
+					if ( e.originalEvent.state ) {
+						this.render(e.originalEvent.state.id);
+					}
 				});
 
 				$(window).on('resize', () => {
@@ -192,7 +191,7 @@ module Shot {
 				});
 
 				$.each(imagesData, (i, data) => {
-					this.images.push(new Image(data));
+					this.images.push(new Models.Image(data));
 				});
 
 				wrap.appendTo(carousel);
@@ -206,14 +205,14 @@ module Shot {
 			 * Update the carousel UI
 			 */
 			render(id?: number): Carousel {
-				var images = { previous: <Image> null, current: <Image> null, next: <Image> null };
+				var images = { previous: <Models.Image> null, current: <Models.Image> null, next: <Models.Image> null };
 
 				// Jump to a specific image
 				if ( id !== undefined ) {
 					this.currentId = id;
 
 					// Get index
-					$.each(this.images, (i, image: Image) => {
+					$.each(this.images, (i, image: Models.Image) => {
 						if ( image.data.id === this.currentId ) {
 							this.index = i;
 						}
@@ -249,11 +248,11 @@ module Shot {
 				}
 
 				$.each([ 'previous', 'current', 'next' ], (i, container) => {
-					var 
+					var
 						anchor,
 						image = images[container];
 
-					if ( image instanceof Image ) {
+					if ( image instanceof Models.Image ) {
 						anchor = this[container].find('.image a');
 
 						if ( container === 'current' ) {
@@ -274,7 +273,7 @@ module Shot {
 			/**
 			 * View image full screen
 			 */
-			fullScreen(image: Image) {
+			fullScreen(image: Models.Image): Carousel {
 				var
 					fullScreen = $('.full-screen').get(0),
 					clone = image.el.clone(),
@@ -285,7 +284,7 @@ module Shot {
 				// Load full size image
 				el
 					.on('load', () => {
-						$(fullScreen).find('img').replaceWidth(el);
+						$(fullScreen).find('img').replaceWith(el);
 					})
 					.prop('src', image.data.paths.original);
 
@@ -298,123 +297,9 @@ module Shot {
 						return false;
 					}
 				});
-			}
-		}
-
-		/**
-		 * Album image
-		 */
-		export class Image {
-			el;
-			preview: Preview;
-
-			constructor(public data) {
-				this.el = $('<img/>');
 
 				return this;
-			}
-
-			/**
-			 * Add image to DOM, display preview image while loading
-			 */
-			appendTo(parent): Image {
-				this.preview = new Preview({ x: this.data.width, y: this.data.height }, parent, this.data.paths.preview);
-
-				this.el.appendTo(parent);
-
-				return this;
-			}
-
-			/**
-			 * Load the image, replace preview image
-			 */
-			render(size: number): Image {
-				var el = $('<img/>');
-
-				el.prop('src', this.data.paths[size] ? this.data.paths[size] : this.data.paths['original']);
-
-				el.on('load', (e) => {
-					// Replace previously rendered image
-					this.el.replaceWith(el);
-
-					this.el = el;
-
-					// Remove preview image
-					if ( this.preview ) {
-						this.preview.destroy();
-					}
-				});
-
-				return this;
-			}
-		}
-
-		/**
-		 * Album preview image
-		 */
-		export class Preview {
-			private el;
-			private id: number;
-
-			constructor(size, parent, filePath) {
-				this.id = new Date().getTime() + Math.round(Math.random() * 999);
-
-				this.el = $('<img/>');
-
-				// Render pre-load image in place of the actual image
-				$(window).on('resize.' + this.id, () => {
-					var parentSize = { x: parent.width(), y: parent.height() };
-
-					if ( size.x > parentSize.x ) {
-						size.y *= parentSize.x / size.x;
-						size.x  = parentSize.x;
-					}
-
-					if ( size.y > parentSize.y ) {
-						size.x *= parentSize.y / size.y;
-						size.y  = parentSize.y;
-					}
-
-					this.el.css({
-						position: 'absolute',
-						top: ( parentSize.y / 2 ) - ( size.y / 2 ),
-						height: size.y,
-						width: size.x
-					});
-
-					switch ( parent.css('textAlign') ) {
-						case 'start':
-							this.el.css({ left: 0 });
-
-							break;
-						case 'center':
-							this.el.css({ left: ( parentSize.x / 2 ) - ( size.x / 2 ) });
-
-							break;
-						case 'right':
-							this.el.css({ right: 0 });
-
-							break;
-					}
-				})
-				.trigger('resize');
-
-				this.el
-					.addClass('preview')
-					.prop('src', filePath)
-					.appendTo(parent);
-
-				return this;
-			}
-
-			/**
-			 * Remove the image
-			 */
-			public destroy(): void {
-				this.el.remove();
-
-				$(window).off('resize.' + this.id);
 			}
 		}
 	}
-} 
+}

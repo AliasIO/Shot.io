@@ -1,4 +1,4 @@
-<?php require 'header.php' ?>
+<?php include 'header.php' ?>
 
 <div class="row">
 	<div class="large-12 columns">
@@ -6,4 +6,4 @@
 	</div>
 </div>
 
-<?php require 'footer.php' ?>
+<?php include 'footer.php' ?>

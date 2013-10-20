@@ -18,7 +18,32 @@ class Admin extends \Swiftlet\Controller
 	 */
 	public function index()
 	{
+		$this->view->name = 'admin/index';
+
 		$dbh = $this->app->getLibrary('pdo')->getHandle();
+
+		$sth = $dbh->prepare('
+			SELECT
+				*
+			FROM albums
+			ORDER BY id DESC
+			');
+
+		$sth->execute();
+
+		$results = $sth->fetchAll(\PDO::FETCH_OBJ);
+
+		$albums = array();
+
+		foreach ( $results as $result ) {
+			$album = $this->app->getModel('album')->load($result->id);
+
+			$albums[] = (object) array(
+				'id' => $album->getId()
+				);
+		}
+
+		$this->view->albums = $albums;
 	}
 
 	/**
