@@ -24,7 +24,7 @@
 		<nav class="top-bar">
 			<ul class="title-area">
 				<li class="name">
-					<h1><a href="<?= $this->app->getRootPath() ?>"><i class="icon-camera"></i>&nbsp;<?= $this->htmlEncode($this->app->getConfig('siteName')) ?></a></h1>
+					<h1><a href="<?= $this->app->getRootPath() ?>"><i class="fa fa-camera"></i>&nbsp;<?= $this->htmlEncode($this->app->getConfig('siteName')) ?></a></h1>
 				</li>
 				<li class="toggle-topbar menu-icon"><a href="#"><span></span></a></li>
 			</ul>
@@ -36,7 +36,7 @@
 					<?php foreach ( $this->breadcrumbs as $breadcrumb ): ?>
 					<li>
 						<a href="<?= $this->app->getRootPath() . $breadcrumb->path ?>">
-							<?php if ( $breadcrumb->icon ): ?><i class="icon-<?= $breadcrumb->icon ?>"></i><?php endif ?>&nbsp;<?= $breadcrumb->title ?>
+							<?php if ( $breadcrumb->icon ): ?><i class="fa fa-<?= $breadcrumb->icon ?>"></i><?php endif ?>&nbsp;<?= $breadcrumb->title ?>
 						</a>
 					</li>
 					<li class="divider"></li>
@@ -48,7 +48,7 @@
 			<section class="top-bar-section">
 				<ul class="right">
 					<li class="divider"></li>
-					<li><a href="<?= $this->app->getRootPath() ?>admin"><i class="icon-wrench"></i>&nbsp;Admin</a></li>
+					<li><a href="<?= $this->app->getRootPath() ?>admin"><i class="fa fa-wrench"></i>&nbsp;Admin</a></li>
 				</ul>
 			</section>
 		</nav>

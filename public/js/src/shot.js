@@ -1,3 +1,27 @@
+$(function () {
+    SHOT.app = new Shot.App();
+});
+
+var Shot;
+(function (Shot) {
+    var App = (function () {
+        function App() {
+            $(document).foundation();
+
+            FastClick.attach(document);
+
+            $(document).on('dragstart', 'img, a', function (e) {
+                e.preventDefault();
+            });
+
+            new Shot.Controllers[SHOT.controller]()[SHOT.action]();
+
+            return this;
+        }
+        return App;
+    })();
+    Shot.App = App;
+})(Shot || (Shot = {}));
 var Shot;
 (function (Shot) {
     (function (Controllers) {
@@ -5,6 +29,15 @@ var Shot;
             function Admin() {
             }
             Admin.prototype.index = function () {
+                var thumbnailGrid = $('.thumbnail-grid');
+
+                $('#album').on('submit', function (e) {
+                    var album = null, title = $('#title').val();
+
+                    e.preventDefault();
+
+                    album = new Shot.Models.Album(thumbnailGrid).setTitle(title).save();
+                });
             };
 
             Admin.prototype.album = function () {
@@ -64,163 +97,28 @@ var Shot;
 var Shot;
 (function (Shot) {
     (function (Models) {
-        var Image = (function () {
-            function Image(data) {
-                this.data = data;
-                this.el = $('<img/>');
+        var Album = (function () {
+            function Album(thumbnailGrid) {
+                this.thumbnailGrid = thumbnailGrid;
+                this.setTitle = function (title) {
+                    this.title = title;
 
-                return this;
+                    this.thumbnail.find('.title').html('<i class="fa fa-folder"/>&nbsp;' + title);
+
+                    return this;
+                };
+                this.save = function () {
+                    return this;
+                };
+                this.thumbnail = $('<li>' + '<div class="container">' + '<div class="title-wrap">' + '<div class="title"/>' + '</div>' + '</div>' + '</li>');
+
+                thumbnailGrid.prepend(this.thumbnail);
             }
-            Image.prototype.appendTo = function (parent) {
-                this.preview = new Models.Preview({ x: this.data.width, y: this.data.height }, parent, this.data.paths.preview);
-
-                this.el.appendTo(parent);
-
-                return this;
-            };
-
-            Image.prototype.render = function (size) {
-                var _this = this;
-                var el = $('<img/>');
-
-                el.prop('src', this.data.paths[size] ? this.data.paths[size] : this.data.paths['original']);
-
-                el.on('load', function (e) {
-                    _this.el.replaceWith(el);
-
-                    _this.el = el;
-
-                    if (_this.preview) {
-                        _this.preview.destroy();
-                    }
-                });
-
-                return this;
-            };
-            return Image;
+            return Album;
         })();
-        Models.Image = Image;
+        Models.Album = Album;
     })(Shot.Models || (Shot.Models = {}));
     var Models = Shot.Models;
-})(Shot || (Shot = {}));
-var Shot;
-(function (Shot) {
-    (function (Models) {
-        var Preview = (function () {
-            function Preview(size, parent, filePath) {
-                var _this = this;
-                this.id = new Date().getTime() + Math.round(Math.random() * 999);
-
-                this.el = $('<img/>');
-
-                $(window).on('resize.' + this.id, function () {
-                    var parentSize = { x: parent.width(), y: parent.height() };
-
-                    if (size.x > parentSize.x) {
-                        size.y *= parentSize.x / size.x;
-                        size.x = parentSize.x;
-                    }
-
-                    if (size.y > parentSize.y) {
-                        size.x *= parentSize.y / size.y;
-                        size.y = parentSize.y;
-                    }
-
-                    _this.el.css({
-                        position: 'absolute',
-                        top: (parentSize.y / 2) - (size.y / 2),
-                        height: size.y,
-                        width: size.x
-                    });
-
-                    switch (parent.css('textAlign')) {
-                        case 'start':
-                            _this.el.css({ left: 0 });
-
-                            break;
-                        case 'center':
-                            _this.el.css({ left: (parentSize.x / 2) - (size.x / 2) });
-
-                            break;
-                        case 'right':
-                            _this.el.css({ right: 0 });
-
-                            break;
-                    }
-                }).trigger('resize');
-
-                this.el.addClass('preview').prop('src', filePath).appendTo(parent);
-
-                return this;
-            }
-            Preview.prototype.destroy = function () {
-                this.el.remove();
-
-                $(window).off('resize.' + this.id);
-            };
-            return Preview;
-        })();
-        Models.Preview = Preview;
-    })(Shot.Models || (Shot.Models = {}));
-    var Models = Shot.Models;
-})(Shot || (Shot = {}));
-var Shot;
-(function (Shot) {
-    (function (Models) {
-        var ProgressBar = (function () {
-            function ProgressBar(thumbnail) {
-                this.thumbnail = thumbnail;
-                var wrap = $('<div class="progressbar-wrap"/>');
-
-                this.el = $('<div class="progressbar"/>');
-
-                wrap.append(this.el);
-
-                thumbnail.find('.container').append(wrap);
-            }
-            ProgressBar.prototype.set = function (percentage, callback) {
-                var _this = this;
-                this.el.stop(true, true).animate({ width: percentage + '%' }, 200, function () {
-                    if (percentage === 100) {
-                        _this.el.fadeOut('fast');
-                    }
-
-                    if (typeof callback === 'function') {
-                        callback();
-                    }
-                });
-
-                return this;
-            };
-            return ProgressBar;
-        })();
-        Models.ProgressBar = ProgressBar;
-    })(Shot.Models || (Shot.Models = {}));
-    var Models = Shot.Models;
-})(Shot || (Shot = {}));
-$(function () {
-    SHOT.app = new Shot.App();
-});
-
-var Shot;
-(function (Shot) {
-    var App = (function () {
-        function App() {
-            $(document).foundation();
-
-            FastClick.attach(document);
-
-            $(document).on('dragstart', 'img, a', function (e) {
-                e.preventDefault();
-            });
-
-            new Shot.Controllers[SHOT.controller]()[SHOT.action]();
-
-            return this;
-        }
-        return App;
-    })();
-    Shot.App = App;
 })(Shot || (Shot = {}));
 var Shot;
 (function (Shot) {
@@ -485,6 +383,143 @@ var Shot;
 var Shot;
 (function (Shot) {
     (function (Models) {
+        var Image = (function () {
+            function Image(data) {
+                this.data = data;
+                this.el = $('<img/>');
+
+                return this;
+            }
+            Image.prototype.appendTo = function (parent) {
+                this.preview = new Shot.Models.Preview({ x: this.data.width, y: this.data.height }, parent, this.data.paths.preview);
+
+                this.el.appendTo(parent);
+
+                return this;
+            };
+
+            Image.prototype.render = function (size) {
+                var _this = this;
+                var el = $('<img/>');
+
+                el.prop('src', this.data.paths[size] ? this.data.paths[size] : this.data.paths['original']);
+
+                el.on('load', function (e) {
+                    _this.el.replaceWith(el);
+
+                    _this.el = el;
+
+                    if (_this.preview) {
+                        _this.preview.destroy();
+                    }
+                });
+
+                return this;
+            };
+            return Image;
+        })();
+        Models.Image = Image;
+    })(Shot.Models || (Shot.Models = {}));
+    var Models = Shot.Models;
+})(Shot || (Shot = {}));
+var Shot;
+(function (Shot) {
+    (function (Models) {
+        var Preview = (function () {
+            function Preview(size, parent, filePath) {
+                var _this = this;
+                this.id = new Date().getTime() + Math.round(Math.random() * 999);
+
+                this.el = $('<img/>');
+
+                $(window).on('resize.' + this.id, function () {
+                    var parentSize = { x: parent.width(), y: parent.height() };
+
+                    if (size.x > parentSize.x) {
+                        size.y *= parentSize.x / size.x;
+                        size.x = parentSize.x;
+                    }
+
+                    if (size.y > parentSize.y) {
+                        size.x *= parentSize.y / size.y;
+                        size.y = parentSize.y;
+                    }
+
+                    _this.el.css({
+                        position: 'absolute',
+                        top: (parentSize.y / 2) - (size.y / 2),
+                        height: size.y,
+                        width: size.x
+                    });
+
+                    switch (parent.css('textAlign')) {
+                        case 'start':
+                            _this.el.css({ left: 0 });
+
+                            break;
+                        case 'center':
+                            _this.el.css({ left: (parentSize.x / 2) - (size.x / 2) });
+
+                            break;
+                        case 'right':
+                            _this.el.css({ right: 0 });
+
+                            break;
+                    }
+                }).trigger('resize');
+
+                this.el.addClass('preview').prop('src', filePath).appendTo(parent);
+
+                return this;
+            }
+            Preview.prototype.destroy = function () {
+                this.el.remove();
+
+                $(window).off('resize.' + this.id);
+            };
+            return Preview;
+        })();
+        Models.Preview = Preview;
+    })(Shot.Models || (Shot.Models = {}));
+    var Models = Shot.Models;
+})(Shot || (Shot = {}));
+var Shot;
+(function (Shot) {
+    (function (Models) {
+        var ProgressBar = (function () {
+            function ProgressBar(thumbnail) {
+                this.thumbnail = thumbnail;
+                var wrap = $('<div class="progressbar-wrap"/>');
+
+                this.el = $('<div class="progressbar"/>');
+
+                wrap.append(this.el);
+
+                thumbnail.find('.container').append(wrap);
+            }
+            ProgressBar.prototype.set = function (percentage, callback) {
+                var _this = this;
+                this.el.stop(true, true).animate({ width: percentage + '%' }, 200, function () {
+                    if (percentage === 100) {
+                        _this.el.fadeOut('fast');
+                    }
+
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+                });
+
+                return this;
+            };
+            return ProgressBar;
+        })();
+        Models.ProgressBar = ProgressBar;
+    })(Shot.Models || (Shot.Models = {}));
+    var Models = Shot.Models;
+})(Shot || (Shot = {}));
+var Shot;
+(function (Shot) {
+    (function (Models) {
         var Thumbnail = (function () {
             function Thumbnail(file, thumbnailGrid) {
                 var _this = this;
@@ -495,9 +530,9 @@ var Shot;
 
                 formData.append('image', file);
 
-                this.thumbnail = $('<li><div class="container"><div class="processing"/><div class="title-wrap"><div class="title"/></div></div></li>');
+                this.thumbnail = $('<li>' + '<div class="container">' + '<div class="processing"/>' + '<div class="title-wrap">' + '<div class="title"/>' + '</div>' + '</div>' + '</li>');
 
-                this.thumbnail.find('.title').html('<i class="icon-picture"/>&nbsp;' + file.name);
+                this.thumbnail.find('.title').html('<i class="fa fa-picture"/>&nbsp;' + file.name);
 
                 this.progressBar = new Shot.Models.ProgressBar(this.thumbnail);
 

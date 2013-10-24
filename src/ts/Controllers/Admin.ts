@@ -8,6 +8,19 @@ module Shot {
 			 * Index action
 			 */
 			index() {
+				var thumbnailGrid = $('.thumbnail-grid');
+
+				$('#album').on('submit', (e) => {
+					var
+						album: Models.Album = null,
+						title: string = $('#title').val();
+
+					e.preventDefault();
+
+					album = new Models.Album(thumbnailGrid)
+						.setTitle(title)
+						.save();
+				});
 			}
 
 			/**

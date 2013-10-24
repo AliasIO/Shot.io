@@ -3,16 +3,20 @@
 <div class="row">
 	<div class="large-12 columns">
 		<form id="upload" class="well" method="post" enctype="multipart/form-data">
-			<div class="row">
-				<div class="large-12 columns">
-					<div class="button small expand upload">
-						<i class="icon-picture"></i>&nbsp;Upload images
-						<input id="files" name="files" type="file" multiple>
-					</div>
+			<fieldset>
+				<legend>Upload images</legend>
 
-					<div class="progress"></div>
+				<div class="row">
+					<div class="large-12 columns">
+						<div class="button expand upload">
+							Choose files
+							<input id="files" name="files" type="file" multiple>
+						</div>
+
+						<div class="progress"></div>
+					</div>
 				</div>
-			</div>
+			</fieldet>
 		</form>
 	</div>
 </div>

@@ -13,9 +13,18 @@ module Shot {
 
 				formData.append('image', file);
 
-				this.thumbnail = $('<li><div class="container"><div class="processing"/><div class="title-wrap"><div class="title"/></div></div></li>');
+				this.thumbnail = $(
+					'<li>' +
+						'<div class="container">' +
+							'<div class="processing"/>' +
+							'<div class="title-wrap">' +
+								'<div class="title"/>' +
+							'</div>' +
+						'</div>' +
+					'</li>'
+				);
 
-				this.thumbnail.find('.title').html('<i class="icon-picture"/>&nbsp;' + file.name);
+				this.thumbnail.find('.title').html('<i class="fa fa-picture"/>&nbsp;' + file.name);
 
 				this.progressBar = new Models.ProgressBar(this.thumbnail);
 

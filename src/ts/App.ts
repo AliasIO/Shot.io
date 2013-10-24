@@ -1,9 +1,3 @@
-/// <reference path="Controllers/Admin.ts"/>
-/// <reference path="Controllers/Album"/>
-/// <reference path="Models/Image"/>
-/// <reference path="Models/Preview"/>
-/// <reference path="Models/ProgressBar"/>
-
 $(function() {
 	SHOT.app = new Shot.App();
 });
