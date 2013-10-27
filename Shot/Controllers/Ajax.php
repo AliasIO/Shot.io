@@ -3,16 +3,10 @@
 namespace Shot\Controllers;
 
 /**
- * Upload controller
+ * Ajax controller
  */
-class Upload extends \Swiftlet\Controller
+class Ajax extends \Swiftlet\Controller
 {
-	/**
-	 * Page title
-	 * @var string
-	 */
-	protected $title = 'Upload';
-
 	/**
 	 * File types
 	 * @var array
@@ -26,9 +20,29 @@ class Upload extends \Swiftlet\Controller
 		);
 
 	/**
-	 * Default action
+	 * Save album action
 	 */
-	public function index()
+	public function saveAlbum()
+	{
+		header('Content-Type: application/json');
+
+		if ( !empty($_POST) ) {
+			$title = !empty($_POST['title']) ? $_POST['title'] : '';
+
+			$album = $this->app->getModel('album');
+
+			$album
+				->setTitle($title)
+				->save();
+
+			exit(json_encode(array('id' => $album->getId())));
+		}
+	}
+
+	/**
+	 * Save image action
+	 */
+	public function saveImage()
 	{
 		header('Content-Type: application/json');
 
@@ -70,13 +84,14 @@ class Upload extends \Swiftlet\Controller
 
 					move_uploaded_file($file['tmp_name'], \Shot\Models\Image::$imagePath . $filename);
 
-					$image = $this->app->getModel('image')->create($filename);
+					$image = $this->app->getModel('image');
 
-					//$image->title = basepath($file['tmp_name']);
+					$image
+						->create($filename)
+						->setTitle(basename($file['tmp_name']))
+						->save();
 
-					//$image->save();
-
-					echo json_encode(array('filename' => $filename));
+					echo json_encode(array('id' => $image->getId(), 'filename' => $filename));
 
 					exit;
 				}

@@ -70,12 +70,13 @@ class Image extends \Swiftlet\Model
 	/**
 	 * Create a new image object
 	 * @param string $filename
+	 * @return object
 	 */
 	public function create($filename)
 	{
 		$this->filename = $filename;
 
-		$this->title = $filename;
+		$this->title = basename($filename);
 
 		$this->image = new \Imagick(self::$imagePath . $filename);
 
@@ -84,41 +85,75 @@ class Image extends \Swiftlet\Model
 		$this
 			->autoRotate()
 			->exportSizes()
-			->exportThumbnails()
-			;
+			->exportThumbnails();
 
 		$geometry = $this->image->getImageGeometry();
 
 		$this->width  = $geometry['width'];
 		$this->height = $geometry['height'];
 
-		$dbh = $this->app->getLibrary('pdo')->getHandle();
+		return $this;
+	}
 
-		$sth = $dbh->prepare('
-			INSERT INTO photos (
-				filename,
-				title,
-				width,
-				height,
-				properties
-			) VALUES (
-				:filename,
-				:title,
-				:width,
-				:height,
-				:properties
-			)
-			');
+	/**
+	 * Save
+	 * @return object
+	 */
+	public function save()
+	{
+		$dbh = $this->app->getLibrary('pdo')->getHandle();
 
 		$properties = serialize($this->properties);
 
-		$sth->bindParam('filename', $this->filename);
-		$sth->bindParam('title', $this->title);
-		$sth->bindParam('width', $this->width, \PDO::PARAM_INT);
-		$sth->bindParam('height', $this->height, \PDO::PARAM_INT);
-		$sth->bindParam('properties', $properties);
+		if ( $this->id ) {
+			$sth = $dbh->prepare('
+				UPDATE photos SET
+					filename   = :filename,
+					title      = :title,
+					width      = :width,
+					height     = :height,
+					properties = :properties
+				WHERE
+					id = :id
+				LIMIT 1
+				');
 
-		$sth->execute();
+			$sth->bindParam('id',         $this->id,     \PDO::PARAM_INT);
+			$sth->bindParam('title',      $this->title);
+			$sth->bindParam('width',      $this->width,  \PDO::PARAM_INT);
+			$sth->bindParam('height',     $this->height, \PDO::PARAM_INT);
+			$sth->bindParam('properties', $properties);
+
+			$sth->execute();
+		} else {
+			$sth = $dbh->prepare('
+				INSERT INTO photos (
+					filename,
+					title,
+					width,
+					height,
+					properties
+				) VALUES (
+					:filename,
+					:title,
+					:width,
+					:height,
+					:properties
+				)
+				');
+
+			$sth->bindParam('filename',   $this->filename);
+			$sth->bindParam('title',      $this->title);
+			$sth->bindParam('width',      $this->width,  \PDO::PARAM_INT);
+			$sth->bindParam('height',     $this->height, \PDO::PARAM_INT);
+			$sth->bindParam('properties', $properties);
+
+			$sth->execute();
+
+			$this->id = $dbh->lastInsertId();
+
+			return $this;
+		}
 	}
 
 	/**

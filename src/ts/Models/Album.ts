@@ -4,30 +4,22 @@ module Shot {
 		 * Album model
 		 */
 		export class Album {
-			title: string;
-			thumbnail;
+			el;
 
-			constructor(public thumbnailGrid) {
-				this.thumbnail = $(
-					'<li>' +
-						'<div class="container">' +
-							'<div class="title-wrap">' +
-								'<div class="title"/>' +
-							'</div>' +
-						'</div>' +
-					'</li>'
-				);
+			private id: number;
+			private template;
 
-				thumbnailGrid.prepend(this.thumbnail);
+			constructor(public title: string, id?: number) {
+				this.id = id;
+
+				this.template = $('#template-album').html();
 			}
 
 			/**
-			 * Set title
+			 * Render
 			 */
-			setTitle = function(title: string): Album {
-				this.title = title;
-
-				this.thumbnail.find('.title').html('<i class="fa fa-folder"/>&nbsp;' + title);
+			render(): Album {
+				this.el = $(Mustache.render(this.template, this));
 
 				return this;
 			}
@@ -35,8 +27,26 @@ module Shot {
 			/**
 			 * Save
 			 */
-			save = function(): Album {
-				return this;
+			save = function() {
+				var deferred = $.Deferred();
+
+				if ( this.id ) {
+					// TODO
+				} else {
+					$.post(SHOT.rootPath + 'ajax/saveAlbum', {
+						title: this.title
+					})
+					.done((data) => {
+						this.id       = data.id;
+
+						deferred.resolve(data);
+					})
+					.fail((e) => {
+						deferred.reject(e);
+					});
+				}
+
+				return deferred;
 			}
 		}
 	}

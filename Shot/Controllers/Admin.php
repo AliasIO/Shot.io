@@ -36,10 +36,9 @@ class Admin extends \Swiftlet\Controller
 		$albums = array();
 
 		foreach ( $results as $result ) {
-			$album = $this->app->getModel('album')->load($result->id);
-
 			$albums[] = (object) array(
-				'id' => $album->getId()
+				'id'    => (int) $result->id,
+				'title' => $result->title
 				);
 		}
 

@@ -15,7 +15,7 @@ DROP TABLE IF EXISTS albums;
 
 CREATE TABLE albums (
 	id      INTEGER PRIMARY KEY,
-	name    TEXT    NOT NULL,
+	title   TEXT    NOT NULL,
 	`order` INTEGER     NULL
 );
 

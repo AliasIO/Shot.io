@@ -24,17 +24,25 @@
 <div class="row">
 	<div class="large-12 columns">
 		<ul class="thumbnail-grid">
-			<?php /*
-			<?php foreach ( $this->images as $image ): ?>
-			<li>
-				<div class="container">
-					<img src="<?= $image->path ?>">
-				</div>
-			</li>
-			<?php endforeach ?>
-			*/ ?>
 		</ul>
 	</div>
 </div>
+
+<script id="template-thumbnail" type="text/template">
+	<li>
+		<div class="container">
+			<div class="processing"></div>
+			<div class="title-wrap">
+				<div class="title"><i class="fa fa-picture"></i> {{title}}</div>
+			</div>
+		</div>
+	</li>
+</script>
+
+<script id="template-progressbar" type="text/template">
+	<div class="progressbar-wrap">
+		<div class="progressbar"></div>
+	</div>
+</script>
 
 <?php include 'views/footer.php' ?>

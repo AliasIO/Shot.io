@@ -2,7 +2,7 @@ $(function() {
 	SHOT.app = new Shot.App();
 });
 
-declare var SHOT, $, FastClick;
+declare var SHOT, $, Mustache, FastClick;
 
 module Shot {
 	/**

@@ -5,22 +5,26 @@ module Shot {
 		 */
 		export class ProgressBar {
 			el;
+			template;
 
-			constructor(public thumbnail) {
-				var wrap = $('<div class="progressbar-wrap"/>');
+			constructor() {
+				this.template = $('#template-progressbar').html();
+			}
 
-				this.el = $('<div class="progressbar"/>');
+			/**
+			 * Render
+			 */
+			render(): ProgressBar {
+				this.el = $(Mustache.render(this.template, this));
 
-				wrap.append(this.el);
-
-				thumbnail.find('.container').append(wrap);
+				return this;
 			}
 
 			/**
 			 * Update progress bar value
 			 */
-			set(percentage: number, callback: () => void): ProgressBar {
-				this.el.stop(true, true).animate({ width: percentage + '%' }, 200, () => {
+			set(percentage: number, callback?: () => void): ProgressBar {
+				this.el.find('.progressbar').stop(true, true).animate({ width: percentage + '%' }, 200, () => {
 					if ( percentage === 100 ) {
 						this.el.fadeOut('fast');
 					}

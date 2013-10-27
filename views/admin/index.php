@@ -1,5 +1,9 @@
 <?php include 'views/header.php' ?>
 
+<script>
+	SHOT.albums = <?= json_encode($this->albums) ?>;
+</script>
+
 <div class="row">
 	<div class="large-12 columns">
 		<form id="album">
@@ -23,15 +27,18 @@
 <div class="row">
 	<div class="large-12 columns">
 		<ul class="thumbnail-grid">
-			<?php foreach ( $this->albums as $album ): ?>
-			<li>
-				<div class="container">
-					Album
-				</div>
-			</li>
-			<?php endforeach ?>
 		</ul>
 	</div>
 </div>
+
+<script id="template-album" type="text/template">
+	<li>
+		<div class="container">
+			<div class="title-wrap">
+				<div class="title"><i class="fa fa-folder"></i> {{title}}</div>
+			</div>
+		</div>
+	</li>
+</script>
 
 <?php include 'views/footer.php' ?>
