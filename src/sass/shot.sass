@@ -29,6 +29,8 @@ $form-label-bottom-margin: .5em
 
 $shiny-edge-color: rgba(#fff, .3)
 
+$thumbnail-size: 480px
+
 @import "compass"
 
 @import "settings"
@@ -79,6 +81,7 @@ html
 
 body
 	min-height: 100%
+	padding-bottom: 100px
 
 .top-bar
 	z-index: 999
@@ -101,8 +104,12 @@ h1, h2, h3, h4, h5, h6
 	color: $body-font-color
 
 form
-	max-width: 600px
 	margin: 0 auto
+	max-width: 600px
+
+fieldset
+	padding-left: 0
+	padding-right: 0
 
 input
 	border-width: 0 1px 1px 0
@@ -266,6 +273,21 @@ input
 	canvas
 		height: auto
 		max-width: 100%
+
+	.placeholder-thumbnail
+		background: $secondary-color
+		color: lighten($secondary-color, 10%)
+		display: inline-block
+		height: $thumbnail-size
+		max-height: 100%
+		max-width: 100%
+		overflow: hidden
+		position: absolute
+		text-align: center
+		width: $thumbnail-size
+
+		.fa
+			vertical-align: middle
 
 @media #{$screen}
 	.thumbnail-grid

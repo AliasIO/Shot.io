@@ -33,7 +33,7 @@ var Shot;
 
                 if (SHOT.albums) {
                     $.each(SHOT.albums, function (i, albumData) {
-                        var album = new Shot.Models.Album(albumData.title, albumData.id).render();
+                        var album = new Shot.Models.Album(albumData).render();
 
                         thumbnailGrid.prepend(album.el);
 
@@ -46,16 +46,19 @@ var Shot;
 
                     e.preventDefault();
 
-                    album = new Shot.Models.Album(title).render();
+                    if (title) {
+                        album = new Shot.Models.Album({ title: title }).render();
 
-                    album.save().done(function (data) {
-                    }).fail(function (e) {
-                        console.log('fail');
-                    });
+                        album.save().done(function (data) {
+                            album.render();
+                        }).fail(function (e) {
+                            console.log('fail');
+                        });
 
-                    albums.push(album);
+                        albums.push(album);
 
-                    thumbnailGrid.prepend(album.el);
+                        thumbnailGrid.prepend(album.el);
+                    }
                 });
             };
 
@@ -70,7 +73,7 @@ var Shot;
 
                 if (SHOT.thumbnails) {
                     $.each(SHOT.thubmnails, function (i, thumbnailData) {
-                        var thumbnail = new Shot.Models.Thumbnail(thumbnailData.title, thumbnailData.id).render();
+                        var thumbnail = new Shot.Models.Thumbnail(thumbnailData.title).render();
 
                         thumbnailGrid.prepend(thumbnail);
 
@@ -83,13 +86,10 @@ var Shot;
                         var thumbnail, progressBar;
 
                         if (file.name && $.inArray(file.type, fileTypes) !== -1) {
-                            thumbnail = new Shot.Models.Thumbnail(file.name).render();
+                            thumbnail = new Shot.Models.Thumbnail({ title: file.name, file: file, formData: new FormData() }).render();
                             progressBar = new Shot.Models.ProgressBar().render();
 
-                            thumbnail.file = file;
-                            thumbnail.formData = new FormData();
-
-                            thumbnail.formData.append('image', file);
+                            thumbnail.data.formData.append('image', file);
 
                             thumbnail.el.find('.container').append(progressBar.el);
 
@@ -160,7 +160,7 @@ var Shot;
                             return callback();
                         };
 
-                        reader.readAsDataURL(thumbnail.file);
+                        reader.readAsDataURL(thumbnail.data.file);
                     };
 
                     (function nextThumbnail() {
@@ -185,6 +185,17 @@ var Shot;
             function Album() {
             }
             Album.prototype.grid = function () {
+                var thumbnailGrid = $('.thumbnail-grid'), thumbnails = [];
+
+                if (SHOT.thumbnails) {
+                    $.each(SHOT.thumbnails, function (i, thumbnailData) {
+                        var thumbnail = new Shot.Models.Thumbnail(thumbnailData).render();
+
+                        thumbnailGrid.prepend(thumbnail.el);
+
+                        thumbnails.push(thumbnail);
+                    });
+                }
             };
 
             Album.prototype.carousel = function () {
@@ -198,10 +209,35 @@ var Shot;
 })(Shot || (Shot = {}));
 var Shot;
 (function (Shot) {
+    (function (Controllers) {
+        var Index = (function () {
+            function Index() {
+            }
+            Index.prototype.index = function () {
+                var thumbnailGrid = $('.thumbnail-grid'), albums = [];
+
+                if (SHOT.albums) {
+                    $.each(SHOT.albums, function (i, albumData) {
+                        var album = new Shot.Models.Album(albumData).render();
+
+                        thumbnailGrid.prepend(album.el);
+
+                        albums.push(album);
+                    });
+                }
+            };
+            return Index;
+        })();
+        Controllers.Index = Index;
+    })(Shot.Controllers || (Shot.Controllers = {}));
+    var Controllers = Shot.Controllers;
+})(Shot || (Shot = {}));
+var Shot;
+(function (Shot) {
     (function (Models) {
         var Album = (function () {
-            function Album(title, id) {
-                this.title = title;
+            function Album(data) {
+                this.data = data;
                 this.save = function () {
                     var _this = this;
                     var deferred = $.Deferred();
@@ -209,9 +245,9 @@ var Shot;
                     if (this.id) {
                     } else {
                         $.post(SHOT.rootPath + 'ajax/saveAlbum', {
-                            title: this.title
+                            title: this.data.title
                         }).done(function (data) {
-                            _this.id = data.id;
+                            _this.data.id = data.id;
 
                             deferred.resolve(data);
                         }).fail(function (e) {
@@ -221,12 +257,12 @@ var Shot;
 
                     return deferred;
                 };
-                this.id = id;
-
                 this.template = $('#template-album').html();
             }
             Album.prototype.render = function () {
-                this.el = $(Mustache.render(this.template, this));
+                var el = $(Mustache.render(this.template, this.data));
+
+                this.el ? this.el.replaceWith(el) : this.el = el;
 
                 return this;
             };
@@ -438,7 +474,7 @@ var Shot;
                     history.pushState({ id: this.currentId }, '', '/album/carousel/' + SHOT.album.id + '/' + images.current.data.id);
                 }
 
-                this.breadcrumb.prop('href', SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + images.current.data.id).html('<i class="icon-picture"/>&nbsp;' + images.current.data.title);
+                this.breadcrumb.prop('href', SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + images.current.data.id).html('<i class="fa fa-picture-o"/>&nbsp;' + images.current.data.title);
 
                 this.carousel.find('.image img').remove();
 
@@ -607,7 +643,7 @@ var Shot;
                 this.template = $('#template-progressbar').html();
             }
             ProgressBar.prototype.render = function () {
-                this.el = $(Mustache.render(this.template, this));
+                this.el = $(Mustache.render(this.template));
 
                 return this;
             };
@@ -636,14 +672,14 @@ var Shot;
 (function (Shot) {
     (function (Models) {
         var Thumbnail = (function () {
-            function Thumbnail(title, id) {
-                this.title = title;
-                this.id = id;
-
+            function Thumbnail(data) {
+                this.data = data;
                 this.template = $('#template-thumbnail').html();
             }
             Thumbnail.prototype.render = function () {
-                this.el = $(Mustache.render(this.template, this));
+                var el = $(Mustache.render(this.template, this.data));
+
+                this.el ? this.el.replaceWith(el) : this.el = el;
 
                 return this;
             };
@@ -652,12 +688,12 @@ var Shot;
                 var _this = this;
                 var deferred = $.Deferred();
 
-                if (this.id) {
+                if (this.data.id) {
                 } else {
                     $.ajax({
                         url: SHOT.rootPath + 'ajax/saveImage',
                         type: 'POST',
-                        data: this.formData,
+                        data: this.data.formData,
                         processData: false,
                         contentType: false,
                         cache: false,
@@ -675,8 +711,8 @@ var Shot;
                             return xhr;
                         }
                     }, 'json').done(function (data) {
-                        _this.id = data.id;
-                        _this.filename = data.filename;
+                        _this.data.id = data.id;
+                        _this.data.filename = data.filename;
 
                         deferred.resolve(data);
                     }).fail(function (e) {

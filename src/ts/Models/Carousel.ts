@@ -235,7 +235,7 @@ module Shot {
 
 				this.breadcrumb
 					.prop('href', SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + images.current.data.id)
-					.html('<i class="icon-picture"/>&nbsp;' + images.current.data.title);
+					.html('<i class="fa fa-picture-o"/>&nbsp;' + images.current.data.title);
 
 				this.carousel.find('.image img').remove();
 

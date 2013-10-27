@@ -5,16 +5,10 @@ module Shot {
 		 */
 		export class Thumbnail {
 			el;
-			file;
-			formData;
 
-			private id: number;
-			private filename: string;
 			private template;
 
-			constructor(public title, id?: number) {
-				this.id = id;
-
+			constructor(public data) {
 				this.template = $('#template-thumbnail').html();
 			}
 
@@ -22,7 +16,9 @@ module Shot {
 			 * Render
 			 */
 			render(): Thumbnail {
-				this.el = $(Mustache.render(this.template, this));
+				var el = $(Mustache.render(this.template, this.data));
+
+				this.el ? this.el.replaceWith(el) : this.el = el;
 
 				return this;
 			}
@@ -33,13 +29,13 @@ module Shot {
 			save() {
 				var deferred = $.Deferred();
 
-				if ( this.id ) {
+				if ( this.data.id ) {
 					// TODO
 				} else {
 					$.ajax({
 						url: SHOT.rootPath + 'ajax/saveImage',
 						type: 'POST',
-						data: this.formData,
+						data: this.data.formData,
 						processData: false,
 						contentType: false,
 						cache: false,
@@ -59,8 +55,8 @@ module Shot {
 						}
 					}, 'json')
 					.done((data) => {
-						this.id       = data.id;
-						this.filename = data.filename;
+						this.data.id       = data.id;
+						this.data.filename = data.filename;
 
 						deferred.resolve(data);
 					})

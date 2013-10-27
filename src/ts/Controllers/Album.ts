@@ -5,9 +5,22 @@ module Shot {
 		 */
 		export class Album {
 			/**
-			 * Grid action
+			 * Index action
 			 */
 			grid() {
+				var
+					thumbnailGrid = $('.thumbnail-grid'),
+					thumbnails = [];
+
+				if ( SHOT.thumbnails ) {
+					$.each(SHOT.thumbnails, (i, thumbnailData) => {
+						var thumbnail = new Models.Thumbnail(thumbnailData).render();
+
+						thumbnailGrid.prepend(thumbnail.el);
+
+						thumbnails.push(thumbnail);
+					});
+				}
 			}
 
 			/**

@@ -88,7 +88,7 @@ class Ajax extends \Swiftlet\Controller
 
 					$image
 						->create($filename)
-						->setTitle(basename($file['tmp_name']))
+						->setTitle(basename($file['name']))
 						->save();
 
 					echo json_encode(array('id' => $image->getId(), 'filename' => $filename));

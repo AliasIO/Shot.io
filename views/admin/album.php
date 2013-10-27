@@ -28,21 +28,8 @@
 	</div>
 </div>
 
-<script id="template-thumbnail" type="text/template">
-	<li>
-		<div class="container">
-			<div class="processing"></div>
-			<div class="title-wrap">
-				<div class="title"><i class="fa fa-picture"></i> {{title}}</div>
-			</div>
-		</div>
-	</li>
-</script>
+<?php include 'views/templates/thumbnail.php' ?>
 
-<script id="template-progressbar" type="text/template">
-	<div class="progressbar-wrap">
-		<div class="progressbar"></div>
-	</div>
-</script>
+<?php include 'views/templates/progressbar.php' ?>
 
 <?php include 'views/footer.php' ?>

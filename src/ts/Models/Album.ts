@@ -6,12 +6,9 @@ module Shot {
 		export class Album {
 			el;
 
-			private id: number;
 			private template;
 
-			constructor(public title: string, id?: number) {
-				this.id = id;
-
+			constructor(public data) {
 				this.template = $('#template-album').html();
 			}
 
@@ -19,7 +16,9 @@ module Shot {
 			 * Render
 			 */
 			render(): Album {
-				this.el = $(Mustache.render(this.template, this));
+				var el = $(Mustache.render(this.template, this.data));
+
+				this.el ? this.el.replaceWith(el) : this.el = el;
 
 				return this;
 			}
@@ -34,10 +33,10 @@ module Shot {
 					// TODO
 				} else {
 					$.post(SHOT.rootPath + 'ajax/saveAlbum', {
-						title: this.title
+						title: this.data.title
 					})
 					.done((data) => {
-						this.id       = data.id;
+						this.data.id = data.id;
 
 						deferred.resolve(data);
 					})

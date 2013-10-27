@@ -14,9 +14,9 @@ class Album extends \Swiftlet\Controller
 	protected $title = 'Album';
 
 	/**
-	 * Default action
+	 * Grid action
 	 */
-	public function index()
+	public function grid()
 	{
 		$this->view->name = 'album/grid';
 
@@ -35,7 +35,7 @@ class Album extends \Swiftlet\Controller
 
 		$results = $sth->fetchAll(\PDO::FETCH_OBJ);
 
-		$images = array();
+		$thumbnails = array();
 
 		foreach ( $results as $result ) {
 			try {
@@ -51,7 +51,7 @@ class Album extends \Swiftlet\Controller
 					$paths[$imageSize] = $image->getFilePath($imageSize);
 				}
 
-				$images[] = (object) array(
+				$thumbnails[] = (object) array(
 					'id'       => (int) $image->getId(),
 					'filename' => $image->getFilename(),
 					'title'    => $image->getTitle(),
@@ -63,7 +63,7 @@ class Album extends \Swiftlet\Controller
 			}
 		}
 
-		$this->view->images = $images;
+		$this->view->thumbnails = $thumbnails;
 
 		$this->view->album = (object) array(
 			'title' => 'Album title',
@@ -73,16 +73,8 @@ class Album extends \Swiftlet\Controller
 		$this->view->breadcrumbs = array((object) array(
 			'path'  => 'album/grid/' . $albumId,
 			'title' => 'Album title',
-			'icon'  => 'th'
+			'icon'  => 'folder'
 			));
-	}
-
-	/**
-	 * Grid action
-	 */
-	public function grid()
-	{
-		$this->index();
 	}
 
 	/**
@@ -90,7 +82,9 @@ class Album extends \Swiftlet\Controller
 	 */
 	public function carousel()
 	{
-		$this->index();
+		$this->grid();
+
+		$this->view->images = $this->view->thumbnails;
 
 		$this->view->name = 'album/carousel';
 	}

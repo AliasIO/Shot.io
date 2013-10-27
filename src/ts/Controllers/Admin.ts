@@ -14,7 +14,7 @@ module Shot {
 
 				if ( SHOT.albums ) {
 					$.each(SHOT.albums, (i, albumData) => {
-						var album = new Models.Album(albumData.title, albumData.id).render();
+						var album = new Models.Album(albumData).render();
 
 						thumbnailGrid.prepend(album.el);
 
@@ -29,18 +29,21 @@ module Shot {
 
 					e.preventDefault();
 
-					album = new Models.Album(title).render();
+					if ( title ) {
+						album = new Models.Album({ title: title }).render();
 
-					album.save()
-						.done((data) => {
-						})
-						.fail((e) => {
-							console.log('fail');
-						});
+						album.save()
+							.done((data) => {
+								album.render();
+							})
+							.fail((e) => {
+								console.log('fail');
+							});
 
-					albums.push(album);
+						albums.push(album);
 
-					thumbnailGrid.prepend(album.el);
+						thumbnailGrid.prepend(album.el);
+					}
 				});
 			}
 
@@ -65,7 +68,7 @@ module Shot {
 				// Add thumbnails to grid
 				if ( SHOT.thumbnails ) {
 					$.each(SHOT.thubmnails, (i, thumbnailData) => {
-						var thumbnail = new Models.Thumbnail(thumbnailData.title, thumbnailData.id).render();
+						var thumbnail = new Models.Thumbnail(thumbnailData.title).render();
 
 						thumbnailGrid.prepend(thumbnail);
 
@@ -80,13 +83,10 @@ module Shot {
 							progressBar;
 
 						if ( file.name && $.inArray(file.type, fileTypes) !== -1 ) {
-							thumbnail   = new Models.Thumbnail(file.name).render();
+							thumbnail   = new Models.Thumbnail({ title: file.name, file: file, formData: new FormData() }).render();
 							progressBar = new Models.ProgressBar().render();
 
-							thumbnail.file     = file;
-							thumbnail.formData = new FormData();
-
-							thumbnail.formData.append('image', file);
+							thumbnail.data.formData.append('image', file);
 
 							thumbnail.el.find('.container').append(progressBar.el);
 
@@ -175,7 +175,7 @@ module Shot {
 
 						reader.onerror = () => callback();
 
-						reader.readAsDataURL(thumbnail.file);
+						reader.readAsDataURL(thumbnail.data.file);
 					};
 
 					// Pre render all thumbnails, one at a time
