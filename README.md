@@ -12,8 +12,8 @@ Prerequisites
 -------------
 
 * PHP5.3
-  * imagick  
-	* pdo_sqlite
+ * imagick
+ * pdo_sqlite
 * SQLite
 
 
@@ -22,7 +22,9 @@ Development
 
 Install [Node.js](http://nodejs.org/).
 
-  $ git clone git@github.com:ElbertF/Shot.io.git shot.io
-  $ cd shot.io
-  $ npm install -g grunt-cli
-  $ npm install
+```shell
+$ git clone git@github.com:ElbertF/Shot.io.git shot.io
+$ cd shot.io
+$ npm install -g grunt-cli
+$ npm install
+```
