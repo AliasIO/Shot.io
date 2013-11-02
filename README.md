@@ -5,7 +5,7 @@ A mobile optimised photo gallery web app (self-hosted Flickr alternative).
 
 **This is very much a work in progress.**
 
-*Licensed under the [GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)*
+*Licensed under the [GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt).*
 
 
 Prerequisites

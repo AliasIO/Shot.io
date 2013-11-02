@@ -1,12 +1,14 @@
-<?php require 'views/header.php' ?>
+<?php include 'views/header.php' ?>
 
 <script>
 	SHOT.images = <?= json_encode($this->images) ?>;
 	SHOT.album = <?= json_encode($this->album) ?>;
 </script>
 
-<div class="carousel"></div>
+<div id="carousel-wrap"></div>
 
-<div class="full-screen"></div>
+<?php include 'views/templates/carousel.php' ?>
+<?php include 'views/templates/image.php' ?>
+<?php include 'views/templates/breadcrumb.php' ?>
 
-<?php require 'views/footer.php' ?>
+<?php include 'views/footer.php' ?>

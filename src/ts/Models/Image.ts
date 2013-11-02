@@ -5,46 +5,100 @@ module Shot {
 		 */
 		export class Image {
 			el;
-			preview: Models.Preview;
+
+			private template;
 
 			constructor(public data) {
-				this.el = $('<img/>');
+				this.template = $('#template-image').html();
 
 				return this;
 			}
 
 			/**
-			 * Add image to DOM, display preview image while loading
+			 * Render
 			 */
-			appendTo(parent): Image {
-				this.preview = new Models.Preview({ x: this.data.width, y: this.data.height }, parent, this.data.paths.preview);
+			render(): Image {
+				var
+					data = $.extend({}, this.data),
+					id = new Date().getTime() + Math.round(Math.random() * 999),
+					el,
+					preview;
 
-				this.el.appendTo(parent);
+				if ( this.el ) {
+					this.el.replaceWith($(Mustache.render(this.template, data)));
+				} else {
+					// Render pre-load image in place of the actual image
+					data.url = this.data.paths.preview;
+
+					this.el = $(Mustache.render(this.template, data));
+
+					preview = this.el.find('img');
+
+					$(window).on('resize.' + id, () => this.resize(preview));
+
+					// Load actual image
+					el = $('<img/>');
+
+					el
+						.prop('src', this.data.url)
+						.on('load', (e) => {
+							$(window).off('resize.' + id);
+
+							preview.replaceWith(el)
+						});
+				}
 
 				return this;
 			}
 
 			/**
-			 * Load the image, replace preview image
+			 * Scale preview image to fit parent element
 			 */
-			render(size: number): Image {
-				var el = $('<img/>');
+			resize(el) {
+				var
+					size = { x: this.data.width, y: this.data.height },
+					parentSize;
 
-				el.prop('src', this.data.paths[size] ? this.data.paths[size] : this.data.paths['original']);
+				if ( !$.contains(document.documentElement, this.el.get(0)) ) {
+					return;
+				}
 
-				el.on('load', (e) => {
-					// Replace previously rendered image
-					this.el.replaceWith(el);
+				parentSize = {
+					x: this.el.parent().width(),
+					y: this.el.parent().height()
+				};
 
-					this.el = el;
+				if ( size.x > parentSize.x ) {
+					size.y *= parentSize.x / size.x;
+					size.x  = parentSize.x;
+				}
 
-					// Remove preview image
-					if ( this.preview ) {
-						this.preview.destroy();
-					}
+				if ( size.y > parentSize.y ) {
+					size.x *= parentSize.y / size.y;
+					size.y  = parentSize.y;
+				}
+
+				el.css({
+					position: 'absolute',
+					top: ( parentSize.y / 2 ) - ( size.y / 2 ),
+					height: size.y,
+					width: size.x
 				});
 
-				return this;
+				switch ( this.el.css('textAlign') ) {
+					case 'start':
+						el.css({ left: 0 });
+
+						break;
+					case 'center':
+						el.css({ left: ( parentSize.x / 2 ) - ( size.x / 2 ) });
+
+						break;
+					case 'right':
+						el.css({ right: 0 });
+
+						break;
+				}
 			}
 		}
 	}
