@@ -2,7 +2,7 @@
 	<li>
 		<div class="container">
 			{{#id}}
-			<a href="<?= $this->app->getRootPath() ?>album/grid/{{id}}">
+			<a href="{{link}}" data-id="{{id}}">
 				{{#paths.thumb}}
 				<img src="<?= $this->app->getRootPath() ?>{{paths.thumb}}">
 				{{/paths.thumb}}

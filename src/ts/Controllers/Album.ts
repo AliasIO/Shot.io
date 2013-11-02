@@ -14,9 +14,11 @@ module Shot {
 
 				if ( SHOT.thumbnails ) {
 					$.each(SHOT.thumbnails, (i, thumbnailData) => {
-						var thumbnail = new Models.Thumbnail(thumbnailData).render();
+						var thumbnail = new Models.Thumbnail(thumbnailData);
 
-						thumbnailGrid.append(thumbnail.el);
+						thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + thumbnail.data.id;
+
+						thumbnailGrid.append(thumbnail.render().el);
 
 						thumbnails.push(thumbnail);
 					});

@@ -7,6 +7,7 @@ module Shot {
 			el;
 
 			private template;
+			private loaded = false;
 
 			constructor(public data) {
 				this.template = $('#template-image').html();
@@ -24,10 +25,13 @@ module Shot {
 					el,
 					preview;
 
-				if ( this.el ) {
-					this.el.replaceWith($(Mustache.render(this.template, data)));
+				if ( this.loaded ) {
+					el = $(Mustache.render(this.template, data));
+
+					this.el.replaceWith(el);
+
+					this.el = el;
 				} else {
-					// Render pre-load image in place of the actual image
 					data.url = this.data.paths.preview;
 
 					this.el = $(Mustache.render(this.template, data));
@@ -36,12 +40,22 @@ module Shot {
 
 					$(window).on('resize.' + id, () => this.resize(preview));
 
+					preview
+						.hide()
+						.on('load', () => {
+							$(window).trigger('resize.' + id)
+
+							preview.show();
+						});
+
 					// Load actual image
 					el = $('<img/>');
 
 					el
 						.prop('src', this.data.url)
 						.on('load', (e) => {
+							this.loaded = true;
+
 							$(window).off('resize.' + id);
 
 							preview.replaceWith(el)

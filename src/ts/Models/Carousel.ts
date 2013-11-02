@@ -35,7 +35,11 @@ module Shot {
 			render(): Carousel {
 				var el = $(Mustache.render(this.template));
 
-				this.el ? this.el.replaceWith(el) : this.el = el;
+				if ( this.el ) {
+					this.el.replaceWith(el);
+				}
+
+				this.el = el;
 
 				$(window).on('resize', () => {
 					this.cutOff = $(window).width() / 2;

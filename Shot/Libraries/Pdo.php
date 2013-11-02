@@ -10,9 +10,9 @@ class Pdo extends \Swiftlet\Library
 	 * Establish database connection
 	 * @param object $app
 	 */
-	public function __construct(\Swiftlet\Interfaces\App $app)
+	public function __construct(\Swiftlet\Interfaces\App $app, \Swiftlet\Interfaces\View $view, \Swiftlet\Interfaces\Controller $controller)
 	{
-		parent::__construct($app);
+		parent::__construct($app, $view, $controller);
 
 		if ( !file_exists('db/db.sdb') ) {
 			header('Location: ' . $this->app->getRootPath() . 'install');

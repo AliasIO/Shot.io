@@ -33,9 +33,11 @@ var Shot;
 
                 if (SHOT.albums) {
                     $.each(SHOT.albums, function (i, albumData) {
-                        var album = new Shot.Models.Album(albumData).render();
+                        var album = new Shot.Models.Album(albumData);
 
-                        thumbnailGrid.prepend(album.el);
+                        album.data.link = SHOT.rootPath + 'admin/album/' + album.data.id;
+
+                        thumbnailGrid.prepend(album.render().el);
 
                         albums.push(album);
                     });
@@ -50,6 +52,8 @@ var Shot;
                         album = new Shot.Models.Album({ title: title }).render();
 
                         album.save().done(function (data) {
+                            album.data.link = SHOT.rootPath + 'admin/album/' + data.id;
+
                             album.render();
                         }).fail(function (e) {
                             console.log('fail');
@@ -107,7 +111,7 @@ var Shot;
                                         thumbnail.el.find('.processing').fadeOut('fast');
 
                                         $(e.target).fadeIn('fast');
-                                    }).prependTo(thumbnail.el.find('.container')).prop('src', SHOT.rootPath + 'photos/thumb/smart/' + data.filename);
+                                    }).prependTo(thumbnail.el.find('.container')).prop('src', SHOT.rootPath + 'photos/thumb/' + data.filename);
                                 });
                             }).progress(function (data) {
                                 progressBar.set(data);
@@ -189,9 +193,11 @@ var Shot;
 
                 if (SHOT.thumbnails) {
                     $.each(SHOT.thumbnails, function (i, thumbnailData) {
-                        var thumbnail = new Shot.Models.Thumbnail(thumbnailData).render();
+                        var thumbnail = new Shot.Models.Thumbnail(thumbnailData);
 
-                        thumbnailGrid.append(thumbnail.el);
+                        thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + thumbnail.data.id;
+
+                        thumbnailGrid.append(thumbnail.render().el);
 
                         thumbnails.push(thumbnail);
                     });
@@ -301,9 +307,11 @@ var Shot;
 
                 if (SHOT.albums) {
                     $.each(SHOT.albums, function (i, albumData) {
-                        var album = new Shot.Models.Album(albumData).render();
+                        var album = new Shot.Models.Album(albumData);
 
-                        thumbnailGrid.prepend(album.el);
+                        album.data.link = SHOT.rootPath + 'album/grid/' + album.data.id;
+
+                        thumbnailGrid.prepend(album.render().el);
 
                         albums.push(album);
                     });
@@ -345,7 +353,11 @@ var Shot;
             Album.prototype.render = function () {
                 var el = $(Mustache.render(this.template, this.data));
 
-                this.el ? this.el.replaceWith(el) : this.el = el;
+                if (this.el) {
+                    this.el.replaceWith(el);
+                }
+
+                this.el = el;
 
                 return this;
             };
@@ -380,7 +392,11 @@ var Shot;
                 var _this = this;
                 var el = $(Mustache.render(this.template));
 
-                this.el ? this.el.replaceWith(el) : this.el = el;
+                if (this.el) {
+                    this.el.replaceWith(el);
+                }
+
+                this.el = el;
 
                 $(window).on('resize', function () {
                     _this.cutOff = $(window).width() / 2;
@@ -524,6 +540,7 @@ var Shot;
         var Image = (function () {
             function Image(data) {
                 this.data = data;
+                this.loaded = false;
                 this.template = $('#template-image').html();
 
                 return this;
@@ -532,8 +549,12 @@ var Shot;
                 var _this = this;
                 var data = $.extend({}, this.data), id = new Date().getTime() + Math.round(Math.random() * 999), el, preview;
 
-                if (this.el) {
-                    this.el.replaceWith($(Mustache.render(this.template, data)));
+                if (this.loaded) {
+                    el = $(Mustache.render(this.template, data));
+
+                    this.el.replaceWith(el);
+
+                    this.el = el;
                 } else {
                     data.url = this.data.paths.preview;
 
@@ -545,9 +566,17 @@ var Shot;
                         return _this.resize(preview);
                     });
 
+                    preview.hide().on('load', function () {
+                        $(window).trigger('resize.' + id);
+
+                        preview.show();
+                    });
+
                     el = $('<img/>');
 
                     el.prop('src', this.data.url).on('load', function (e) {
+                        _this.loaded = true;
+
                         $(window).off('resize.' + id);
 
                         preview.replaceWith(el);
@@ -651,7 +680,11 @@ var Shot;
             Thumbnail.prototype.render = function () {
                 var el = $(Mustache.render(this.template, this.data));
 
-                this.el ? this.el.replaceWith(el) : this.el = el;
+                if (this.el) {
+                    this.el.replaceWith(el);
+                }
+
+                this.el = el;
 
                 return this;
             };

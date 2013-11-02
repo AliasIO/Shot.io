@@ -236,7 +236,7 @@ class Image extends \Swiftlet\Model
 				return $this->app->getRootPath() . 'photos/' . $size . '/' . $this->filename;
 			}
 
-			if ( in_array($size, array('thumb/centered', 'thumb/smart', 'thumb/preview')) ) {
+			if ( in_array($size, array('thumb', 'preview')) ) {
 				return $this->app->getRootPath() . 'photos/' . $size . '/' . $this->filename;
 			}
 		}
@@ -302,7 +302,7 @@ class Image extends \Swiftlet\Model
 	{
 		$this->exportPreviewThumbnail();
 		$this->exportSmartThumbnail();
-		$this->exportCenteredThumbnail();
+		//$this->exportCenteredThumbnail();
 	}
 
 	/**
@@ -334,7 +334,7 @@ class Image extends \Swiftlet\Model
 
 		$this->scaleThumbnail($thumbnail, 100);
 
-		$thumbnail->writeImage(self::$imagePath . 'thumb/preview/' . $this->filename);
+		$thumbnail->writeImage(self::$imagePath . 'preview/' . $this->filename);
 
 		return $this;
 	}
@@ -414,7 +414,7 @@ class Image extends \Swiftlet\Model
 			$thumbnail->setImagePage(self::$thumbnailSize, self::$thumbnailSize, 0, 0);
 		}
 
-		$thumbnail->writeImage(self::$imagePath . 'thumb/smart/' . $this->filename);
+		$thumbnail->writeImage(self::$imagePath . 'thumb/' . $this->filename);
 
 		return $this;
 	}
@@ -436,7 +436,7 @@ class Image extends \Swiftlet\Model
 			$thumbnail->setImagePage(self::$thumbnailSize, self::$thumbnailSize, 0, 0);
 		}
 
-		$thumbnail->writeImage(self::$imagePath . 'thumb/centered/' . $this->filename);
+		$thumbnail->writeImage(self::$imagePath . 'thumb/' . $this->filename);
 	}
 
 	/**

@@ -27,6 +27,27 @@ class Album extends \Swiftlet\Controller
 		$sth = $dbh->prepare('
 			SELECT
 				*
+			FROM albums
+			WHERE
+				id = :id
+			LIMIT 1
+			');
+
+		$sth->bindParam('id', $albumId, \PDO::PARAM_INT);
+
+		$sth->execute();
+
+		$album = $sth->fetchObject();
+
+		if ( !$album ) {
+			$this->app->getLibrary('helpers')->error404();
+
+			return;
+		}
+
+		$sth = $dbh->prepare('
+			SELECT
+				*
 			FROM photos
 			ORDER BY id DESC
 			');
@@ -43,8 +64,8 @@ class Album extends \Swiftlet\Controller
 
 				$paths = array(
 					'original' => $image->getFilePath(),
-					'preview'  => $image->getFilePath('thumb/preview'),
-					'thumb'    => $image->getFilePath('thumb/smart')
+					'preview'  => $image->getFilePath('preview'),
+					'thumb'    => $image->getFilePath('thumb')
 					);
 
 				foreach ( $image::$imageSizes as $imageSize ) {
@@ -66,13 +87,13 @@ class Album extends \Swiftlet\Controller
 		$this->view->thumbnails = $thumbnails;
 
 		$this->view->album = (object) array(
-			'title' => 'Album title',
-			'id'    => (int) $albumId
+			'title' => $album->title,
+			'id'    => (int) $album->id
 			);
 
 		$this->view->breadcrumbs = array((object) array(
-			'path'  => 'album/grid/' . $albumId,
-			'title' => 'Album title',
+			'path'  => 'album/grid/' . $album->id,
+			'title' => $album->title,
 			'icon'  => 'folder'
 			));
 	}

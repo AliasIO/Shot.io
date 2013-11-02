@@ -2,7 +2,7 @@
 	<li>
 		<div class="container">
 			{{#id}}
-			<a href="<?= $this->app->getRootPath() ?>album/carousel/1/{{id}}">
+			<a href="{{link}}">
 				<img src="{{paths.thumb}}">
 			</a>
 			{{/id}}

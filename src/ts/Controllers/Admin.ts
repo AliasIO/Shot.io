@@ -14,9 +14,11 @@ module Shot {
 
 				if ( SHOT.albums ) {
 					$.each(SHOT.albums, (i, albumData) => {
-						var album = new Models.Album(albumData).render();
+						var album = new Models.Album(albumData);
 
-						thumbnailGrid.prepend(album.el);
+						album.data.link = SHOT.rootPath + 'admin/album/' + album.data.id;
+
+						thumbnailGrid.prepend(album.render().el);
 
 						albums.push(album);
 					});
@@ -34,6 +36,8 @@ module Shot {
 
 						album.save()
 							.done((data) => {
+								album.data.link = SHOT.rootPath + 'admin/album/' + data.id;
+
 								album.render();
 							})
 							.fail((e) => {
@@ -112,7 +116,7 @@ module Shot {
 												$(e.target).fadeIn('fast');
 											})
 											.prependTo(thumbnail.el.find('.container'))
-											.prop('src', SHOT.rootPath + 'photos/thumb/smart/' + data.filename);
+											.prop('src', SHOT.rootPath + 'photos/thumb/' + data.filename);
 									});
 								})
 								.progress((data) => {

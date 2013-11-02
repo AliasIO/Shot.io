@@ -2,6 +2,7 @@
 
 <script>
 	SHOT.thumbnails = <?= json_encode($this->thumbnails) ?>;
+	SHOT.album = <?= json_encode($this->album) ?>;
 </script>
 
 <div class="row">

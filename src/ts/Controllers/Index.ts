@@ -14,9 +14,11 @@ module Shot {
 
 				if ( SHOT.albums ) {
 					$.each(SHOT.albums, (i, albumData) => {
-						var album = new Models.Album(albumData).render();
+						var album = new Models.Album(albumData);
 
-						thumbnailGrid.prepend(album.el);
+						album.data.link = SHOT.rootPath + 'album/grid/' + album.data.id;
+
+						thumbnailGrid.prepend(album.render().el);
 
 						albums.push(album);
 					});
