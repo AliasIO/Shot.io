@@ -107,7 +107,7 @@ class Image extends \Swiftlet\Model
 
 		if ( $this->id ) {
 			$sth = $dbh->prepare('
-				UPDATE photos SET
+				UPDATE images SET
 					filename   = :filename,
 					title      = :title,
 					width      = :width,
@@ -127,7 +127,7 @@ class Image extends \Swiftlet\Model
 			$sth->execute();
 		} else {
 			$sth = $dbh->prepare('
-				INSERT INTO photos (
+				INSERT INTO images (
 					filename,
 					title,
 					width,
@@ -158,7 +158,7 @@ class Image extends \Swiftlet\Model
 
 	/**
 	 * Load an image
-	 * @param string $id
+	 * @param integer $id
 	 */
 	public function load($id)
 	{
@@ -167,7 +167,7 @@ class Image extends \Swiftlet\Model
 		$sth = $dbh->prepare('
 			SELECT
 				*
-			FROM photos
+			FROM images
 			WHERE
 				id = :id
 			LIMIT 1

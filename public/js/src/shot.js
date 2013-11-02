@@ -76,10 +76,13 @@ var Shot;
                 ], preRender;
 
                 if (SHOT.thumbnails) {
-                    $.each(SHOT.thubmnails, function (i, thumbnailData) {
-                        var thumbnail = new Shot.Models.Thumbnail(thumbnailData.title).render();
+                    $.each(SHOT.thumbnails, function (i, thumbnailData) {
+                        console.log(thumbnailData);
+                        var thumbnail = new Shot.Models.Thumbnail(thumbnailData);
 
-                        thumbnailGrid.prepend(thumbnail);
+                        thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + thumbnail.data.id;
+
+                        thumbnailGrid.append(thumbnail.render().el);
 
                         thumbnails.push(thumbnail);
                     });
@@ -94,6 +97,7 @@ var Shot;
                             progressBar = new Shot.Models.ProgressBar().render();
 
                             thumbnail.data.formData.append('image', file);
+                            thumbnail.data.formData.append('albumId', SHOT.album.id);
 
                             thumbnail.el.find('.container').append(progressBar.el);
 

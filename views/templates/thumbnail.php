@@ -3,7 +3,7 @@
 		<div class="container">
 			{{#id}}
 			<a href="{{link}}">
-				<img src="{{paths.thumb}}">
+				<img src="{{path}}">
 			</a>
 			{{/id}}
 			<div class="title-wrap">

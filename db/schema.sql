@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS photos;
+DROP TABLE IF EXISTS images;
 
-CREATE TABLE photos (
+CREATE TABLE images (
 	id         INTEGER PRIMARY KEY,
 	filename   TEXT    NOT NULL,
 	title      TEXT        NULL,
@@ -9,7 +9,7 @@ CREATE TABLE photos (
 	properties TEXT        NULL
 );
 
-CREATE UNIQUE INDEX filename ON photos ( filename );
+CREATE UNIQUE INDEX filename ON images ( filename );
 
 DROP TABLE IF EXISTS albums;
 
@@ -19,17 +19,17 @@ CREATE TABLE albums (
 	`order` INTEGER     NULL
 );
 
-DROP TABLE IF EXISTS albums_photos;
+DROP TABLE IF EXISTS albums_images;
 
-CREATE TABLE albums_photos (
+CREATE TABLE albums_images (
 	album_id INTEGER NOT NULL,
-	photo_id INTEGER NOT NULL,
+	image_id INTEGER NOT NULL,
 	`order`  INTEGER     NULL,
 	FOREIGN KEY(album_id) REFERENCES albums(id) ON DELETE CASCADE,
-	FOREIGN KEY(photo_id) REFERENCES photos(id) ON DELETE CASCADE
+	FOREIGN KEY(image_id) REFERENCES images(id) ON DELETE CASCADE
 );
 
-CREATE UNIQUE INDEX album_photo ON albums_photos ( album_id, photo_id );
+CREATE UNIQUE INDEX album_image ON albums_images ( album_id, image_id );
 
 DROP TABLE IF EXISTS options;
 

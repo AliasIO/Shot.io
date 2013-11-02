@@ -79,32 +79,42 @@ class Admin extends \Swiftlet\Controller
 
 		$sth = $dbh->prepare('
 			SELECT
-				*
-			FROM photos
-			ORDER BY id DESC
+				images.*
+			FROM       albums_images
+			INNER JOIN images ON albums_images.image_id = images.id
+			WHERE
+				albums_images.album_id = :album_id
+			ORDER BY images.id DESC
 			');
+
+		$sth->bindParam('album_id', $albumId);
 
 		$sth->execute();
 
 		$results = $sth->fetchAll(\PDO::FETCH_OBJ);
 
-		$images = array();
+		$thumbnails = array();
 
 		foreach ( $results as $result ) {
 			try {
-				$image = $this->app->getModel('image')->load($result->id);
+				$thumbnail = $this->app->getModel('image')->load($result->id);
 
-				$images[] = (object) array(
-					'id'       => $image->getId(),
-					'filename' => $image->getFilename(),
-					'title'    => $image->getTitle(),
-					'path'     => $image->getFilePath('thumb')
+				$thumbnails[] = (object) array(
+					'id'       => (int) $thumbnail->getId(),
+					'filename' => $thumbnail->getFilename(),
+					'title'    => $thumbnail->getTitle(),
+					'path'     => $thumbnail->getFilePath('thumb')
 					);
 			} catch ( \Swiftlet\Exception $e ) {
 			}
 		}
 
-		$this->view->images = $images;
+		$this->view->thumbnails = $thumbnails;
+
+		$this->view->album = (object) array(
+			'title' => $album->title,
+			'id'    => (int) $album->id
+			);
 
 		$this->view->breadcrumbs = array((object) array(
 			'path'  => 'admin/album/' . $album->id,

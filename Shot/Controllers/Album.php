@@ -47,10 +47,15 @@ class Album extends \Swiftlet\Controller
 
 		$sth = $dbh->prepare('
 			SELECT
-				*
-			FROM photos
-			ORDER BY id DESC
+				images.*
+			FROM       albums_images
+			INNER JOIN images ON albums_images.image_id = images.id
+			WHERE
+				albums_images.album_id = :album_id
+			ORDER BY images.id DESC
 			');
+
+		$sth->bindParam('album_id', $albumId);
 
 		$sth->execute();
 
@@ -78,6 +83,7 @@ class Album extends \Swiftlet\Controller
 					'title'    => $image->getTitle(),
 					'width'    => (int) $image->getWidth(),
 					'height'   => (int) $image->getHeight(),
+					'path'     => $image->getFilePath('thumb'),
 					'paths'    => $paths
 					);
 			} catch ( \Swiftlet\Exception $e ) {

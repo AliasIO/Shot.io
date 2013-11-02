@@ -7,6 +7,8 @@ namespace Shot\Models;
  */
 class Album extends \Swiftlet\Model
 {
+	const EXCEPTION_NOT_FOUND = 1;
+
 	/**
 	 * ID
 	 * @var string
@@ -54,6 +56,65 @@ class Album extends \Swiftlet\Model
 
 			$this->id = $dbh->lastInsertId();
 		}
+	}
+
+	/**
+	 * Load an album
+	 * @param integer $id
+	 */
+	public function load($id)
+	{
+		$dbh = $this->app->getLibrary('pdo')->getHandle();
+
+		$sth = $dbh->prepare('
+			SELECT
+				*
+			FROM albums
+			WHERE
+				id = :id
+			LIMIT 1
+			');
+
+		$sth->bindParam('id', $id, \PDO::PARAM_INT);
+
+		$sth->execute();
+
+		$result = $sth->fetchObject();
+
+		if ( !$result ) {
+			throw new \Swiftlet\Exception('Album does not exist', self::EXCEPTION_NOT_FOUND);
+		}
+
+		$this->id    = $result->id;
+		$this->title = $result->title;
+
+		return $this;
+	}
+
+	/**
+	 * Add image
+	 * @param Image
+	 */
+	public function addImage(Image $image)
+	{
+		$imageId = $image->getId();
+
+		$dbh = $this->app->getLibrary('pdo')->getHandle();
+
+		$sth = $dbh->prepare('
+			INSERT OR IGNORE INTO albums_images (
+				album_id,
+				image_id
+			) VALUES (
+				:album_id,
+				:image_id
+			)
+			');
+
+		$sth->bindParam('album_id', $this->id, \PDO::PARAM_INT);
+		$sth->bindParam('image_id', $imageId,  \PDO::PARAM_INT);
+
+		$sth->execute();
 	}
 
 	/**

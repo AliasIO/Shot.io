@@ -71,10 +71,13 @@ module Shot {
 
 				// Add thumbnails to grid
 				if ( SHOT.thumbnails ) {
-					$.each(SHOT.thubmnails, (i, thumbnailData) => {
-						var thumbnail = new Models.Thumbnail(thumbnailData.title).render();
+					$.each(SHOT.thumbnails, (i, thumbnailData) => {
+							console.log(thumbnailData);
+						var thumbnail = new Models.Thumbnail(thumbnailData);
 
-						thumbnailGrid.prepend(thumbnail);
+						thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + thumbnail.data.id;
+
+						thumbnailGrid.append(thumbnail.render().el);
 
 						thumbnails.push(thumbnail);
 					});
@@ -91,6 +94,7 @@ module Shot {
 							progressBar = new Models.ProgressBar().render();
 
 							thumbnail.data.formData.append('image', file);
+							thumbnail.data.formData.append('albumId', SHOT.album.id);
 
 							thumbnail.el.find('.container').append(progressBar.el);
 
