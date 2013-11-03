@@ -5,6 +5,7 @@ module Shot {
 		 */
 		export class Thumbnail {
 			el;
+			selected = false;
 
 			private template;
 
@@ -23,6 +24,12 @@ module Shot {
 				}
 
 				this.el = el;
+
+				this.el.on('click', '.edit', (e) => {
+					this.selected = !this.selected;
+
+					this.el.toggleClass('selected', this.selected);
+				});
 
 				return this;
 			}
@@ -59,8 +66,8 @@ module Shot {
 						}
 					}, 'json')
 					.done((data) => {
-						this.data.id       = data.id;
-						this.data.filename = data.filename;
+						this.data.id = data.id;
+						this.data.path = data.path;
 
 						deferred.resolve(data);
 					})

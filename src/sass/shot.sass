@@ -100,6 +100,10 @@ body
 .top-bar ul li:hover > a
 	color: $topbar-link-color-hover
 
+a
+	&:active
+		background: none
+
 h1, h2, h3, h4, h5, h6
 	color: $body-font-color
 
@@ -110,6 +114,9 @@ form
 fieldset
 	padding-left: 0
 	padding-right: 0
+
+button
+	background-image: none
 
 input
 	border-width: 0 1px 1px 0
@@ -186,7 +193,7 @@ li
 		a
 			cursor: zoom-in
 
-	a
+	.image
 		bottom: 0
 		left: 0
 		max-height: 100%
@@ -248,8 +255,29 @@ li
 					margin-bottom: -3px
 					width: 0
 
-			.title-wrap
+			.selection
+				border: 2px solid #fff
+				bottom: 0
+				display: none
+				left: 0
+				opacity: .9
 				position: absolute
+				right: 0
+				top: 0
+
+			.bar-wrap
+				height: 35px
+				left: 2px
+				position: absolute
+				right: 2px
+				bottom: 2px
+
+			.bar
+				+box-shadow(0 0 5px rgba(0, 0, 0, .5))
+				display: table
+				margin: 0
+				position: absolute
+				table-layout: fixed
 				width: 100%
 
 				&:before
@@ -263,16 +291,45 @@ li
 					right: 0
 					top: 0
 
-				.title
-					+box-shadow(0 0 5px rgba(0, 0, 0, .5))
+				li
+					border-left: 1px solid rgba(255, 255, 255, .2)
+					border-right: 1px solid rgba(0, 0, 0, .2)
 					color: #000
-					font-size: 14px
+					display: table-cell
+					font-size: 13px
 					height: 35px
 					line-height: 35px
+					list-style: none
 					overflow: hidden
 					+opacity(.999)
 					padding: 0 10px
+					text-overflow: ellipsis
 					white-space: nowrap
+					width: 100%
+
+					&:first-child
+						border-left: none
+
+					&:last-child
+						border-right: none
+
+					&.edit
+						cursor: pointer
+						padding: 0
+						text-align: center
+						width: 35px
+
+		&.selected
+
+			.selection
+				display: block
+
+			.bar
+				+box-shadow(none)
+
+				&:before
+					opacity: .9
+
 
 	img, canvas
 		position: absolute

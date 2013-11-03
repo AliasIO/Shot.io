@@ -8,8 +8,6 @@ var Shot;
         function App() {
             $(document).foundation();
 
-            FastClick.attach(document);
-
             $(document).on('dragstart', 'img, a', function (e) {
                 e.preventDefault();
             });
@@ -77,7 +75,6 @@ var Shot;
 
                 if (SHOT.thumbnails) {
                     $.each(SHOT.thumbnails, function (i, thumbnailData) {
-                        console.log(thumbnailData);
                         var thumbnail = new Shot.Models.Thumbnail(thumbnailData);
 
                         thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + thumbnail.data.id;
@@ -93,7 +90,7 @@ var Shot;
                         var thumbnail, progressBar;
 
                         if (file.name && $.inArray(file.type, fileTypes) !== -1) {
-                            thumbnail = new Shot.Models.Thumbnail({ title: file.name, file: file, formData: new FormData() }).render();
+                            thumbnail = new Shot.Models.Thumbnail({ title: file.name.replace(/\..{1,4}$/, ''), file: file, formData: new FormData() }).render();
                             progressBar = new Shot.Models.ProgressBar().render();
 
                             thumbnail.data.formData.append('image', file);
@@ -114,8 +111,12 @@ var Shot;
 
                                         thumbnail.el.find('.processing').fadeOut('fast');
 
-                                        $(e.target).fadeIn('fast');
-                                    }).prependTo(thumbnail.el.find('.container')).prop('src', SHOT.rootPath + 'photos/thumb/' + data.filename);
+                                        $(e.target).fadeIn('fast', function () {
+                                            thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + data.id;
+
+                                            thumbnail.render();
+                                        });
+                                    }).prependTo(thumbnail.el.find('.container')).prop('src', data.path);
                                 });
                             }).progress(function (data) {
                                 progressBar.set(data);
@@ -219,7 +220,7 @@ var Shot;
 
                 carousel.el.on('change', function (e, image) {
                     var data = {
-                        text: image.data.title,
+                        text: image.data.title.replace(/&amp;/g, '&'),
                         url: SHOT.rootPath + 'album/' + SHOT.album.id + '/' + image.data.id
                     };
 
@@ -527,7 +528,7 @@ var Shot;
 
                             _this.animating = false;
 
-                            _this.show(swipe.direction === 'right' ? _this.previous.data.id : _this.next.data.id);
+                            _this.show(swipe.direction === 'right' ? (_this.previous ? _this.previous.data.id : null) : (_this.next ? _this.next.data.id : null));
                         });
                     }
                 }
@@ -679,9 +680,11 @@ var Shot;
         var Thumbnail = (function () {
             function Thumbnail(data) {
                 this.data = data;
+                this.selected = false;
                 this.template = $('#template-thumbnail').html();
             }
             Thumbnail.prototype.render = function () {
+                var _this = this;
                 var el = $(Mustache.render(this.template, this.data));
 
                 if (this.el) {
@@ -689,6 +692,12 @@ var Shot;
                 }
 
                 this.el = el;
+
+                this.el.on('click', '.edit', function (e) {
+                    _this.selected = !_this.selected;
+
+                    _this.el.toggleClass('selected', _this.selected);
+                });
 
                 return this;
             };
@@ -721,7 +730,7 @@ var Shot;
                         }
                     }, 'json').done(function (data) {
                         _this.data.id = data.id;
-                        _this.data.filename = data.filename;
+                        _this.data.path = data.path;
 
                         deferred.resolve(data);
                     }).fail(function (e) {

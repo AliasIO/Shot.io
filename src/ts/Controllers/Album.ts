@@ -42,7 +42,7 @@ module Shot {
 				carousel.el.on('change', (e, image: Models.Image) => {
 					var
 						data = {
-							text: image.data.title,
+							text: image.data.title.replace(/&amp;/g, '&'),
 							url: SHOT.rootPath + 'album/' + SHOT.album.id + '/' + image.data.id
 						};
 

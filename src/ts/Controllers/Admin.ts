@@ -72,7 +72,6 @@ module Shot {
 				// Add thumbnails to grid
 				if ( SHOT.thumbnails ) {
 					$.each(SHOT.thumbnails, (i, thumbnailData) => {
-							console.log(thumbnailData);
 						var thumbnail = new Models.Thumbnail(thumbnailData);
 
 						thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + thumbnail.data.id;
@@ -90,7 +89,7 @@ module Shot {
 							progressBar;
 
 						if ( file.name && $.inArray(file.type, fileTypes) !== -1 ) {
-							thumbnail   = new Models.Thumbnail({ title: file.name, file: file, formData: new FormData() }).render();
+							thumbnail   = new Models.Thumbnail({ title: file.name.replace(/\..{1,4}$/, ''), file: file, formData: new FormData() }).render();
 							progressBar = new Models.ProgressBar().render();
 
 							thumbnail.data.formData.append('image', file);
@@ -117,10 +116,14 @@ module Shot {
 												thumbnail.el.find('.processing').fadeOut('fast');
 
 												// Reveal the processed image
-												$(e.target).fadeIn('fast');
+												$(e.target).fadeIn('fast', () => {
+													thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + data.id;
+
+													thumbnail.render();
+												});
 											})
 											.prependTo(thumbnail.el.find('.container'))
-											.prop('src', SHOT.rootPath + 'photos/thumb/' + data.filename);
+											.prop('src', data.path);
 									});
 								})
 								.progress((data) => {

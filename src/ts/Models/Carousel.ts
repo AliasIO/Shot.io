@@ -189,7 +189,7 @@ module Shot {
 
 							this.animating = false;
 
-							this.show(swipe.direction === 'right' ? this.previous.data.id : this.next.data.id);
+							this.show(swipe.direction === 'right' ? ( this.previous ? this.previous.data.id : null ) : ( this.next ? this.next.data.id : null ));
 						});
 					}
 				}

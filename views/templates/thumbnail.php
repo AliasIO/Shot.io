@@ -1,13 +1,21 @@
 <script id="template-thumbnail" type="text/template">
-	<li>
+	<li{{#id}} data-id="{{id}}"{{/id}}>
 		<div class="container">
 			{{#id}}
 			<a href="{{link}}">
 				<img src="{{path}}">
+				<div class="selection"></div>
 			</a>
 			{{/id}}
-			<div class="title-wrap">
-				<div class="title"><i class="fa fa-picture"></i> {{title}}</div>
+			<div class="bar-wrap">
+				<ul class="bar">
+					<li class="title">
+						<i class="fa fa-picture-o"></i> {{{title}}}
+					</li>
+					<li class="edit">
+						<i class="fa fa-pencil"></i>
+					</li>
+				</ul>
 			</div>
 		</div>
 	</li>

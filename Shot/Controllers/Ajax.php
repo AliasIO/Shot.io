@@ -36,7 +36,7 @@ class Ajax extends \Swiftlet\Controller
 					->setTitle($title)
 					->save();
 
-				exit(json_encode(array('id' => $album->getId())));
+				exit(json_encode(array('id' => (int) $album->getId())));
 			}
 		} catch ( \Swiftlet\Exception $e ) {
 			header('HTTP/1.1 503 Service unavailable');
@@ -111,7 +111,10 @@ class Ajax extends \Swiftlet\Controller
 
 						$album->addImage($image);
 
-						echo json_encode(array('id' => $image->getId(), 'filename' => $filename));
+						echo json_encode(array(
+							'id'   => (int) $image->getId(),
+							'path' => $image->getFilePath('thumb')
+							));
 
 						exit;
 					}

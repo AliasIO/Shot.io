@@ -6,7 +6,6 @@
 		<script src="<?= $this->app->getRootPath() ?>js/src/lib/foundation/foundation.js"></script>
 		<script src="<?= $this->app->getRootPath() ?>js/src/lib/foundation/foundation.topbar.js"></script>
 		<script src="<?= $this->app->getRootPath() ?>js/src/lib/mustache.js"></script>
-		<script src="<?= $this->app->getRootPath() ?>js/src/lib/fastclick.js"></script>
 		<script src="<?= $this->app->getRootPath() ?>js/src/lib/swipe.jquery.js"></script>
 		<script src="<?= $this->app->getRootPath() ?>js/src/shot.js"></script>
 	</body>
