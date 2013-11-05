@@ -20,6 +20,22 @@ Prerequisites
 * SQLite
 
 
+Stack
+-----
+
+*Backend*
+
+* [PHP](http://php.net)
+* [Swiftlet](http://swiftlet.org)
+
+*Frontend*
+
+* [TypeScript](http://www.typescriptlang.org)
+* [Foundation](http://foundation.zurb.com)
+* [jQuery](http://jquery.com)
+* [Mustache](https://github.com/janl/mustache.js)
+
+
 Development
 -----------
 
