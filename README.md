@@ -23,14 +23,15 @@ Prerequisites
 Stack
 -----
 
-*Backend*
+**Backend**
 
 * [PHP](http://php.net)
 * [Swiftlet](http://swiftlet.org)
 
-*Frontend*
+**Frontend**
 
 * [TypeScript](http://www.typescriptlang.org)
+* [SASS](http://sass-lang.com)
 * [Foundation](http://foundation.zurb.com)
 * [jQuery](http://jquery.com)
 * [Mustache](https://github.com/janl/mustache.js)
@@ -39,7 +40,7 @@ Stack
 Development
 -----------
 
-Install [Node.js](http://nodejs.org/).
+Install [Node.js](http://nodejs.org/) first.
 
 ```shell
 $ git clone git@github.com:ElbertF/Shot.io.git shot.io
