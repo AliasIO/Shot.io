@@ -22,7 +22,7 @@ class Index extends \Swiftlet\Controller
 
 		$sth = $dbh->prepare('
 			SELECT
-				*
+				id
 			FROM albums
 			ORDER BY id DESC
 			');
@@ -34,9 +34,12 @@ class Index extends \Swiftlet\Controller
 		$albums = array();
 
 		foreach ( $results as $result ) {
+			$album = $this->app->getModel('album')->load($result->id);
+
 			$albums[] = (object) array(
-				'id'    => (int) $result->id,
-				'title' => $result->title
+				'id'    => (int) $album->getId(),
+				'title' => $album->getTitle(),
+				'path'  => $album->getFilePath()
 				);
 		}
 

@@ -3,13 +3,12 @@ module Shot {
 		/**
 		 * Thumbnail model
 		 */
-		export class Thumbnail {
-			el;
-			selected = false;
-
+		export class Thumbnail extends Editable {
 			private template;
 
 			constructor(public data) {
+				super();
+
 				this.template = $('#template-thumbnail').html();
 			}
 
@@ -25,11 +24,7 @@ module Shot {
 
 				this.el = el;
 
-				this.el.on('click', '.edit', (e) => {
-					this.selected = !this.selected;
-
-					this.el.toggleClass('selected', this.selected);
-				});
+				super.render();
 
 				return this;
 			}
@@ -43,6 +38,8 @@ module Shot {
 				if ( this.data.id ) {
 					// TODO
 				} else {
+					this.data.formData.append('title', this.data.title);
+
 					$.ajax({
 						url: SHOT.rootPath + 'ajax/saveImage',
 						type: 'POST',

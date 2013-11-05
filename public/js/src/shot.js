@@ -1,3 +1,40 @@
+var Shot;
+(function (Shot) {
+    (function (Models) {
+        var Editable = (function () {
+            function Editable() {
+                this.selected = false;
+            }
+            Editable.prototype.render = function () {
+                var _this = this;
+                this.el.on('click', function (e) {
+                    var event = $.Event('click');
+
+                    event.originalEvent = e;
+
+                    $(_this).trigger(event);
+                });
+
+                return this;
+            };
+
+            Editable.prototype.select = function (on) {
+                this.selected = on;
+
+                this.el.toggleClass('selected', this.selected);
+
+                return this;
+            };
+
+            Editable.prototype.isSelected = function () {
+                return this.selected;
+            };
+            return Editable;
+        })();
+        Models.Editable = Editable;
+    })(Shot.Models || (Shot.Models = {}));
+    var Models = Shot.Models;
+})(Shot || (Shot = {}));
 $(function () {
     SHOT.app = new Shot.App();
 });
@@ -30,7 +67,7 @@ var Shot;
                 var thumbnailGrid = $('.thumbnail-grid'), albums = [];
 
                 if (SHOT.albums) {
-                    $.each(SHOT.albums, function (i, albumData) {
+                    SHOT.albums.forEach(function (albumData) {
                         var album = new Shot.Models.Album(albumData);
 
                         album.data.link = SHOT.rootPath + 'admin/album/' + album.data.id;
@@ -74,7 +111,7 @@ var Shot;
                 ], preRender;
 
                 if (SHOT.thumbnails) {
-                    $.each(SHOT.thumbnails, function (i, thumbnailData) {
+                    SHOT.thumbnails.forEach(function (thumbnailData) {
                         var thumbnail = new Shot.Models.Thumbnail(thumbnailData);
 
                         thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + thumbnail.data.id;
@@ -194,10 +231,10 @@ var Shot;
             function Album() {
             }
             Album.prototype.grid = function () {
-                var thumbnailGrid = $('.thumbnail-grid'), thumbnails = [];
+                var thumbnailGrid = $('.thumbnail-grid'), thumbnails = [], editMode = new Shot.EditMode();
 
                 if (SHOT.thumbnails) {
-                    $.each(SHOT.thumbnails, function (i, thumbnailData) {
+                    SHOT.thumbnails.forEach(function (thumbnailData) {
                         var thumbnail = new Shot.Models.Thumbnail(thumbnailData);
 
                         thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + thumbnail.data.id;
@@ -205,12 +242,14 @@ var Shot;
                         thumbnailGrid.append(thumbnail.render().el);
 
                         thumbnails.push(thumbnail);
+
+                        editMode.push(thumbnail);
                     });
                 }
             };
 
             Album.prototype.carousel = function () {
-                var carousel = new Shot.Models.Carousel(SHOT.images), id, breadcrumb = null;
+                var carousel = new Shot.Models.Carousel(SHOT.images), id, navItem = null;
 
                 carousel.render();
 
@@ -219,18 +258,18 @@ var Shot;
                 }));
 
                 carousel.el.on('change', function (e, image) {
-                    var data = {
-                        text: image.data.title.replace(/&amp;/g, '&'),
-                        url: SHOT.rootPath + 'album/' + SHOT.album.id + '/' + image.data.id
-                    };
-
-                    if (breadcrumb) {
-                        breadcrumb.remove();
+                    if (navItem) {
+                        navItem.remove();
                     }
 
-                    breadcrumb = $(Mustache.render($('#template-breadcrumb').html(), data));
+                    navItem = $(Mustache.render($('#template-nav-item').html(), {
+                        text: image.data.title.replace(/&amp;/g, '&'),
+                        icon: 'picture-o',
+                        url: SHOT.rootPath + 'album/' + SHOT.album.id + '/' + image.data.id,
+                        left: true
+                    }));
 
-                    $('.top-bar .breadcrumbs').append(breadcrumb);
+                    $('.top-bar .left').append(navItem);
 
                     if (image.data.id !== id) {
                         id = image.data.id;
@@ -308,10 +347,10 @@ var Shot;
             function Index() {
             }
             Index.prototype.index = function () {
-                var thumbnailGrid = $('.thumbnail-grid'), albums = [];
+                var thumbnailGrid = $('.thumbnail-grid'), albums = [], editMode = new Shot.EditMode();
 
                 if (SHOT.albums) {
-                    $.each(SHOT.albums, function (i, albumData) {
+                    SHOT.albums.forEach(function (albumData) {
                         var album = new Shot.Models.Album(albumData);
 
                         album.data.link = SHOT.rootPath + 'album/grid/' + album.data.id;
@@ -319,6 +358,8 @@ var Shot;
                         thumbnailGrid.prepend(album.render().el);
 
                         albums.push(album);
+
+                        editMode.push(album);
                     });
                 }
             };
@@ -330,9 +371,108 @@ var Shot;
 })(Shot || (Shot = {}));
 var Shot;
 (function (Shot) {
+    var EditMode = (function () {
+        function EditMode() {
+            var _this = this;
+            this.active = false;
+            this.editables = [];
+            var navItem;
+
+            navItem = $(Mustache.render($('#template-nav-item').html(), {
+                text: 'Edit mode',
+                icon: 'wrench',
+                right: true
+            }));
+
+            $('.top-bar .right').prepend(navItem);
+
+            navItem.on('click', 'a', function () {
+                _this.active = !_this.active;
+
+                if (_this.active) {
+                    _this.el.css({ bottom: -20, opacity: 0 }).show().animate({ bottom: 0, opacity: 1 }, 'fast');
+                } else {
+                    _this.el.animate({ bottom: -20, opacity: 0 }, 'fast');
+
+                    _this.selectAll(false);
+                }
+            });
+
+            this.template = $('#template-edit-mode').html();
+
+            this.el = $(Mustache.render(this.template));
+
+            this.el.on('click', '.close', function (e) {
+                e.preventDefault();
+
+                $(e.target).blur();
+
+                navItem.find('a').trigger('click');
+            });
+
+            this.el.on('click', '.select-all', function (e) {
+                e.preventDefault();
+
+                $(e.target).blur();
+
+                _this.selectAll(true);
+            });
+
+            this.el.on('click', '.select-none', function (e) {
+                e.preventDefault();
+
+                $(e.target).blur();
+
+                _this.selectAll(false);
+            });
+
+            this.el.on('click', '.delete', function (e) {
+                e.preventDefault();
+
+                $(e.target).blur();
+            });
+
+            $('body').append(this.el);
+        }
+        EditMode.prototype.push = function (editable) {
+            var _this = this;
+            this.editables.push(editable);
+
+            $(editable).on('click', function (e) {
+                if (_this.active) {
+                    e.originalEvent.preventDefault();
+
+                    editable.select(!editable.isSelected());
+                }
+            });
+
+            return this;
+        };
+
+        EditMode.prototype.selectAll = function (select) {
+            this.editables.forEach(function (editable) {
+                editable.select(select);
+            });
+
+            return this;
+        };
+        return EditMode;
+    })();
+    Shot.EditMode = EditMode;
+})(Shot || (Shot = {}));
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+var Shot;
+(function (Shot) {
     (function (Models) {
-        var Album = (function () {
+        var Album = (function (_super) {
+            __extends(Album, _super);
             function Album(data) {
+                _super.call(this);
                 this.data = data;
                 this.save = function () {
                     var _this = this;
@@ -353,6 +493,7 @@ var Shot;
 
                     return deferred;
                 };
+
                 this.template = $('#template-album').html();
             }
             Album.prototype.render = function () {
@@ -364,10 +505,12 @@ var Shot;
 
                 this.el = el;
 
+                _super.prototype.render.call(this);
+
                 return this;
             };
             return Album;
-        })();
+        })(Models.Editable);
         Models.Album = Album;
     })(Shot.Models || (Shot.Models = {}));
     var Models = Shot.Models;
@@ -384,7 +527,7 @@ var Shot;
                 this.offset = 0;
                 this.template = $('#template-carousel').html();
 
-                $.each(imagesData, function (i, data) {
+                imagesData.forEach(function (data) {
                     data.url = data.paths[2048];
                     data.link = SHOT.rootPath + 'album/' + SHOT.album.id + '/' + data.id;
 
@@ -408,7 +551,7 @@ var Shot;
                 }).trigger('resize');
 
                 $(document).on('click', '.full-screen', function (e) {
-                    $.each(['c', 'mozC', 'webkitC', 'msC', 'oC'], function (i, prefix) {
+                    ['c', 'mozC', 'webkitC', 'msC', 'oC'].forEach(function (prefix) {
                         var method = prefix + 'ancelFullScreen';
 
                         if (typeof document[method] === 'function') {
@@ -430,7 +573,7 @@ var Shot;
                     return;
                 }
 
-                $.each(this.images, function (i, image) {
+                this.images.forEach(function (image, i) {
                     if (image.data.id === id) {
                         _this.index = i;
                     }
@@ -440,7 +583,7 @@ var Shot;
                 this.current = this.images[this.index];
                 this.next = this.images.length > this.index + 1 ? this.images[this.index + 1] : null;
 
-                $.each(['previous', 'current', 'next'], function (i, container) {
+                ['previous', 'current', 'next'].forEach(function (container) {
                     var el = _this.el.find('.' + container);
 
                     el.empty();
@@ -476,7 +619,7 @@ var Shot;
                     el.replaceWith(el);
                 }).prop('src', SHOT.rootPath + image.data.paths.original);
 
-                $.each(['r', 'mozR', 'webkitR', 'msR', 'oR'], function (i, prefix) {
+                ['r', 'mozR', 'webkitR', 'msR', 'oR'].forEach(function (prefix) {
                     var method = prefix + 'equestFullScreen';
 
                     if (typeof fullScreen[method] === 'function') {
@@ -677,14 +820,15 @@ var Shot;
 var Shot;
 (function (Shot) {
     (function (Models) {
-        var Thumbnail = (function () {
+        var Thumbnail = (function (_super) {
+            __extends(Thumbnail, _super);
             function Thumbnail(data) {
+                _super.call(this);
                 this.data = data;
-                this.selected = false;
+
                 this.template = $('#template-thumbnail').html();
             }
             Thumbnail.prototype.render = function () {
-                var _this = this;
                 var el = $(Mustache.render(this.template, this.data));
 
                 if (this.el) {
@@ -693,11 +837,7 @@ var Shot;
 
                 this.el = el;
 
-                this.el.on('click', '.edit', function (e) {
-                    _this.selected = !_this.selected;
-
-                    _this.el.toggleClass('selected', _this.selected);
-                });
+                _super.prototype.render.call(this);
 
                 return this;
             };
@@ -708,6 +848,8 @@ var Shot;
 
                 if (this.data.id) {
                 } else {
+                    this.data.formData.append('title', this.data.title);
+
                     $.ajax({
                         url: SHOT.rootPath + 'ajax/saveImage',
                         type: 'POST',
@@ -741,7 +883,7 @@ var Shot;
                 return deferred;
             };
             return Thumbnail;
-        })();
+        })(Models.Editable);
         Models.Thumbnail = Thumbnail;
     })(Shot.Models || (Shot.Models = {}));
     var Models = Shot.Models;

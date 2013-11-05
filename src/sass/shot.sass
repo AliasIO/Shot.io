@@ -29,7 +29,7 @@ $form-label-bottom-margin: .5em
 
 $shiny-edge-color: rgba(#fff, .3)
 
-$thumbnail-size: 480px
+$thumbnail-size: emCalc(480px)
 
 @import "compass"
 
@@ -45,7 +45,7 @@ $thumbnail-size: 480px
 @import "foundation/components/buttons"
 @import "foundation/components/forms"
 @import "foundation/components/custom-forms"
-// @import "foundation/components/button-groups" // *requires components/buttons
+@import "foundation/components/button-groups"
 // @import "foundation/components/dropdown-buttons" // *requires components/buttons
 // @import "foundation/components/split-buttons" // *requires components/buttons
 // @import "foundation/components/flex-video"
@@ -128,12 +128,24 @@ code
 li
 	list-style-position: inside
 
+.button-group li
+	list-style-position: inherit
+
 .row
 	min-width: 100% !important
 
 @media #{$medium}
 	.row
 		min-width: 80% !important
+
+#edit
+	background: lighten($secondary-color, 5%)
+	bottom: 0
+	+box-shadow(0 0 5px rgba(0, 0, 0, .5))
+	display: none
+	padding-top: 1.25em
+	position: fixed
+	width: 100%
 
 .valign
 	display: inline-block

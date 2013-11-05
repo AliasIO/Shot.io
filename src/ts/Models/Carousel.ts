@@ -19,7 +19,7 @@ module Shot {
 			constructor(imagesData: any[]) {
 				this.template = $('#template-carousel').html();
 
-				$.each(imagesData, (i, data) => {
+				imagesData.forEach((data) => {
 					data.url  = data.paths[2048];
 					data.link = SHOT.rootPath + 'album/' + SHOT.album.id + '/' + data.id;
 
@@ -48,7 +48,7 @@ module Shot {
 
 				// Exit full screen
 				$(document).on('click', '.full-screen', (e) => {
-					$.each([ 'c', 'mozC', 'webkitC', 'msC', 'oC' ], (i, prefix) => {
+					[ 'c', 'mozC', 'webkitC', 'msC', 'oC' ].forEach((prefix) => {
 						var method = prefix + 'ancelFullScreen';
 
 						if ( typeof document[method] === 'function' ) {
@@ -71,7 +71,7 @@ module Shot {
 				}
 
 				// Get index
-				$.each(this.images, (i, image: Models.Image) => {
+				this.images.forEach((image: Models.Image, i) => {
 					if ( image.data.id === id ) {
 						this.index = i;
 					}
@@ -81,7 +81,7 @@ module Shot {
 				this.current = this.images[this.index];
 				this.next = this.images.length > this.index + 1 ? this.images[this.index + 1]: null;
 
-				$.each(['previous', 'current', 'next'], (i, container) => {
+				['previous', 'current', 'next'].forEach((container) => {
 					var el = this.el.find('.' + container);
 
 					el.empty();
@@ -126,7 +126,7 @@ module Shot {
 					})
 					.prop('src', SHOT.rootPath + image.data.paths.original);
 
-				$.each([ 'r', 'mozR', 'webkitR', 'msR', 'oR' ], (i, prefix) => {
+				[ 'r', 'mozR', 'webkitR', 'msR', 'oR' ].forEach((prefix) => {
 					var method = prefix + 'equestFullScreen';
 
 					if ( typeof fullScreen[method] === 'function' ) {

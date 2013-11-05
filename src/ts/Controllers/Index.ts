@@ -10,10 +10,11 @@ module Shot {
 			index() {
 				var
 					thumbnailGrid = $('.thumbnail-grid'),
-					albums = [];
+					albums = [],
+					editMode = new EditMode<Models.Album>();
 
 				if ( SHOT.albums ) {
-					$.each(SHOT.albums, (i, albumData) => {
+					SHOT.albums.forEach((albumData) => {
 						var album = new Models.Album(albumData);
 
 						album.data.link = SHOT.rootPath + 'album/grid/' + album.data.id;
@@ -21,6 +22,8 @@ module Shot {
 						thumbnailGrid.prepend(album.render().el);
 
 						albums.push(album);
+
+						editMode.push(album);
 					});
 				}
 			}

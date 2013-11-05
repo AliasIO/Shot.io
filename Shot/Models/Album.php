@@ -16,6 +16,12 @@ class Album extends \Swiftlet\Model
 	protected $id = null;
 
 	/**
+	 * Filename
+	 * @var string
+	 */
+	protected $filename;
+
+	/**
 	 * Title
 	 * @var string
 	 */
@@ -23,6 +29,8 @@ class Album extends \Swiftlet\Model
 
 	/**
 	 * Save album
+	 * @return Album
+	 * @throws \Swiftlet\Exception
 	 */
 	public function save()
 	{
@@ -56,6 +64,8 @@ class Album extends \Swiftlet\Model
 
 			$this->id = $dbh->lastInsertId();
 		}
+
+		return $this;
 	}
 
 	/**
@@ -68,10 +78,13 @@ class Album extends \Swiftlet\Model
 
 		$sth = $dbh->prepare('
 			SELECT
-				*
-			FROM albums
+				albums.*,
+				images.filename AS filename
+			FROM      albums
+			LEFT JOIN albums_images ON albums.id = albums_images.album_id
+			LEFT JOIN images ON albums_images.image_id = images.id AND albums.cover_image_id = images.id
 			WHERE
-				id = :id
+				albums.id = :id
 			LIMIT 1
 			');
 
@@ -85,8 +98,33 @@ class Album extends \Swiftlet\Model
 			throw new \Swiftlet\Exception('Album does not exist', self::EXCEPTION_NOT_FOUND);
 		}
 
-		$this->id    = $result->id;
-		$this->title = $result->title;
+		$this->id       = $result->id;
+		$this->title    = $result->title;
+		$this->filename = $result->filename;
+
+		// If no cover image is set get the first image in the album
+		if ( !$this->filename ) {
+			$sth = $dbh->prepare('
+				SELECT
+					images.filename
+				FROM       albums_images
+				INNER JOIN images ON albums_images.image_id = images.id
+				WHERE
+					albums_images.album_id = :id
+				GROUP BY albums_images.album_id
+				ORDER BY albums_images.sort_order DESC, images.id DESC
+				');
+
+			$sth->bindParam('id', $id, \PDO::PARAM_INT);
+
+			$sth->execute();
+
+			$result = $sth->fetchObject();
+
+			if ( $result ) {
+				$this->filename = $result->filename;
+			}
+		}
 
 		return $this;
 	}
@@ -123,6 +161,15 @@ class Album extends \Swiftlet\Model
 	public function getId()
 	{
 		return $this->id;
+	}
+
+	/**
+	 * Get file path
+	 * @return string
+	 */
+	public function getFilePath()
+	{
+		return $this->app->getRootPath() . 'photos/thumb/' . $this->filename;
 	}
 }
 

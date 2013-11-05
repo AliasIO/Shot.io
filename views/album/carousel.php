@@ -9,6 +9,5 @@
 
 <?php include 'views/templates/carousel.php' ?>
 <?php include 'views/templates/image.php' ?>
-<?php include 'views/templates/breadcrumb.php' ?>
 
 <?php include 'views/footer.php' ?>

@@ -13,7 +13,7 @@ module Shot {
 					albums = [];
 
 				if ( SHOT.albums ) {
-					$.each(SHOT.albums, (i, albumData) => {
+					SHOT.albums.forEach((albumData) => {
 						var album = new Models.Album(albumData);
 
 						album.data.link = SHOT.rootPath + 'admin/album/' + album.data.id;
@@ -71,7 +71,7 @@ module Shot {
 
 				// Add thumbnails to grid
 				if ( SHOT.thumbnails ) {
-					$.each(SHOT.thumbnails, (i, thumbnailData) => {
+					SHOT.thumbnails.forEach((thumbnailData) => {
 						var thumbnail = new Models.Thumbnail(thumbnailData);
 
 						thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + thumbnail.data.id;

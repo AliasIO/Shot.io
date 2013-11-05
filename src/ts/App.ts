@@ -1,3 +1,5 @@
+/// <reference path="Models/Editable.ts"/>
+
 $(function() {
 	SHOT.app = new Shot.App();
 });

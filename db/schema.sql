@@ -14,17 +14,19 @@ CREATE UNIQUE INDEX filename ON images ( filename );
 DROP TABLE IF EXISTS albums;
 
 CREATE TABLE albums (
-	id      INTEGER PRIMARY KEY,
-	title   TEXT    NOT NULL,
-	`order` INTEGER     NULL
+	id             INTEGER PRIMARY KEY,
+	title          TEXT    NOT NULL,
+	cover_image_id INTEGER     NULL,
+	sort_order     INTEGER     NULL,
+	FOREIGN KEY(cover_image_id) REFERENCES images(id) ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS albums_images;
 
 CREATE TABLE albums_images (
-	album_id INTEGER NOT NULL,
-	image_id INTEGER NOT NULL,
-	`order`  INTEGER     NULL,
+	album_id   INTEGER NOT NULL,
+	image_id   INTEGER NOT NULL,
+	sort_order INTEGER     NULL,
 	FOREIGN KEY(album_id) REFERENCES albums(id) ON DELETE CASCADE,
 	FOREIGN KEY(image_id) REFERENCES images(id) ON DELETE CASCADE
 );
@@ -45,5 +47,5 @@ INSERT INTO options (
 	value
 ) VALUES (
 	'sitename',
-	'Shot'
+	'Shot.io'
 );

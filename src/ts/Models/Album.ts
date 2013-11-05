@@ -3,12 +3,12 @@ module Shot {
 		/**
 		 * Album model
 		 */
-		export class Album {
-			el;
-
+		export class Album extends Editable {
 			private template;
 
 			constructor(public data) {
+				super();
+
 				this.template = $('#template-album').html();
 			}
 
@@ -23,6 +23,8 @@ module Shot {
 				}
 
 				this.el = el;
+
+				super.render();
 
 				return this;
 			}

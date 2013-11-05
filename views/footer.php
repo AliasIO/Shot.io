@@ -1,3 +1,6 @@
+		<?php include 'templates/edit-mode.php' ?>
+		<?php include 'views/templates/nav-item.php' ?>
+
 		<!--
 		<script src="<?= $this->app->getRootPath() ?>js/shot.min.js"></script>
 		-->

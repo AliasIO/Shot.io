@@ -12,9 +12,6 @@
 					<li class="title">
 						<i class="fa fa-picture-o"></i> {{{title}}}
 					</li>
-					<li class="edit">
-						<i class="fa fa-pencil"></i>
-					</li>
 				</ul>
 			</div>
 		</div>

@@ -3,15 +3,16 @@
 		<div class="container">
 			{{#id}}
 			<a href="{{link}}">
-				{{#paths.thumb}}
-				<img src="<?= $this->app->getRootPath() ?>{{paths.thumb}}">
-				{{/paths.thumb}}
-				{{^paths.thumb}}
+				{{#path}}
+				<img src="{{path}}">
+				{{/path}}
+				{{^path}}
 				<div class="placeholder-thumbnail">
 					<div class="valign"></div>
 					<i class="fa fa-picture-o fa-5x"></i>
 				</div>
-				{{/paths.thumb}}
+				{{/path}}
+				<div class="selection"></div>
 			</a>
 			{{/id}}
 			{{^id}}
@@ -23,7 +24,7 @@
 			<div class="bar-wrap">
 				<ul class="bar">
 					<li class="title">
-						<i class="fa fa-picture-o"></i> {{{title}}}
+						<i class="fa fa-folder"></i> {{{title}}}
 					</li>
 				</ul>
 			</div>

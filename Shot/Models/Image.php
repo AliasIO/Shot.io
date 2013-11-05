@@ -70,7 +70,7 @@ class Image extends \Swiftlet\Model
 	/**
 	 * Create a new image object
 	 * @param string $filename
-	 * @return object
+	 * @return Image
 	 */
 	public function create($filename)
 	{
@@ -97,7 +97,8 @@ class Image extends \Swiftlet\Model
 
 	/**
 	 * Save
-	 * @return object
+	 * @return Image
+	 * @throws \Swiftlet\Exception
 	 */
 	public function save()
 	{
@@ -159,6 +160,7 @@ class Image extends \Swiftlet\Model
 	/**
 	 * Load an image
 	 * @param integer $id
+	 * @return Image
 	 */
 	public function load($id)
 	{
@@ -194,6 +196,7 @@ class Image extends \Swiftlet\Model
 
 	/**
 	 * Get ID
+	 * @return integer
 	 */
 	public function getId()
 	{
@@ -202,6 +205,7 @@ class Image extends \Swiftlet\Model
 
 	/**
 	 * Get file name
+	 * @return string
 	 */
 	public function getFilename()
 	{
@@ -210,6 +214,7 @@ class Image extends \Swiftlet\Model
 
 	/**
 	 * Get width
+	 * @return integer
 	 */
 	public function getWidth()
 	{
@@ -218,6 +223,7 @@ class Image extends \Swiftlet\Model
 
 	/**
 	 * Get height
+	 * @return integer
 	 */
 	public function getHeight()
 	{
@@ -246,7 +252,7 @@ class Image extends \Swiftlet\Model
 
 	/**
 	 * Auto rotate image based on EXIF data
-	 * @param \Imagick $image
+	 * @return Image
 	 */
 	protected function autoRotate()
 	{
@@ -274,7 +280,7 @@ class Image extends \Swiftlet\Model
 
 	/**
 	 * Generate various file sizes
-	 * @return \Imagick
+	 * @return Image
 	 */
 	protected function exportSizes()
 	{
@@ -297,18 +303,22 @@ class Image extends \Swiftlet\Model
 
 	/**
 	 * Generate thumbnails
+	 * @return Image
 	 */
 	protected function exportThumbnails()
 	{
 		$this->exportPreviewThumbnail();
 		$this->exportSmartThumbnail();
 		//$this->exportCenteredThumbnail();
+
+		return $this;
 	}
 
 	/**
 	 * Scale thumbnail
 	 * @param \Imagick $thumbnail
 	 * @param integer $size
+	 * @return Image
 	 */
 	protected function scaleThumbnail(\Imagick $thumbnail, $size = null)
 	{
@@ -321,10 +331,13 @@ class Image extends \Swiftlet\Model
 		} else {
 			$thumbnail->scaleImage($size, 0);
 		}
+
+		return $this;
 	}
 
 	/**
 	 * Generate preview thumbnail
+	 * @return Image
 	 */
 	protected function exportPreviewThumbnail()
 	{
@@ -341,6 +354,7 @@ class Image extends \Swiftlet\Model
 
 	/**
 	 * Generate smart thumbnail
+	 * @return Image
 	 */
 	protected function exportSmartThumbnail()
 	{
@@ -421,6 +435,7 @@ class Image extends \Swiftlet\Model
 
 	/**
 	 * Generate centered thumbnail
+	 * @return Image
 	 */
 	protected function exportCenteredThumbnail()
 	{
@@ -437,12 +452,15 @@ class Image extends \Swiftlet\Model
 		}
 
 		$thumbnail->writeImage(self::$imagePath . 'thumb/' . $this->filename);
+
+		return $this;
 	}
 
 	/**
 	 * Calculate entropy
 	 * @param \ImageMagick $image
 	 * @param integer $area
+	 * @return integer
 	 */
 	protected function getEntropy(\Imagick $image, $area)
 	{

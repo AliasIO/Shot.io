@@ -36,9 +36,12 @@ class Admin extends \Swiftlet\Controller
 		$albums = array();
 
 		foreach ( $results as $result ) {
+			$album = $this->app->getModel('album')->load($result->id);
+
 			$albums[] = (object) array(
-				'id'    => (int) $result->id,
-				'title' => $result->title
+				'id'    => (int) $album->getId(),
+				'title' => $album->getTitle(),
+				'path'  => $album->getFilePath()
 				);
 		}
 
@@ -58,7 +61,7 @@ class Admin extends \Swiftlet\Controller
 
 		$sth = $dbh->prepare('
 			SELECT
-				*
+				id
 			FROM albums
 			WHERE
 				id = :id
@@ -69,9 +72,11 @@ class Admin extends \Swiftlet\Controller
 
 		$sth->execute();
 
-		$album = $sth->fetchObject();
+		$result = $sth->fetchObject();
 
-		if ( !$album ) {
+		if ( $result ) {
+			$album = $this->app->getModel('album')->load($result->id);
+		} else {
 			$this->app->getLibrary('helpers')->error404();
 
 			return;
@@ -96,29 +101,27 @@ class Admin extends \Swiftlet\Controller
 		$thumbnails = array();
 
 		foreach ( $results as $result ) {
-			try {
-				$thumbnail = $this->app->getModel('image')->load($result->id);
+			$thumbnail = $this->app->getModel('image')->load($result->id);
 
-				$thumbnails[] = (object) array(
-					'id'       => (int) $thumbnail->getId(),
-					'filename' => $thumbnail->getFilename(),
-					'title'    => $thumbnail->getTitle(),
-					'path'     => $thumbnail->getFilePath('thumb')
-					);
-			} catch ( \Swiftlet\Exception $e ) {
-			}
+			$thumbnails[] = (object) array(
+				'id'       => (int) $thumbnail->getId(),
+				'filename' => $thumbnail->getFilename(),
+				'title'    => $thumbnail->getTitle(),
+				'path'     => $thumbnail->getFilePath('thumb')
+				);
 		}
 
 		$this->view->thumbnails = $thumbnails;
 
 		$this->view->album = (object) array(
-			'title' => $album->title,
-			'id'    => (int) $album->id
+			'title' => $album->getTitle(),
+			'id'    => (int) $album->getId(),
+			'path'  => $album->getFilePath()
 			);
 
 		$this->view->breadcrumbs = array((object) array(
-			'path'  => 'admin/album/' . $album->id,
-			'title' => $album->title,
+			'path'  => 'admin/album/' . $album->getId(),
+			'title' => $album->getTitle(),
 			'icon'  => 'folder'
 			));
 	}

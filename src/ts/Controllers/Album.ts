@@ -10,10 +10,11 @@ module Shot {
 			grid() {
 				var
 					thumbnailGrid = $('.thumbnail-grid'),
-					thumbnails = [];
+					thumbnails = [],
+					editMode = new EditMode<Models.Thumbnail>();
 
 				if ( SHOT.thumbnails ) {
-					$.each(SHOT.thumbnails, (i, thumbnailData) => {
+					SHOT.thumbnails.forEach((thumbnailData) => {
 						var thumbnail = new Models.Thumbnail(thumbnailData);
 
 						thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + thumbnail.data.id;
@@ -21,6 +22,8 @@ module Shot {
 						thumbnailGrid.append(thumbnail.render().el);
 
 						thumbnails.push(thumbnail);
+
+						editMode.push(thumbnail);
 					});
 				}
 			}
@@ -32,7 +35,7 @@ module Shot {
 				var
 					carousel = new Models.Carousel(SHOT.images),
 					id: number,
-					breadcrumb = null;
+					navItem = null;
 
 				carousel.render();
 
@@ -40,20 +43,19 @@ module Shot {
 				id = parseInt(location.pathname.replace(/^\/album\/carousel\/\d\/(\d)/, (match, a) => { return a; }));
 
 				carousel.el.on('change', (e, image: Models.Image) => {
-					var
-						data = {
-							text: image.data.title.replace(/&amp;/g, '&'),
-							url: SHOT.rootPath + 'album/' + SHOT.album.id + '/' + image.data.id
-						};
-
-					// Breadcrumb
-					if ( breadcrumb ) {
-						breadcrumb.remove();
+					// Nav item
+					if ( navItem ) {
+						navItem.remove();
 					}
 
-					breadcrumb = $(Mustache.render($('#template-breadcrumb').html(), data));
+					navItem = $(Mustache.render($('#template-nav-item').html(), {
+						text: image.data.title.replace(/&amp;/g, '&'),
+						icon: 'picture-o',
+						url: SHOT.rootPath + 'album/' + SHOT.album.id + '/' + image.data.id,
+						left: true
+					}));
 
-					$('.top-bar .breadcrumbs').append(breadcrumb);
+					$('.top-bar .left').append(navItem);
 
 					// Update the URL
 					if ( image.data.id !== id ) {

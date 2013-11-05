@@ -58,6 +58,7 @@ class Ajax extends \Swiftlet\Controller
 		try {
 			if ( !empty($_POST) ) {
 				$albumId = !empty($_POST['albumId']) ? $_POST['albumId'] : '';
+				$title   = !empty($_POST['title'])   ? $_POST['title']   : '';
 
 				if ( !$albumId ) {
 					throw new \Swiftlet\Exception('No album ID specified');
@@ -106,7 +107,7 @@ class Ajax extends \Swiftlet\Controller
 
 						$image
 							->create($filename)
-							->setTitle(basename($file['name']))
+							->setTitle($title ? $title : basename($file['name']))
 							->save();
 
 						$album->addImage($image);
