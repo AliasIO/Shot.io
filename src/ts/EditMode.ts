@@ -23,6 +23,8 @@ module Shot {
 				this.active = !this.active;
 
 				if ( this.active ) {
+					this.checkSelection();
+
 					this.el
 						.css({ bottom: -20, opacity: 0 })
 						.show()
@@ -36,7 +38,7 @@ module Shot {
 
 			this.template = $('#template-edit-mode').html();
 
-			this.el = $(Mustache.render(this.template));
+			this.el = $(Mustache.render(this.template, {}));
 
 			this.el.on('click', '.close', (e) => {
 				e.preventDefault();
@@ -62,13 +64,85 @@ module Shot {
 				this.selectAll(false);
 			});
 
+			this.el.on('click', '.edit', (e) => {
+				e.preventDefault();
+
+				$(e.target).blur();
+
+				this.edit();
+			});
+
 			this.el.on('click', '.delete', (e) => {
 				e.preventDefault();
 
 				$(e.target).blur();
+
+				this.delete();
 			});
 
 			$('body').append(this.el);
+		}
+
+		/**
+		 * Edit
+		 */
+		edit(): EditMode<T> {
+			var modal = $(Mustache.render($('#template-edit-mode-edit').html(), {}));
+
+			modal.appendTo('body').show();
+
+			this.el.hide();
+
+			return this;
+		}
+
+		/**
+		 * Delete
+		 */
+		delete(): EditMode<T> {
+			var modal = $(Mustache.render($('#template-edit-mode-delete').html(), {}));
+
+			modal.on('submit', 'form', (e) => {
+				var ids: Array<number> = [];
+
+				e.preventDefault();
+
+				this.editables.slice(0).forEach((editable) => {
+					if ( editable.isSelected() ) {
+						ids.push(editable.data.id);
+
+						// Remove editable from array
+						this.editables.splice(this.editables.indexOf(editable), 1);
+
+						$(editable).trigger('delete');
+					}
+				});
+
+				console.log(this.editables[0] instanceof Models.Thumbnail);
+				console.log(this.editables[0] instanceof Models.Album);
+
+				$.post(SHOT.rootPath + 'ajax/delete', {
+					ids: ids
+				});
+
+				modal.remove();
+
+				this.el.show();
+			});
+
+			modal.on('click', '.cancel', (e) => {
+				e.preventDefault();
+
+				modal.remove();
+
+				this.el.show();
+			});
+
+			modal.appendTo('body').show();
+
+			this.el.hide();
+
+			return this;
 		}
 
 		/**
@@ -82,16 +156,42 @@ module Shot {
 					e.originalEvent.preventDefault();
 
 					editable.select(!editable.isSelected());
+
+					this.checkSelection();
 				}
 			});
 
 			return this;
 		}
 
+		/**
+		 * Select all
+		 */
 		selectAll(select: boolean): EditMode<T> {
 			this.editables.forEach((editable) => {
 				editable.select(select);
 			});
+
+			this.checkSelection();
+
+			return this;
+		}
+
+		/**
+		 * Check selection
+		 */
+		checkSelection(): EditMode<T> {
+			var selectedCount = 0;
+
+			this.editables.forEach((editable) => {
+				if ( editable.isSelected() ) {
+					selectedCount ++;
+				}
+			});
+
+			this.el.find('.select-none, .edit, .albums, .delete').attr('disabled', !selectedCount);
+
+			this.el.find('.select-all').attr('disabled', selectedCount === this.editables.length);
 
 			return this;
 		}

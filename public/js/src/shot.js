@@ -18,10 +18,10 @@ var Shot;
                 return this;
             };
 
-            Editable.prototype.select = function (on) {
-                this.selected = on;
+            Editable.prototype.select = function (selected) {
+                this.selected = selected;
 
-                this.el.toggleClass('selected', this.selected);
+                this.el.toggleClass('selected', selected);
 
                 return this;
             };
@@ -90,7 +90,7 @@ var Shot;
                             album.data.link = SHOT.rootPath + 'admin/album/' + data.id;
 
                             album.render();
-                        }).fail(function (e) {
+                        }).fail(function () {
                             console.log('fail');
                         });
 
@@ -231,7 +231,7 @@ var Shot;
             function Album() {
             }
             Album.prototype.grid = function () {
-                var thumbnailGrid = $('.thumbnail-grid'), thumbnails = [], editMode = new Shot.EditMode();
+                var thumbnailGrid = $('.thumbnail-grid'), editMode = new Shot.EditMode();
 
                 if (SHOT.thumbnails) {
                     SHOT.thumbnails.forEach(function (thumbnailData) {
@@ -241,9 +241,13 @@ var Shot;
 
                         thumbnailGrid.append(thumbnail.render().el);
 
-                        thumbnails.push(thumbnail);
-
                         editMode.push(thumbnail);
+
+                        $(thumbnail).on('delete', function () {
+                            thumbnail.el.remove();
+
+                            thumbnail = null;
+                        });
                     });
                 }
             };
@@ -390,6 +394,8 @@ var Shot;
                 _this.active = !_this.active;
 
                 if (_this.active) {
+                    _this.checkSelection();
+
                     _this.el.css({ bottom: -20, opacity: 0 }).show().animate({ bottom: 0, opacity: 1 }, 'fast');
                 } else {
                     _this.el.animate({ bottom: -20, opacity: 0 }, 'fast');
@@ -400,7 +406,7 @@ var Shot;
 
             this.template = $('#template-edit-mode').html();
 
-            this.el = $(Mustache.render(this.template));
+            this.el = $(Mustache.render(this.template, {}));
 
             this.el.on('click', '.close', function (e) {
                 e.preventDefault();
@@ -426,14 +432,80 @@ var Shot;
                 _this.selectAll(false);
             });
 
+            this.el.on('click', '.edit', function (e) {
+                e.preventDefault();
+
+                $(e.target).blur();
+
+                _this.edit();
+            });
+
             this.el.on('click', '.delete', function (e) {
                 e.preventDefault();
 
                 $(e.target).blur();
+
+                _this.delete();
             });
 
             $('body').append(this.el);
         }
+        EditMode.prototype.edit = function () {
+            var modal = $(Mustache.render($('#template-edit-mode-edit').html(), {}));
+
+            modal.appendTo('body').show();
+
+            this.el.hide();
+
+            return this;
+        };
+
+        EditMode.prototype.delete = function () {
+            var _this = this;
+            var modal = $(Mustache.render($('#template-edit-mode-delete').html(), {}));
+
+            modal.on('submit', 'form', function (e) {
+                var ids = [];
+
+                e.preventDefault();
+
+                _this.editables.slice(0).forEach(function (editable) {
+                    if (editable.isSelected()) {
+                        ids.push(editable.data.id);
+
+                        _this.editables.splice(_this.editables.indexOf(editable), 1);
+
+                        $(editable).trigger('delete');
+                    }
+                });
+
+                console.log(_this.editables[0] instanceof Shot.Models.Thumbnail);
+                console.log(_this.editables[0] instanceof Shot.Models.Album);
+
+                $.post(SHOT.rootPath + 'ajax/delete', {
+                    ids: ids
+                });
+
+                modal.remove();
+
+                _this.el.show();
+            });
+
+            modal.on('click', '.cancel', function (e) {
+                e.preventDefault();
+
+                modal.remove();
+
+                _this.el.show();
+            });
+
+            modal.appendTo('body').show();
+
+            this.el.hide();
+
+            return this;
+        };
+
         EditMode.prototype.push = function (editable) {
             var _this = this;
             this.editables.push(editable);
@@ -443,6 +515,8 @@ var Shot;
                     e.originalEvent.preventDefault();
 
                     editable.select(!editable.isSelected());
+
+                    _this.checkSelection();
                 }
             });
 
@@ -453,6 +527,24 @@ var Shot;
             this.editables.forEach(function (editable) {
                 editable.select(select);
             });
+
+            this.checkSelection();
+
+            return this;
+        };
+
+        EditMode.prototype.checkSelection = function () {
+            var selectedCount = 0;
+
+            this.editables.forEach(function (editable) {
+                if (editable.isSelected()) {
+                    selectedCount++;
+                }
+            });
+
+            this.el.find('.select-none, .edit, .albums, .delete').attr('disabled', !selectedCount);
+
+            this.el.find('.select-all').attr('disabled', selectedCount === this.editables.length);
 
             return this;
         };
@@ -538,7 +630,7 @@ var Shot;
             }
             Carousel.prototype.render = function () {
                 var _this = this;
-                var el = $(Mustache.render(this.template));
+                var el = $(Mustache.render(this.template, {}));
 
                 if (this.el) {
                     this.el.replaceWith(el);
@@ -777,6 +869,8 @@ var Shot;
 
                         break;
                 }
+
+                return this;
             };
             return Image;
         })();
@@ -792,7 +886,7 @@ var Shot;
                 this.template = $('#template-progressbar').html();
             }
             ProgressBar.prototype.render = function () {
-                this.el = $(Mustache.render(this.template));
+                this.el = $(Mustache.render(this.template, {}));
 
                 return this;
             };
@@ -850,8 +944,7 @@ var Shot;
                 } else {
                     this.data.formData.append('title', this.data.title);
 
-                    $.ajax({
-                        url: SHOT.rootPath + 'ajax/saveImage',
+                    $.ajax(SHOT.rootPath + 'ajax/saveImage', {
                         type: 'POST',
                         data: this.data.formData,
                         processData: false,
@@ -870,7 +963,7 @@ var Shot;
 
                             return xhr;
                         }
-                    }, 'json').done(function (data) {
+                    }).done(function (data) {
                         _this.data.id = data.id;
                         _this.data.path = data.path;
 

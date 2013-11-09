@@ -7,7 +7,7 @@
 
 <div class="row">
 	<div class="large-12 columns">
-		<form id="upload" class="well" method="post" enctype="multipart/form-data">
+		<form id="upload" method="post" enctype="multipart/form-data">
 			<fieldset>
 				<legend>Upload images</legend>
 

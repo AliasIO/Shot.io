@@ -4,9 +4,9 @@ module Shot {
 		 * Thumbnail model
 		 */
 		export class Thumbnail extends Editable {
-			private template;
+			private template: string;
 
-			constructor(public data) {
+			constructor(public data: { id?: number; title?: string; path?: string; link?: string; file?: any; formData?: any }) {
 				super();
 
 				this.template = $('#template-thumbnail').html();
@@ -32,7 +32,7 @@ module Shot {
 			/**
 			 * Save
 			 */
-			save() {
+			save(): JQueryDeferred<any> {
 				var deferred = $.Deferred();
 
 				if ( this.data.id ) {
@@ -40,8 +40,7 @@ module Shot {
 				} else {
 					this.data.formData.append('title', this.data.title);
 
-					$.ajax({
-						url: SHOT.rootPath + 'ajax/saveImage',
+					$.ajax(SHOT.rootPath + 'ajax/saveImage', {
 						type: 'POST',
 						data: this.data.formData,
 						processData: false,
@@ -61,7 +60,7 @@ module Shot {
 
 							return xhr;
 						}
-					}, 'json')
+					})
 					.done((data) => {
 						this.data.id = data.id;
 						this.data.path = data.path;

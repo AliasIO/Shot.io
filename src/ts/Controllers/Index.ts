@@ -7,10 +7,10 @@ module Shot {
 			/**
 			 * Index action
 			 */
-			index() {
+			index(): void {
 				var
 					thumbnailGrid = $('.thumbnail-grid'),
-					albums = [],
+					albums: Array<Models.Album> = [],
 					editMode = new EditMode<Models.Album>();
 
 				if ( SHOT.albums ) {

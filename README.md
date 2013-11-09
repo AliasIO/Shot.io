@@ -1,7 +1,7 @@
 Shot.io
 =======
 
-A mobile optimised photo gallery web app (self-hosted Flickr alternative).
+A mobile optimised photo publishing platform (self-hosted Flickr alternative).
 
 **This is very much a work in progress.**
 

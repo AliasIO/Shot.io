@@ -4,7 +4,7 @@ module Shot {
 		 * Carousel model
 		 */
 		export class Carousel {
-			el;
+			el: JQuery;
 			index = 0;
 			images: Models.Image[] = [];
 
@@ -12,7 +12,7 @@ module Shot {
 			private current: Models.Image;
 			private previous: Models.Image;
 			private next: Models.Image;
-			private template;
+			private template: string;
 			private offset = 0;
 			private cutOff: number;
 
@@ -33,7 +33,7 @@ module Shot {
 			 * Render
 			 */
 			render(): Carousel {
-				var el = $(Mustache.render(this.template));
+				var el = $(Mustache.render(this.template, {}));
 
 				if ( this.el ) {
 					this.el.replaceWith(el);

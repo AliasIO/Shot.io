@@ -4,9 +4,9 @@ module Shot {
 		 * Image model
 		 */
 		export class Image {
-			el;
+			el: JQuery;
 
-			private template;
+			private template: string;
 			private loaded = false;
 
 			constructor(public data) {
@@ -68,7 +68,7 @@ module Shot {
 			/**
 			 * Scale preview image to fit parent element
 			 */
-			resize(el) {
+			resize(el: JQuery): Image {
 				var
 					size = { x: this.data.width, y: this.data.height },
 					parentSize;
@@ -113,6 +113,8 @@ module Shot {
 
 						break;
 				}
+
+				return this;
 			}
 		}
 	}

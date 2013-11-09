@@ -4,9 +4,9 @@ module Shot {
 		 * Album model
 		 */
 		export class Album extends Editable {
-			private template;
+			private template: string;
 
-			constructor(public data) {
+			constructor(public data: { id?: number; link?: string }) {
 				super();
 
 				this.template = $('#template-album').html();
@@ -32,7 +32,7 @@ module Shot {
 			/**
 			 * Save
 			 */
-			save = function() {
+			save = function(): JQueryDeferred<any> {
 				var deferred = $.Deferred();
 
 				if ( this.id ) {

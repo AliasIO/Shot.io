@@ -1,10 +1,11 @@
+/// <reference path="definitions/jquery.d.ts"/>
+/// <reference path="definitions/mustache.d.ts"/>
+/// <reference path="definitions/shot.d.ts"/>
 /// <reference path="Models/Editable.ts"/>
 
 $(function() {
 	SHOT.app = new Shot.App();
 });
-
-declare var SHOT, $, Mustache, FastClick;
 
 module Shot {
 	/**

@@ -84,7 +84,7 @@ body
 	padding-bottom: 100px
 
 .top-bar
-	z-index: 999
+	z-index: 98
 
 .top-bar-section ul li:first-child.divider
 	display: none
@@ -138,7 +138,25 @@ li
 	.row
 		min-width: 80% !important
 
-#edit
+.modal
+	display: none
+
+.modal-background
+	background: rgba(darken($secondary-color, 20%), .7)
+	bottom: 0
+	left: 0
+	position: fixed
+	right: 0
+	top: 0
+	z-index: 99
+
+.modal-content
+	position: absolute
+	top: 100px
+	z-index: 99
+	width: 100%
+
+#edit-mode
 	background: lighten($secondary-color, 5%)
 	bottom: 0
 	+box-shadow(0 0 5px rgba(0, 0, 0, .5))
@@ -227,7 +245,7 @@ li
 			+box-shadow(none)
 
 .thumbnail-grid
-	@include block-grid(5, 10px, true)
+	+block-grid(5, 10px, true)
 
 	li
 
@@ -262,7 +280,7 @@ li
 
 				.progressbar
 					background: $primary-color
-					@include background(linear-gradient(top left, lighten($primary-color, 10%), $primary-color))
+					+background(linear-gradient(top left, lighten($primary-color, 10%), $primary-color))
 					height: 3px
 					margin-bottom: -3px
 					width: 0
@@ -365,15 +383,15 @@ li
 
 @media #{$screen}
 	.thumbnail-grid
-		@include block-grid(2, 15px, true)
+		+block-grid(2, 15px, true)
 
 @media #{$small}
 	.thumbnail-grid
-		@include block-grid(3, 15px, true)
+		+block-grid(3, 15px, true)
 
 @media #{$large}
 	.thumbnail-grid
-		@include block-grid(5, 15px, true)
+		+block-grid(5, 15px, true)
 
 .full-screen
 	background: $body-bg

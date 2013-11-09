@@ -4,7 +4,8 @@ module Shot {
 		 * Editable model
 		 */
 		export class Editable {
-			el;
+			el: JQuery;
+			data: { id?: number };
 
 			private selected = false;
 
@@ -29,10 +30,10 @@ module Shot {
 			/**
 			 * Select
 			 */
-			select(on:boolean): Editable {
-				this.selected = on;
+			select(selected:boolean): Editable {
+				this.selected = selected;
 
-				this.el.toggleClass('selected', this.selected);
+				this.el.toggleClass('selected', selected);
 
 				return this;
 			}
@@ -40,7 +41,7 @@ module Shot {
 			/**
 			 * Is selected
 			 */
-			isSelected() {
+			isSelected(): boolean {
 				return this.selected;
 			}
 		}

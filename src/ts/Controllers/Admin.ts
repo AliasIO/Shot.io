@@ -7,10 +7,10 @@ module Shot {
 			/**
 			 * Index action
 			 */
-			index() {
+			index(): void {
 				var
 					thumbnailGrid = $('.thumbnail-grid'),
-					albums = [];
+					albums: Array<Models.Album> = [];
 
 				if ( SHOT.albums ) {
 					SHOT.albums.forEach((albumData) => {
@@ -40,7 +40,7 @@ module Shot {
 
 								album.render();
 							})
-							.fail((e) => {
+							.fail(() => {
 								console.log('fail');
 							});
 
@@ -54,7 +54,7 @@ module Shot {
 			/**
 			 * Album action
 			 */
-			album() {
+			album(): void {
 				var
 					thumbnailSize = 480,
 					thumbnailGrid = $('.thumbnail-grid'),
@@ -82,7 +82,7 @@ module Shot {
 					});
 				}
 
-				$('#files').on('change', (e) => {
+				$('#files').on('change', (e: any) => {
 					$.each(e.target.files, (i, file) => {
 						var
 							thumbnail,
@@ -145,7 +145,7 @@ module Shot {
 					/**
 					 * Pre render thumbnail
 					 */
-					preRender = (thumbnail, callback) => {
+					preRender = (thumbnail: Models.Thumbnail, callback: () => void) => {
 						var reader = new FileReader();
 
 						callback = typeof callback === 'function' ? callback : () => {};
@@ -154,7 +154,7 @@ module Shot {
 						reader.onload = (e) => {
 							var image = $('<img/>');
 
-							image.on('load', (e) => {
+							image.on('load', (e: any) => {
 								var
 									canvas = $('<canvas/>').get(0),
 									size = {

@@ -7,10 +7,9 @@ module Shot {
 			/**
 			 * Index action
 			 */
-			grid() {
+			grid(): void {
 				var
 					thumbnailGrid = $('.thumbnail-grid'),
-					thumbnails = [],
 					editMode = new EditMode<Models.Thumbnail>();
 
 				if ( SHOT.thumbnails ) {
@@ -21,9 +20,13 @@ module Shot {
 
 						thumbnailGrid.append(thumbnail.render().el);
 
-						thumbnails.push(thumbnail);
-
 						editMode.push(thumbnail);
+
+						$(thumbnail).on('delete', () => {
+							thumbnail.el.remove();
+
+							thumbnail = null;
+						});
 					});
 				}
 			}
@@ -31,7 +34,7 @@ module Shot {
 			/**
 			 * Carousel action
 			 */
-			carousel() {
+			carousel(): void {
 				var
 					carousel = new Models.Carousel(SHOT.images),
 					id: number,

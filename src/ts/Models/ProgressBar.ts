@@ -4,8 +4,8 @@ module Shot {
 		 * Progress bar model
 		 */
 		export class ProgressBar {
-			el;
-			template;
+			el: JQuery;
+			template: string;
 
 			constructor() {
 				this.template = $('#template-progressbar').html();
@@ -15,7 +15,7 @@ module Shot {
 			 * Render
 			 */
 			render(): ProgressBar {
-				this.el = $(Mustache.render(this.template));
+				this.el = $(Mustache.render(this.template, {}));
 
 				return this;
 			}
