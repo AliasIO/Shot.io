@@ -7,6 +7,7 @@ module Shot {
 		private template;
 		private active = false;
 		private editables: Array<T> = [];
+		private type: string;
 
 		constructor() {
 			var navItem;
@@ -87,7 +88,60 @@ module Shot {
 		 * Edit
 		 */
 		edit(): EditMode<T> {
-			var modal = $(Mustache.render($('#template-edit-mode-edit').html(), {}));
+			var
+				modal: JQuery,
+				selected: Array<T> = [];
+
+			this.editables.forEach((editable) => {
+				if ( editable.isSelected() ) {
+					selected.push(editable);
+				}
+			});
+
+			if ( !selected ) {
+				return this;
+			}
+
+			modal = $(Mustache.render($('#template-edit-mode-edit').html(), {
+				count: selected.length,
+				image: this.type === 'image',
+				album: this.type === 'album'
+			}));
+
+			modal.on('submit', 'form', (e) => {
+				var
+					ids: Array<number> = [],
+					title = modal.find(':input[name="title"]').val();
+
+				e.preventDefault();
+
+				selected.forEach((editable) => {
+					ids.push(editable.data.id);
+
+					editable.data.title = title;
+
+					editable
+						.render()
+						.select(true);
+				});
+
+				$.post(SHOT.rootPath + 'ajax/save' + ( this.type === 'image' ? 'Images' : 'Albums' ), {
+					title: title,
+					ids: ids
+				});
+
+				modal.remove();
+
+				this.el.show();
+			});
+
+			modal.on('click', '.cancel', (e) => {
+				e.preventDefault();
+
+				modal.remove();
+
+				this.el.show();
+			});
 
 			modal.appendTo('body').show();
 
@@ -100,28 +154,41 @@ module Shot {
 		 * Delete
 		 */
 		delete(): EditMode<T> {
-			var modal = $(Mustache.render($('#template-edit-mode-delete').html(), {}));
+			var
+				modal: JQuery,
+				selected: Array<T> = [];
+
+			this.editables.forEach((editable) => {
+				if ( editable.isSelected() ) {
+					selected.push(editable);
+				}
+			});
+
+			if ( !selected ) {
+				return this;
+			}
+
+			modal = $(Mustache.render($('#template-edit-mode-delete').html(), {
+				count: selected.length,
+				image: this.type === 'image',
+				album: this.type === 'album'
+			}));
 
 			modal.on('submit', 'form', (e) => {
 				var ids: Array<number> = [];
 
 				e.preventDefault();
 
-				this.editables.slice(0).forEach((editable) => {
-					if ( editable.isSelected() ) {
-						ids.push(editable.data.id);
+				selected.forEach((editable) => {
+					ids.push(editable.data.id);
 
-						// Remove editable from array
-						this.editables.splice(this.editables.indexOf(editable), 1);
+					// Remove editable from array
+					this.editables.splice(this.editables.indexOf(editable), 1);
 
-						$(editable).trigger('delete');
-					}
+					$(editable).trigger('delete');
 				});
 
-				console.log(this.editables[0] instanceof Models.Thumbnail);
-				console.log(this.editables[0] instanceof Models.Album);
-
-				$.post(SHOT.rootPath + 'ajax/delete', {
+				$.post(SHOT.rootPath + 'ajax/delete' + ( this.type === 'image' ? 'Images' : 'Albums' ), {
 					ids: ids
 				});
 
@@ -150,6 +217,14 @@ module Shot {
 		 */
 		push(editable: T): EditMode<T> {
 			this.editables.push(editable);
+
+			if ( editable instanceof Models.Thumbnail ) {
+				this.type = 'image';
+			}
+
+			if ( editable instanceof Models.Album ) {
+				this.type = 'album';
+			}
 
 			$(editable).on('click', (e) => {
 				if ( this.active ) {

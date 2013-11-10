@@ -69,6 +69,34 @@ class Album extends \Swiftlet\Model
 	}
 
 	/**
+	 * Delete album
+	 * @throws \Swiftlet\Exception
+	 */
+	public function delete()
+	{
+		if ( !$this->id ) {
+			return;
+		}
+
+		$dbh = $this->app->getLibrary('pdo')->getHandle();
+
+		if ( $this->id ) {
+			$sth = $dbh->prepare('
+				DELETE
+				FROM albums WHERE
+					id = :id
+				LIMIT 1
+				');
+
+			$sth->bindParam('id', $this->id, \PDO::PARAM_INT);
+
+			$sth->execute();
+		}
+
+		$this->id = null;
+	}
+
+	/**
 	 * Load an album
 	 * @param integer $id
 	 */
@@ -169,7 +197,7 @@ class Album extends \Swiftlet\Model
 	 */
 	public function getFilePath()
 	{
-		return $this->app->getRootPath() . 'photos/thumb/' . $this->filename;
+		return $this->filename ? $this->app->getRootPath() . 'photos/thumb/' . $this->filename : null;
 	}
 }
 

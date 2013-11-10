@@ -130,4 +130,106 @@ class Ajax extends \Swiftlet\Controller
 			exit;
 		}
 	}
+
+	/**
+	 * Save albums action
+	 */
+	public function saveAlbums()
+	{
+		header('Content-Type: application/json');
+
+		if ( !empty($_POST) ) {
+			$ids   = !empty($_POST['ids'])   ? $_POST['ids']   : array();
+			$title = !empty($_POST['title']) ? $_POST['title'] : '';
+
+			if ( is_array($ids) && $ids ) {
+				foreach ( $ids as $id ) {
+					try {
+						$album = $this->app->getModel('album')->load($id);
+
+						$album
+							->setTitle($title)
+							->save();
+					} catch ( \Swiftlet\Exception $e ) { }
+				}
+			}
+
+			exit('{}');
+		}
+	}
+
+	/**
+	 * Save images action
+	 */
+	public function saveImages()
+	{
+		header('Content-Type: application/json');
+
+		if ( !empty($_POST) ) {
+			$ids   = !empty($_POST['ids'])   ? $_POST['ids']   : array();
+			$title = !empty($_POST['title']) ? $_POST['title'] : '';
+
+			if ( is_array($ids) && $ids ) {
+				foreach ( $ids as $id ) {
+					try {
+						$image = $this->app->getModel('image')->load($id);
+
+						$image
+							->setTitle($title)
+							->save();
+					} catch ( \Swiftlet\Exception $e ) { }
+				}
+			}
+
+			exit('{}');
+		}
+	}
+
+	/**
+	 * Delete albums action
+	 */
+	public function deleteAlbums()
+	{
+		header('Content-Type: application/json');
+
+		if ( !empty($_POST) ) {
+			$ids = !empty($_POST['ids']) ? $_POST['ids'] : array();
+
+			if ( is_array($ids) && $ids ) {
+				foreach ( $ids as $id ) {
+					try {
+						$album = $this->app->getModel('album')->load($id);
+
+						$album->delete();
+					} catch ( \Swiftlet\Exception $e ) { }
+				}
+			}
+		}
+
+		exit('{}');
+	}
+
+	/**
+	 * Delete images action
+	 */
+	public function deleteImages()
+	{
+		header('Content-Type: application/json');
+
+		if ( !empty($_POST) ) {
+			$ids = !empty($_POST['ids']) ? $_POST['ids'] : array();
+
+			if ( is_array($ids) && $ids ) {
+				foreach ( $ids as $id ) {
+					try {
+						$image = $this->app->getModel('image')->load($id);
+
+						$image->delete();
+					} catch ( \Swiftlet\Exception $e ) { }
+				}
+			}
+		}
+
+		exit('{}');
+	}
 }

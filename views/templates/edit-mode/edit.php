@@ -12,19 +12,17 @@
 							<div class="row">
 								<div class="large-12 columns">
 									<label>Title</label>
-									<input type="text">
+									<input type="text" name="title" placeholder="No change">
 								</div>
 							</div>
-						</fieldset>
 
-						<fieldset>
 							<div class="row">
-								<div class="large-10 small-6 columns">
-									<button type="submit" class="expand">Save</button>
+								<div class="small-6 columns">
+									<button type="submit" class="delete expand"><i class="fa fa-save"></i> Save</button>
 								</div>
 
-								<div class="large-2 small-6 columns">
-									<button class="secondary expand"><i class="fa fa-times"></i></button>
+								<div class="small-6 columns">
+									<button type="button" class="cancel secondary expand"><i class="fa fa-times"></i> Cancel</button>
 								</div>
 							</div>
 						</fieldset>

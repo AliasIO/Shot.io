@@ -22,6 +22,16 @@ module Shot {
 				e.preventDefault();
 			});
 
+			$(document).on('touchstart', '.top-bar .toggle-topbar a', (e) => {
+				e.preventDefault();
+
+				$(e.target).trigger('click');
+			});
+
+			$(document).on('click', '.top-bar section a', () => {
+				$('.top-bar').removeClass('expanded');
+			});
+
 			new Controllers[SHOT.controller]()[SHOT.action]();
 
 			return this;

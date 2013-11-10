@@ -10,7 +10,7 @@ module Shot {
 			index(): void {
 				var
 					thumbnailGrid = $('.thumbnail-grid'),
-					albums: Array<Models.Album> = [];
+					editMode = new EditMode<Models.Album>();
 
 				if ( SHOT.albums ) {
 					SHOT.albums.forEach((albumData) => {
@@ -20,7 +20,13 @@ module Shot {
 
 						thumbnailGrid.prepend(album.render().el);
 
-						albums.push(album);
+						$(album).on('delete', () => {
+							album.el.remove();
+
+							album = null;
+						});
+
+						editMode.push(album);
 					});
 				}
 
@@ -44,9 +50,15 @@ module Shot {
 								console.log('fail');
 							});
 
-						albums.push(album);
-
 						thumbnailGrid.prepend(album.el);
+
+						$(album).on('delete', () => {
+							album.el.remove();
+
+							album = null;
+						});
+
+						editMode.push(album);
 					}
 				});
 			}
@@ -58,8 +70,8 @@ module Shot {
 				var
 					thumbnailSize = 480,
 					thumbnailGrid = $('.thumbnail-grid'),
-					thumbnails: Models.Thumbnail[] = [],
 					thumbnailQueue: Models.Thumbnail[] = [],
+					editMode = new EditMode<Models.Thumbnail>(),
 					fileTypes = [
 						'image/jpg',
 						'image/jpeg',
@@ -78,7 +90,13 @@ module Shot {
 
 						thumbnailGrid.append(thumbnail.render().el);
 
-						thumbnails.push(thumbnail);
+						$(thumbnail).on('delete', () => {
+							thumbnail.el.remove();
+
+							thumbnail = null;
+						});
+
+						editMode.push(thumbnail);
 					});
 				}
 
@@ -98,6 +116,12 @@ module Shot {
 							thumbnail.el.find('.container').append(progressBar.el);
 
 							thumbnailGrid.prepend(thumbnail.el);
+
+							$(thumbnail).on('delete', () => {
+								thumbnail.el.remove();
+
+								thumbnail = null;
+							});
 
 							thumbnail.save()
 								.done((data) => {
@@ -124,6 +148,8 @@ module Shot {
 											})
 											.prependTo(thumbnail.el.find('.container'))
 											.prop('src', data.path);
+
+										editMode.push(thumbnail);
 									});
 								})
 								.progress((data) => {
@@ -137,7 +163,6 @@ module Shot {
 									console.log('fail');
 								});
 
-							thumbnails.push(thumbnail);
 							thumbnailQueue.push(thumbnail);
 						}
 					});

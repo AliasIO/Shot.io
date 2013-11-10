@@ -20,13 +20,13 @@ module Shot {
 
 						thumbnailGrid.append(thumbnail.render().el);
 
-						editMode.push(thumbnail);
-
 						$(thumbnail).on('delete', () => {
 							thumbnail.el.remove();
 
 							thumbnail = null;
 						});
+
+						editMode.push(thumbnail);
 					});
 				}
 			}

@@ -10,7 +10,6 @@ module Shot {
 			index(): void {
 				var
 					thumbnailGrid = $('.thumbnail-grid'),
-					albums: Array<Models.Album> = [],
 					editMode = new EditMode<Models.Album>();
 
 				if ( SHOT.albums ) {
@@ -21,7 +20,11 @@ module Shot {
 
 						thumbnailGrid.prepend(album.render().el);
 
-						albums.push(album);
+						$(album).on('delete', () => {
+							album.el.remove();
+
+							album = null;
+						});
 
 						editMode.push(album);
 					});

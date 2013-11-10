@@ -16,7 +16,7 @@ module Shot {
 			 * Render
 			 */
 			render(): Album {
-				var el = $(Mustache.render(this.template, this.data));
+				var el = $(Mustache.render(this.template, this.data, {}));
 
 				if ( this.el ) {
 					this.el.replaceWith(el);

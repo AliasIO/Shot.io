@@ -22,9 +22,13 @@ class Index extends \Swiftlet\Controller
 
 		$sth = $dbh->prepare('
 			SELECT
-				id
+				albums.id
 			FROM albums
-			ORDER BY id DESC
+			LEFT JOIN albums_images ON albums.id = albums_images.album_id
+			GROUP BY albums.id
+			HAVING
+				COUNT(albums_images.image_id) > 0
+			ORDER BY albums.id DESC
 			');
 
 		$sth->execute();

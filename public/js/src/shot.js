@@ -49,6 +49,16 @@ var Shot;
                 e.preventDefault();
             });
 
+            $(document).on('touchstart', '.top-bar .toggle-topbar a', function (e) {
+                e.preventDefault();
+
+                $(e.target).trigger('click');
+            });
+
+            $(document).on('click', '.top-bar section a', function () {
+                $('.top-bar').removeClass('expanded');
+            });
+
             new Shot.Controllers[SHOT.controller]()[SHOT.action]();
 
             return this;
@@ -64,7 +74,7 @@ var Shot;
             function Admin() {
             }
             Admin.prototype.index = function () {
-                var thumbnailGrid = $('.thumbnail-grid'), albums = [];
+                var thumbnailGrid = $('.thumbnail-grid'), editMode = new Shot.EditMode();
 
                 if (SHOT.albums) {
                     SHOT.albums.forEach(function (albumData) {
@@ -74,7 +84,13 @@ var Shot;
 
                         thumbnailGrid.prepend(album.render().el);
 
-                        albums.push(album);
+                        $(album).on('delete', function () {
+                            album.el.remove();
+
+                            album = null;
+                        });
+
+                        editMode.push(album);
                     });
                 }
 
@@ -94,15 +110,21 @@ var Shot;
                             console.log('fail');
                         });
 
-                        albums.push(album);
-
                         thumbnailGrid.prepend(album.el);
+
+                        $(album).on('delete', function () {
+                            album.el.remove();
+
+                            album = null;
+                        });
+
+                        editMode.push(album);
                     }
                 });
             };
 
             Admin.prototype.album = function () {
-                var thumbnailSize = 480, thumbnailGrid = $('.thumbnail-grid'), thumbnails = [], thumbnailQueue = [], fileTypes = [
+                var thumbnailSize = 480, thumbnailGrid = $('.thumbnail-grid'), thumbnailQueue = [], editMode = new Shot.EditMode(), fileTypes = [
                     'image/jpg',
                     'image/jpeg',
                     'image/png',
@@ -118,7 +140,13 @@ var Shot;
 
                         thumbnailGrid.append(thumbnail.render().el);
 
-                        thumbnails.push(thumbnail);
+                        $(thumbnail).on('delete', function () {
+                            thumbnail.el.remove();
+
+                            thumbnail = null;
+                        });
+
+                        editMode.push(thumbnail);
                     });
                 }
 
@@ -137,6 +165,12 @@ var Shot;
 
                             thumbnailGrid.prepend(thumbnail.el);
 
+                            $(thumbnail).on('delete', function () {
+                                thumbnail.el.remove();
+
+                                thumbnail = null;
+                            });
+
                             thumbnail.save().done(function (data) {
                                 progressBar.set(100, function () {
                                     var image = $('<img/>');
@@ -154,6 +188,8 @@ var Shot;
                                             thumbnail.render();
                                         });
                                     }).prependTo(thumbnail.el.find('.container')).prop('src', data.path);
+
+                                    editMode.push(thumbnail);
                                 });
                             }).progress(function (data) {
                                 progressBar.set(data);
@@ -165,7 +201,6 @@ var Shot;
                                 console.log('fail');
                             });
 
-                            thumbnails.push(thumbnail);
                             thumbnailQueue.push(thumbnail);
                         }
                     });
@@ -241,13 +276,13 @@ var Shot;
 
                         thumbnailGrid.append(thumbnail.render().el);
 
-                        editMode.push(thumbnail);
-
                         $(thumbnail).on('delete', function () {
                             thumbnail.el.remove();
 
                             thumbnail = null;
                         });
+
+                        editMode.push(thumbnail);
                     });
                 }
             };
@@ -351,7 +386,7 @@ var Shot;
             function Index() {
             }
             Index.prototype.index = function () {
-                var thumbnailGrid = $('.thumbnail-grid'), albums = [], editMode = new Shot.EditMode();
+                var thumbnailGrid = $('.thumbnail-grid'), editMode = new Shot.EditMode();
 
                 if (SHOT.albums) {
                     SHOT.albums.forEach(function (albumData) {
@@ -361,7 +396,11 @@ var Shot;
 
                         thumbnailGrid.prepend(album.render().el);
 
-                        albums.push(album);
+                        $(album).on('delete', function () {
+                            album.el.remove();
+
+                            album = null;
+                        });
 
                         editMode.push(album);
                     });
@@ -451,7 +490,55 @@ var Shot;
             $('body').append(this.el);
         }
         EditMode.prototype.edit = function () {
-            var modal = $(Mustache.render($('#template-edit-mode-edit').html(), {}));
+            var _this = this;
+            var modal, selected = [];
+
+            this.editables.forEach(function (editable) {
+                if (editable.isSelected()) {
+                    selected.push(editable);
+                }
+            });
+
+            if (!selected) {
+                return this;
+            }
+
+            modal = $(Mustache.render($('#template-edit-mode-edit').html(), {
+                count: selected.length,
+                image: this.type === 'image',
+                album: this.type === 'album'
+            }));
+
+            modal.on('submit', 'form', function (e) {
+                var ids = [], title = modal.find(':input[name="title"]').val();
+
+                e.preventDefault();
+
+                selected.forEach(function (editable) {
+                    ids.push(editable.data.id);
+
+                    editable.data.title = title;
+
+                    editable.render().select(true);
+                });
+
+                $.post(SHOT.rootPath + 'ajax/save' + (_this.type === 'image' ? 'Images' : 'Albums'), {
+                    title: title,
+                    ids: ids
+                });
+
+                modal.remove();
+
+                _this.el.show();
+            });
+
+            modal.on('click', '.cancel', function (e) {
+                e.preventDefault();
+
+                modal.remove();
+
+                _this.el.show();
+            });
 
             modal.appendTo('body').show();
 
@@ -462,27 +549,38 @@ var Shot;
 
         EditMode.prototype.delete = function () {
             var _this = this;
-            var modal = $(Mustache.render($('#template-edit-mode-delete').html(), {}));
+            var modal, selected = [];
+
+            this.editables.forEach(function (editable) {
+                if (editable.isSelected()) {
+                    selected.push(editable);
+                }
+            });
+
+            if (!selected) {
+                return this;
+            }
+
+            modal = $(Mustache.render($('#template-edit-mode-delete').html(), {
+                count: selected.length,
+                image: this.type === 'image',
+                album: this.type === 'album'
+            }));
 
             modal.on('submit', 'form', function (e) {
                 var ids = [];
 
                 e.preventDefault();
 
-                _this.editables.slice(0).forEach(function (editable) {
-                    if (editable.isSelected()) {
-                        ids.push(editable.data.id);
+                selected.forEach(function (editable) {
+                    ids.push(editable.data.id);
 
-                        _this.editables.splice(_this.editables.indexOf(editable), 1);
+                    _this.editables.splice(_this.editables.indexOf(editable), 1);
 
-                        $(editable).trigger('delete');
-                    }
+                    $(editable).trigger('delete');
                 });
 
-                console.log(_this.editables[0] instanceof Shot.Models.Thumbnail);
-                console.log(_this.editables[0] instanceof Shot.Models.Album);
-
-                $.post(SHOT.rootPath + 'ajax/delete', {
+                $.post(SHOT.rootPath + 'ajax/delete' + (_this.type === 'image' ? 'Images' : 'Albums'), {
                     ids: ids
                 });
 
@@ -509,6 +607,14 @@ var Shot;
         EditMode.prototype.push = function (editable) {
             var _this = this;
             this.editables.push(editable);
+
+            if (editable instanceof Shot.Models.Thumbnail) {
+                this.type = 'image';
+            }
+
+            if (editable instanceof Shot.Models.Album) {
+                this.type = 'album';
+            }
 
             $(editable).on('click', function (e) {
                 if (_this.active) {
@@ -589,7 +695,7 @@ var Shot;
                 this.template = $('#template-album').html();
             }
             Album.prototype.render = function () {
-                var el = $(Mustache.render(this.template, this.data));
+                var el = $(Mustache.render(this.template, this.data, {}));
 
                 if (this.el) {
                     this.el.replaceWith(el);

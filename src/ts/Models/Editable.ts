@@ -5,7 +5,7 @@ module Shot {
 		 */
 		export class Editable {
 			el: JQuery;
-			data: { id?: number };
+			data: { id?: number; title?: string };
 
 			private selected = false;
 
@@ -30,7 +30,7 @@ module Shot {
 			/**
 			 * Select
 			 */
-			select(selected:boolean): Editable {
+			select(selected: boolean): Editable {
 				this.selected = selected;
 
 				this.el.toggleClass('selected', selected);

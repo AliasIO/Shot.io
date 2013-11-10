@@ -9,9 +9,17 @@
 						<fieldset>
 							<legend>Are you sure?</legend>
 
+							{{#image}}
 							<p>
 								The selected images will be permanently deleted from all albums.
 							</p>
+							{{/image}}
+
+							{{#album}}
+							<p>
+								The selected albums will be deleted. Images will not be deleted.
+							</p>
+							{{/album}}
 
 							<div class="row">
 								<div class="small-6 columns">
@@ -19,7 +27,7 @@
 								</div>
 
 								<div class="small-6 columns">
-									<button class="cancel secondary expand"><i class="fa fa-times"></i> Cancel</button>
+									<button type="button" class="cancel secondary expand"><i class="fa fa-times"></i> Cancel</button>
 								</div>
 							</div>
 						</fieldset>

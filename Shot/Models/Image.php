@@ -40,6 +40,12 @@ class Image extends \Swiftlet\Model
 	protected $height;
 
 	/**
+	 * Properties
+	 * @var array
+	 */
+	protected $properties;
+
+	/**
 	 * Title
 	 * @var string
 	 */
@@ -96,7 +102,7 @@ class Image extends \Swiftlet\Model
 	}
 
 	/**
-	 * Save
+	 * Save image
 	 * @return Image
 	 * @throws \Swiftlet\Exception
 	 */
@@ -120,6 +126,7 @@ class Image extends \Swiftlet\Model
 				');
 
 			$sth->bindParam('id',         $this->id,     \PDO::PARAM_INT);
+			$sth->bindParam('filename',   $this->filename);
 			$sth->bindParam('title',      $this->title);
 			$sth->bindParam('width',      $this->width,  \PDO::PARAM_INT);
 			$sth->bindParam('height',     $this->height, \PDO::PARAM_INT);
@@ -158,6 +165,42 @@ class Image extends \Swiftlet\Model
 	}
 
 	/**
+	 * Delete image
+	 * @throws \Swiftlet\Exception
+	 */
+	public function delete()
+	{
+		if ( !$this->id ) {
+			return;
+		}
+
+		$dbh = $this->app->getLibrary('pdo')->getHandle();
+
+		if ( $this->id ) {
+			$sth = $dbh->prepare('
+				DELETE
+				FROM images WHERE
+					id = :id
+				LIMIT 1
+				');
+
+			$sth->bindParam('id', $this->id, \PDO::PARAM_INT);
+
+			$sth->execute();
+		}
+
+		foreach ( self::$imageSizes as $size ) {
+			unlink(self::$imagePath . $size . '/' . $this->filename);
+		}
+
+		unlink(self::$imagePath .              $this->filename);
+		unlink(self::$imagePath . 'preview/' . $this->filename);
+		unlink(self::$imagePath . 'thumb/'   . $this->filename);
+
+		$this->id = null;
+	}
+
+	/**
 	 * Load an image
 	 * @param integer $id
 	 * @return Image
@@ -185,11 +228,12 @@ class Image extends \Swiftlet\Model
 			throw new \Swiftlet\Exception('Image does not exist', self::EXCEPTION_NOT_FOUND);
 		}
 
-		$this->id       = $result->id;
-		$this->title    = $result->title;
-		$this->filename = $result->filename;
-		$this->width    = $result->width;
-		$this->height   = $result->height;
+		$this->id         = $result->id;
+		$this->title      = $result->title;
+		$this->filename   = $result->filename;
+		$this->width      = $result->width;
+		$this->height     = $result->height;
+		$this->properties = unserialize($result->properties);
 
 		return $this;
 	}
