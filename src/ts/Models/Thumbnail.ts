@@ -6,7 +6,7 @@ module Shot {
 		export class Thumbnail extends Editable {
 			private template: string;
 
-			constructor(public data: { id?: number; title?: string; path?: string; link?: string; file?: any; formData?: any }) {
+			constructor(public data: { id?: number; title?: string; path?: string; link?: string; file?: any; formData?: any; pending?: boolean; error?: boolean }) {
 				super();
 
 				this.template = $('#template-thumbnail').html();
@@ -26,6 +26,8 @@ module Shot {
 
 				super.render();
 
+				this.select(this.isSelected());
+
 				return this;
 			}
 
@@ -34,6 +36,11 @@ module Shot {
 			 */
 			save(): JQueryDeferred<any> {
 				var deferred = $.Deferred();
+
+				this.data.pending = true;
+				this.data.error = false;
+
+				this.render();
 
 				if ( this.data.id ) {
 					// TODO
@@ -64,10 +71,15 @@ module Shot {
 					.done((data) => {
 						this.data.id = data.id;
 						this.data.path = data.path;
+						this.data.pending = false;
+						this.data.error = false;
 
 						deferred.resolve(data);
 					})
 					.fail((e) => {
+						this.data.pending = false;
+						this.data.error = true;
+
 						deferred.reject(e);
 					});
 				}

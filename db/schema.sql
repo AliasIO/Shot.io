@@ -6,6 +6,7 @@ CREATE TABLE images (
 	title      TEXT        NULL,
 	width      INTEGER NOT NULL,
 	height     INTEGER NOT NULL,
+	thumb_crop TEXT    NOT NULL,
 	properties TEXT        NULL
 );
 

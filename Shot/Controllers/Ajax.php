@@ -106,8 +106,8 @@ class Ajax extends \Swiftlet\Controller
 						$image = $this->app->getModel('image');
 
 						$image
-							->create($filename)
 							->setTitle($title ? $title : basename($file['name']))
+							->create($filename)
 							->save();
 
 						$album->addImage($image);
@@ -147,9 +147,11 @@ class Ajax extends \Swiftlet\Controller
 					try {
 						$album = $this->app->getModel('album')->load($id);
 
-						$album
-							->setTitle($title)
-							->save();
+						if ( $title ) {
+							$album->setTitle($title);
+						}
+
+						$album->save();
 					} catch ( \Swiftlet\Exception $e ) { }
 				}
 			}
@@ -166,17 +168,24 @@ class Ajax extends \Swiftlet\Controller
 		header('Content-Type: application/json');
 
 		if ( !empty($_POST) ) {
-			$ids   = !empty($_POST['ids'])   ? $_POST['ids']   : array();
-			$title = !empty($_POST['title']) ? $_POST['title'] : '';
+			$ids       = !empty($_POST['ids'])       ? $_POST['ids']       : array();
+			$title     = !empty($_POST['title'])     ? $_POST['title']     : '';
+			$thumbCrop = !empty($_POST['thumbCrop']) ? $_POST['thumbCrop'] : '';
 
 			if ( is_array($ids) && $ids ) {
 				foreach ( $ids as $id ) {
 					try {
 						$image = $this->app->getModel('image')->load($id);
 
-						$image
-							->setTitle($title)
-							->save();
+						if ( $title ) {
+							$image->setTitle($title);
+						}
+
+						if ( $thumbCrop ) {
+							$image->exportThumbnail($thumbCrop);
+						}
+
+						$image->save();
 					} catch ( \Swiftlet\Exception $e ) { }
 				}
 			}

@@ -11,6 +11,10 @@ then
 	rm db/db.sdb
 fi
 
-find log -name '*.log' -delete
+find log -type f -name '*.log' -delete
 
-find public/photos -name '*.jpg' -o -name "*.png" -o -name "*.gif" -o -name "*.bmp" -delete
+find public/photos -type f \
+	-name '*.jpg' -delete -o \
+	-name "*.png" -delete -o \
+	-name "*.gif" -delete -o \
+	-name "*.bmp" -delete

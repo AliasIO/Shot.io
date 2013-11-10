@@ -76,6 +76,10 @@ $thumbnail-size: emCalc(480px)
 
 @import "font-awesome/font-awesome"
 
+@-moz-document url-prefix()
+	img:-moz-loading
+		visibility: hidden
+
 html
 	background-color: $body-bg
 	height: 100%
@@ -113,8 +117,12 @@ form
 	max-width: 600px
 
 fieldset
+	padding-bottom: 0
 	padding-left: 0
 	padding-right: 0
+
+	& .row:first-child
+		margin-top: -1.25em !important
 
 button
 	background-image: none
@@ -323,8 +331,6 @@ li
 					top: 0
 
 				li
-					border-left: 1px solid rgba(255, 255, 255, .2)
-					border-right: 1px solid rgba(0, 0, 0, .2)
 					color: #000
 					display: table-cell
 					font-size: 13px
@@ -338,14 +344,7 @@ li
 					white-space: nowrap
 					width: 100%
 
-					&:first-child
-						border-left: none
-
-					&:last-child
-						border-right: none
-
-					&.edit
-						cursor: pointer
+					&.icon
 						padding: 0
 						text-align: center
 						width: 35px
@@ -360,7 +359,6 @@ li
 
 				&:before
 					opacity: .9
-
 
 	img, canvas
 		position: absolute

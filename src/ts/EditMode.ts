@@ -110,25 +110,52 @@ module Shot {
 
 			modal.on('submit', 'form', (e) => {
 				var
-					ids: Array<number> = [],
-					title = modal.find(':input[name="title"]').val();
+					title = modal.find(':input[name="title"]').val(),
+					thumbCrop = modal.find(':input[name="thumb-crop"]:checked').val(),
+					data: { ids: Array<number>; title: string; thumbCrop?: string } = {
+						ids: [],
+						title: title
+					};
 
 				e.preventDefault();
 
 				selected.forEach((editable) => {
-					ids.push(editable.data.id);
+					data.ids.push(editable.data.id);
 
-					editable.data.title = title;
+					editable.data.pending = true;
+					editable.data.error   = false;
 
-					editable
-						.render()
-						.select(true);
+					if ( title ) {
+						editable.data.title = title;
+					}
+
+					editable.render();
 				});
 
-				$.post(SHOT.rootPath + 'ajax/save' + ( this.type === 'image' ? 'Images' : 'Albums' ), {
-					title: title,
-					ids: ids
-				});
+				if ( this.type === 'image' ) {
+					data.thumbCrop = thumbCrop;
+				}
+
+				$.post(SHOT.rootPath + 'ajax/save' + ( this.type === 'image' ? 'Images' : 'Albums' ), data)
+					.done(() => {
+						selected.forEach((editable) => {
+							if ( this.type === 'image' ) {
+								editable.data.path = editable.data.path.replace(/\?[a-z]+$/, '?' + thumbCrop)
+							}
+
+							editable.data.pending = false;
+
+							editable.render();
+						});
+					})
+					.fail(() => {
+						selected.forEach((editable) => {
+							editable.data.pending = false;
+							editable.data.error   = true;
+
+							editable.render();
+						});
+					});
 
 				modal.remove();
 
@@ -143,7 +170,13 @@ module Shot {
 				this.el.show();
 			});
 
-			modal.appendTo('body').show();
+			console.log($(document).scrollTop());
+
+			modal
+				.appendTo('body')
+				.show()
+				.find('.modal-content')
+				.css({ marginTop: $(document).scrollTop() + 'px' });
 
 			this.el.hide();
 
@@ -205,7 +238,11 @@ module Shot {
 				this.el.show();
 			});
 
-			modal.appendTo('body').show();
+			modal
+				.appendTo('body')
+				.show()
+				.find('.modal-content')
+				.css({ marginTop: $(document).scrollTop() + 'px' });
 
 			this.el.hide();
 

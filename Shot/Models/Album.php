@@ -22,6 +22,12 @@ class Album extends \Swiftlet\Model
 	protected $filename;
 
 	/**
+	 * Thumbnail crop position
+	 * @var string
+	 */
+	protected $thumbCrop;
+
+	/**
 	 * Title
 	 * @var string
 	 */
@@ -107,7 +113,8 @@ class Album extends \Swiftlet\Model
 		$sth = $dbh->prepare('
 			SELECT
 				albums.*,
-				images.filename AS filename
+				images.filename,
+				images.thumb_crop
 			FROM      albums
 			LEFT JOIN albums_images ON albums.id = albums_images.album_id
 			LEFT JOIN images ON albums_images.image_id = images.id AND albums.cover_image_id = images.id
@@ -126,15 +133,17 @@ class Album extends \Swiftlet\Model
 			throw new \Swiftlet\Exception('Album does not exist', self::EXCEPTION_NOT_FOUND);
 		}
 
-		$this->id       = $result->id;
-		$this->title    = $result->title;
-		$this->filename = $result->filename;
+		$this->id        = $result->id;
+		$this->title     = $result->title;
+		$this->filename  = $result->filename;
+		$this->thumbCrop = $result->thumb_crop;
 
 		// If no cover image is set get the first image in the album
 		if ( !$this->filename ) {
 			$sth = $dbh->prepare('
 				SELECT
-					images.filename
+					images.filename,
+					images.thumb_crop
 				FROM       albums_images
 				INNER JOIN images ON albums_images.image_id = images.id
 				WHERE
@@ -150,7 +159,8 @@ class Album extends \Swiftlet\Model
 			$result = $sth->fetchObject();
 
 			if ( $result ) {
-				$this->filename = $result->filename;
+				$this->filename  = $result->filename;
+				$this->thumbCrop = $result->thumb_crop;
 			}
 		}
 
@@ -197,7 +207,7 @@ class Album extends \Swiftlet\Model
 	 */
 	public function getFilePath()
 	{
-		return $this->filename ? $this->app->getRootPath() . 'photos/thumb/' . $this->filename : null;
+		return $this->filename ? $this->app->getRootPath() . 'photos/thumb/' . $this->filename . '?' . $this->thumbCrop : null;
 	}
 }
 

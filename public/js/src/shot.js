@@ -510,21 +510,47 @@ var Shot;
             }));
 
             modal.on('submit', 'form', function (e) {
-                var ids = [], title = modal.find(':input[name="title"]').val();
+                var title = modal.find(':input[name="title"]').val(), thumbCrop = modal.find(':input[name="thumb-crop"]:checked').val(), data = {
+                    ids: [],
+                    title: title
+                };
 
                 e.preventDefault();
 
                 selected.forEach(function (editable) {
-                    ids.push(editable.data.id);
+                    data.ids.push(editable.data.id);
 
-                    editable.data.title = title;
+                    editable.data.pending = true;
+                    editable.data.error = false;
 
-                    editable.render().select(true);
+                    if (title) {
+                        editable.data.title = title;
+                    }
+
+                    editable.render();
                 });
 
-                $.post(SHOT.rootPath + 'ajax/save' + (_this.type === 'image' ? 'Images' : 'Albums'), {
-                    title: title,
-                    ids: ids
+                if (_this.type === 'image') {
+                    data.thumbCrop = thumbCrop;
+                }
+
+                $.post(SHOT.rootPath + 'ajax/save' + (_this.type === 'image' ? 'Images' : 'Albums'), data).done(function () {
+                    selected.forEach(function (editable) {
+                        if (_this.type === 'image') {
+                            editable.data.path = editable.data.path.replace(/\?[a-z]+$/, '?' + thumbCrop);
+                        }
+
+                        editable.data.pending = false;
+
+                        editable.render();
+                    });
+                }).fail(function () {
+                    selected.forEach(function (editable) {
+                        editable.data.pending = false;
+                        editable.data.error = true;
+
+                        editable.render();
+                    });
                 });
 
                 modal.remove();
@@ -540,7 +566,9 @@ var Shot;
                 _this.el.show();
             });
 
-            modal.appendTo('body').show();
+            console.log($(document).scrollTop());
+
+            modal.appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
 
             this.el.hide();
 
@@ -597,7 +625,7 @@ var Shot;
                 _this.el.show();
             });
 
-            modal.appendTo('body').show();
+            modal.appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
 
             this.el.hide();
 
@@ -676,15 +704,25 @@ var Shot;
                     var _this = this;
                     var deferred = $.Deferred();
 
+                    this.data.pending = true;
+                    this.data.error = false;
+
+                    this.render();
+
                     if (this.id) {
                     } else {
                         $.post(SHOT.rootPath + 'ajax/saveAlbum', {
                             title: this.data.title
                         }).done(function (data) {
                             _this.data.id = data.id;
+                            _this.data.pending = false;
+                            _this.data.error = false;
 
                             deferred.resolve(data);
                         }).fail(function (e) {
+                            _this.data.pending = false;
+                            _this.data.error = true;
+
                             deferred.reject(e);
                         });
                     }
@@ -704,6 +742,8 @@ var Shot;
                 this.el = el;
 
                 _super.prototype.render.call(this);
+
+                this.select(this.isSelected());
 
                 return this;
             };
@@ -1039,12 +1079,19 @@ var Shot;
 
                 _super.prototype.render.call(this);
 
+                this.select(this.isSelected());
+
                 return this;
             };
 
             Thumbnail.prototype.save = function () {
                 var _this = this;
                 var deferred = $.Deferred();
+
+                this.data.pending = true;
+                this.data.error = false;
+
+                this.render();
 
                 if (this.data.id) {
                 } else {
@@ -1072,9 +1119,14 @@ var Shot;
                     }).done(function (data) {
                         _this.data.id = data.id;
                         _this.data.path = data.path;
+                        _this.data.pending = false;
+                        _this.data.error = false;
 
                         deferred.resolve(data);
                     }).fail(function (e) {
+                        _this.data.pending = false;
+                        _this.data.error = true;
+
                         deferred.reject(e);
                     });
                 }

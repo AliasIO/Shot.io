@@ -46,6 +46,12 @@ class Image extends \Swiftlet\Model
 	protected $properties;
 
 	/**
+	 * Thumbnail crop position
+	 * @var string
+	 */
+	protected $thumbCrop;
+
+	/**
 	 * Title
 	 * @var string
 	 */
@@ -78,20 +84,19 @@ class Image extends \Swiftlet\Model
 	 * @param string $filename
 	 * @return Image
 	 */
-	public function create($filename)
+	public function create($filename, $thumbCrop = 'smart')
 	{
 		$this->filename = $filename;
 
-		$this->title = basename($filename);
-
-		$this->image = new \Imagick(self::$imagePath . $filename);
+		$this->loadImage();
 
 		$this->properties = $this->image->getImageProperties();
 
 		$this
 			->autoRotate()
 			->exportSizes()
-			->exportThumbnails();
+			->exportPreviewThumbnail()
+			->exportThumbnail($thumbCrop);
 
 		$geometry = $this->image->getImageGeometry();
 
@@ -119,6 +124,7 @@ class Image extends \Swiftlet\Model
 					title      = :title,
 					width      = :width,
 					height     = :height,
+					thumb_crop = :thumb_crop,
 					properties = :properties
 				WHERE
 					id = :id
@@ -130,6 +136,7 @@ class Image extends \Swiftlet\Model
 			$sth->bindParam('title',      $this->title);
 			$sth->bindParam('width',      $this->width,  \PDO::PARAM_INT);
 			$sth->bindParam('height',     $this->height, \PDO::PARAM_INT);
+			$sth->bindParam('thumb_crop', $this->thumbCrop);
 			$sth->bindParam('properties', $properties);
 
 			$sth->execute();
@@ -140,12 +147,14 @@ class Image extends \Swiftlet\Model
 					title,
 					width,
 					height,
+					thumb_crop,
 					properties
 				) VALUES (
 					:filename,
 					:title,
 					:width,
 					:height,
+					:thumb_crop,
 					:properties
 				)
 				');
@@ -154,6 +163,7 @@ class Image extends \Swiftlet\Model
 			$sth->bindParam('title',      $this->title);
 			$sth->bindParam('width',      $this->width,  \PDO::PARAM_INT);
 			$sth->bindParam('height',     $this->height, \PDO::PARAM_INT);
+			$sth->bindParam('thumb_crop', $this->thumbCrop);
 			$sth->bindParam('properties', $properties);
 
 			$sth->execute();
@@ -233,6 +243,7 @@ class Image extends \Swiftlet\Model
 		$this->filename   = $result->filename;
 		$this->width      = $result->width;
 		$this->height     = $result->height;
+		$this->thumbCrop  = $result->thumb_crop;
 		$this->properties = unserialize($result->properties);
 
 		return $this;
@@ -287,11 +298,47 @@ class Image extends \Swiftlet\Model
 			}
 
 			if ( in_array($size, array('thumb', 'preview')) ) {
-				return $this->app->getRootPath() . 'photos/' . $size . '/' . $this->filename;
+				return $this->app->getRootPath() . 'photos/' . $size . '/' . $this->filename . '?' . $this->thumbCrop;
 			}
 		}
 
 		return $this->app->getRootPath() . 'photos/' . $this->filename;
+	}
+
+	/**
+	 * Export thumbnail
+	 * @param string $thumbCrop
+	 * @return Image
+	 */
+	public function exportThumbnail($thumbCrop)
+	{
+		$this->thumbCrop = $thumbCrop;
+
+		switch ( $thumbCrop ) {
+			case 'smart';
+				$this->exportSmartThumbnail();
+
+				break;
+			case 'centered';
+				$this->exportCenteredThumbnail();
+
+				break;
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Load image
+	 * &return Image
+	 */
+	protected function loadImage()
+	{
+		if ( !( $this->image instanceof \Imagick ) ) {
+			$this->image = new \Imagick(self::$imagePath . $this->filename);
+		}
+
+		return $this;
 	}
 
 	/**
@@ -300,6 +347,8 @@ class Image extends \Swiftlet\Model
 	 */
 	protected function autoRotate()
 	{
+		$this->loadImage();
+
 		$orientation = $this->image->getImageOrientation();
 
 		switch ( $orientation ) {
@@ -319,6 +368,8 @@ class Image extends \Swiftlet\Model
 
 		$this->image->setImageOrientation(\Imagick::ORIENTATION_TOPLEFT);
 
+		$this->image->writeImage(self::$imagePath . $this->filename);
+
 		return $this;
 	}
 
@@ -328,6 +379,8 @@ class Image extends \Swiftlet\Model
 	 */
 	protected function exportSizes()
 	{
+		$this->loadImage();
+
 		$geometry = $this->image->getImageGeometry();
 
 		foreach ( self::$imageSizes as $imageSize ) {
@@ -339,21 +392,10 @@ class Image extends \Swiftlet\Model
 
 			$image->resizeImage($imageSize, $imageSize, \Imagick::FILTER_LANCZOS, 0.9, true);
 
+			$image->setImageOrientation(\Imagick::ORIENTATION_TOPLEFT);
+
 			$image->writeImage(self::$imagePath . $imageSize . '/' . $this->filename);
 		}
-
-		return $this;
-	}
-
-	/**
-	 * Generate thumbnails
-	 * @return Image
-	 */
-	protected function exportThumbnails()
-	{
-		$this->exportPreviewThumbnail();
-		$this->exportSmartThumbnail();
-		//$this->exportCenteredThumbnail();
 
 		return $this;
 	}
@@ -385,11 +427,15 @@ class Image extends \Swiftlet\Model
 	 */
 	protected function exportPreviewThumbnail()
 	{
+		$this->loadImage();
+
 		$thumbnail = clone($this->image);
 
 		$thumbnail->setImageCompressionQuality(80);
 
 		$this->scaleThumbnail($thumbnail, 100);
+
+		$thumbnail->setImageOrientation(\Imagick::ORIENTATION_TOPLEFT);
 
 		$thumbnail->writeImage(self::$imagePath . 'preview/' . $this->filename);
 
@@ -402,6 +448,8 @@ class Image extends \Swiftlet\Model
 	 */
 	protected function exportSmartThumbnail()
 	{
+		$this->loadImage();
+
 		$thumbnail = clone($this->image);
 
 		$this->scaleThumbnail($thumbnail);
@@ -472,6 +520,8 @@ class Image extends \Swiftlet\Model
 			$thumbnail->setImagePage(self::$thumbnailSize, self::$thumbnailSize, 0, 0);
 		}
 
+		$thumbnail->setImageOrientation(\Imagick::ORIENTATION_TOPLEFT);
+
 		$thumbnail->writeImage(self::$imagePath . 'thumb/' . $this->filename);
 
 		return $this;
@@ -483,6 +533,8 @@ class Image extends \Swiftlet\Model
 	 */
 	protected function exportCenteredThumbnail()
 	{
+		$this->loadImage();
+
 		$thumbnail = clone($this->image);
 
 		$this->scaleThumbnail($thumbnail);
@@ -490,10 +542,12 @@ class Image extends \Swiftlet\Model
 		$geometry = $thumbnail->getImageGeometry();
 
 		if ( $geometry['width'] != $geometry['height'] ) {
-			$thumbnail->cropImage(self::$thumbnailSize, self::$thumbnailSize, ( self::$thumbnailSize - $geometry['width'] ) / 2, ( self::$thumbnailSize - $geometry['height'] ) / 2);
+			$thumbnail->cropImage(self::$thumbnailSize, self::$thumbnailSize, ( $geometry['width'] - self::$thumbnailSize ) / 2, ( $geometry['height'] - self::$thumbnailSize ) / 2);
 
 			$thumbnail->setImagePage(self::$thumbnailSize, self::$thumbnailSize, 0, 0);
 		}
+
+		$thumbnail->setImageOrientation(\Imagick::ORIENTATION_TOPLEFT);
 
 		$thumbnail->writeImage(self::$imagePath . 'thumb/' . $this->filename);
 

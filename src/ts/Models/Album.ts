@@ -6,7 +6,7 @@ module Shot {
 		export class Album extends Editable {
 			private template: string;
 
-			constructor(public data: { id?: number; link?: string }) {
+			constructor(public data: { id?: number; link?: string; pending?: boolean; error?: boolean }) {
 				super();
 
 				this.template = $('#template-album').html();
@@ -26,6 +26,8 @@ module Shot {
 
 				super.render();
 
+				this.select(this.isSelected());
+
 				return this;
 			}
 
@@ -35,6 +37,11 @@ module Shot {
 			save = function(): JQueryDeferred<any> {
 				var deferred = $.Deferred();
 
+				this.data.pending = true;
+				this.data.error = false;
+
+				this.render();
+
 				if ( this.id ) {
 					// TODO
 				} else {
@@ -43,10 +50,15 @@ module Shot {
 					})
 					.done((data) => {
 						this.data.id = data.id;
+						this.data.pending = false;
+						this.data.error = false;
 
 						deferred.resolve(data);
 					})
 					.fail((e) => {
+						this.data.pending = false;
+						this.data.error = true;
+
 						deferred.reject(e);
 					});
 				}

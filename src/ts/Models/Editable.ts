@@ -5,7 +5,7 @@ module Shot {
 		 */
 		export class Editable {
 			el: JQuery;
-			data: { id?: number; title?: string };
+			data: { id?: number; title?: string; path?: string; pending?: boolean; error?: boolean };
 
 			private selected = false;
 
