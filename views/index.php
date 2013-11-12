@@ -12,5 +12,6 @@
 
 <?php include 'views/templates/album.php' ?>
 <?php include 'views/templates/edit/albums.php' ?>
+<?php include 'views/templates/edit/albums/upload.php' ?>
 
 <?php include 'footer.php' ?>

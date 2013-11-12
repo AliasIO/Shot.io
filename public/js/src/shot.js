@@ -232,6 +232,8 @@ var Shot;
                     modal.on('submit', 'form', function (e) {
                         var ids = [], selection = multiEdit.getSelection(), title = modal.find(':input[name="title"]').val();
 
+                        e.preventDefault();
+
                         selection.forEach(function (album) {
                             ids.push(album.data.id);
 
@@ -277,6 +279,8 @@ var Shot;
 
                     modal.on('submit', 'form', function (e) {
                         var ids = [], selection = multiEdit.getSelection();
+
+                        e.preventDefault();
 
                         selection.forEach(function (album) {
                             ids.push(album.data.id);
