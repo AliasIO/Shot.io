@@ -6,7 +6,7 @@ module Shot {
 		export class Album extends Editable {
 			private template: string;
 
-			constructor(public data: { id?: number; link?: string; pending?: boolean; error?: boolean }) {
+			constructor(public data: { id?: number; title?: string; link?: string; pending?: boolean; error?: boolean }) {
 				super();
 
 				this.template = $('#template-album').html();

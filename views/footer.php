@@ -1,4 +1,3 @@
-		<?php include 'templates/edit-mode.php' ?>
 		<?php include 'views/templates/nav-item.php' ?>
 
 		<!--

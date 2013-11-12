@@ -46,9 +46,6 @@
 			</section>
 
 			<section class="top-bar-section">
-				<ul class="right">
-					<li class="divider"></li>
-					<li><a href="<?= $this->app->getRootPath() ?>admin"><i class="fa fa-lock"></i> Admin</a></li>
-				</ul>
+				<ul class="right"></ul>
 			</section>
 		</nav>

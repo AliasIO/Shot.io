@@ -9,8 +9,8 @@ module Shot {
 			 */
 			grid(): void {
 				var
-					thumbnailGrid = $('.thumbnail-grid'),
-					editMode = new EditMode<Models.Thumbnail>();
+					thumbnailGrid = $('.thumbnail-grid');
+					//editMode = new EditMode<Models.Thumbnail>();
 
 				if ( SHOT.thumbnails ) {
 					SHOT.thumbnails.forEach((thumbnailData) => {
@@ -26,7 +26,7 @@ module Shot {
 							thumbnail = null;
 						});
 
-						editMode.push(thumbnail);
+						//editMode.push(thumbnail);
 					});
 				}
 			}
@@ -38,7 +38,7 @@ module Shot {
 				var
 					carousel = new Models.Carousel(SHOT.images),
 					id: number,
-					navItem = null;
+					navItem: JQuery;
 
 				carousel.render();
 

@@ -1,4 +1,4 @@
-<script id="template-edit-mode-edit" type="text/template">
+<script id="template-edit-albums-edit" type="text/template">
 	<div class="modal">
 		<div class="modal-background"></div>
 
@@ -16,7 +16,6 @@
 							</div>
 						</fieldset>
 
-						{{#image}}
 						<fieldset>
 							<legend>Thumbnail</legend>
 
@@ -38,7 +37,6 @@
 								</div>
 							</div>
 						</fieldset>
-						{{/image}}
 
 						<fieldset>
 							<div class="row">

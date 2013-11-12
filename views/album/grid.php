@@ -12,5 +12,7 @@
 </div>
 
 <?php include 'views/templates/thumbnail.php' ?>
+<?php include 'views/templates/album.php' ?>
+<?php include 'views/templates/edit/thumbnails.php' ?>
 
 <?php require 'views/footer.php' ?>

@@ -1,8 +1,8 @@
 module Shot {
 	/**
-	 * Edit mode
+	 * Multi edit
 	 */
-	export class EditMode<T extends Models.Editable> {
+	export class MultiEdit<T extends Models.Editable> {
 		private el;
 		private template;
 		private active = false;
@@ -10,16 +10,7 @@ module Shot {
 		private type: string;
 
 		constructor() {
-			var navItem;
-
-			navItem = $(Mustache.render($('#template-nav-item').html(), {
-				text: 'Edit mode',
-				icon: 'wrench',
-				right: true
-			}));
-
-			$('.top-bar .right').prepend(navItem);
-
+			/*
 			navItem.on('click', 'a', () => {
 				this.active = !this.active;
 
@@ -36,8 +27,9 @@ module Shot {
 					this.selectAll(false);
 				}
 			});
+			*/
 
-			this.template = $('#template-edit-mode').html();
+			this.template = $('#template-multi-edit').html();
 
 			this.el = $(Mustache.render(this.template, {}));
 

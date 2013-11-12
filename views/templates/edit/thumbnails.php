@@ -1,4 +1,4 @@
-<script id="template-edit-mode" type="text/template">
+<script id="template-edit-albums" type="text/template">
 	<div id="edit-mode">
 		<div class="row">
 			<div class="large-2 small-6 columns">
@@ -13,7 +13,7 @@
 			</div>
 
 			<div class="large-3 small-6 columns">
-				<button class="albums rename secondary expand"><i class="fa fa-folder"></i> Albums</button>
+				<button class="edit rename secondary expand"><i class="fa fa-folder"></i> Albums</button>
 			</div>
 
 			<div class="large-3 small-6 columns">
@@ -23,32 +23,9 @@
 			<div class="large-1 small-6 columns">
 				<button class="close secondary expand"><i class="fa fa-times"></i></button>
 			</div>
-
-			<!--
-			<div class="large-3 columns">
-				<fieldset>
-					<legend>Rename</legend>
-
-					<div class="row collapse">
-						<div class="small-8 columns">
-							<input type="text" name="title">
-						</div>
-						<div class="small-4 columns">
-							<button class="prefix">Save</button>
-						</div>
-					</div>
-				</fieldset>
-			</div>
-
-			<div class="large-6 columns">
-				<fieldset>
-					<legend>Action</legend>
-				</fieldset>
-			</div>
-			-->
 		</div>
 	</div>
 </script>
 
-<?php include 'views/templates/edit-mode/edit.php' ?>
-<?php include 'views/templates/edit-mode/delete.php' ?>
+<?php include 'views/templates/edit/thumbnails/edit.php' ?>
+<?php include 'views/templates/edit/thumbnails/delete.php' ?>
