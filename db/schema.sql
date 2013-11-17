@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS images;
 
 CREATE TABLE images (
-	id         INTEGER PRIMARY KEY,
+	id         INTEGER PRIMARY KEY AUTOINCREMENT,
 	filename   TEXT    NOT NULL,
 	title      TEXT        NULL,
 	width      INTEGER NOT NULL,
@@ -15,7 +15,7 @@ CREATE UNIQUE INDEX filename ON images ( filename );
 DROP TABLE IF EXISTS albums;
 
 CREATE TABLE albums (
-	id             INTEGER PRIMARY KEY,
+	id             INTEGER PRIMARY KEY AUTOINCREMENT,
 	title          TEXT    NOT NULL,
 	cover_image_id INTEGER     NULL,
 	sort_order     INTEGER     NULL,
