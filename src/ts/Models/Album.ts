@@ -9,6 +9,10 @@ module Shot {
 			constructor(public data: { id?: number; title?: string; link?: string; pending?: boolean; error?: boolean }) {
 				super();
 
+				if ( !this.data.id ) {
+					this.data.pending = true;
+				}
+
 				this.template = $('#template-album').html();
 			}
 
@@ -42,26 +46,23 @@ module Shot {
 
 				this.render();
 
-				if ( this.id ) {
-					// TODO
-				} else {
-					$.post(SHOT.rootPath + 'ajax/saveAlbum', {
-						title: this.data.title
-					})
-					.done((data) => {
-						this.data.id = data.id;
-						this.data.pending = false;
-						this.data.error = false;
+				$.post(SHOT.rootPath + 'ajax/saveAlbum', {
+					id: this.data.id,
+					title: this.data.title
+				})
+				.done((data) => {
+					this.data.id = data.id;
+					this.data.pending = false;
+					this.data.error = false;
 
-						deferred.resolve(data);
-					})
-					.fail((e) => {
-						this.data.pending = false;
-						this.data.error = true;
+					deferred.resolve(data);
+				})
+				.fail((e) => {
+					this.data.pending = false;
+					this.data.error = true;
 
-						deferred.reject(e);
-					});
-				}
+					deferred.reject(e);
+				});
 
 				return deferred;
 			}

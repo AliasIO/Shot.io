@@ -20,7 +20,7 @@ module Shot {
 				this.template = $('#template-carousel').html();
 
 				imagesData.forEach((data) => {
-					data.url  = data.paths[2048];
+					data.urls = data.paths;
 					data.link = SHOT.rootPath + 'album/' + SHOT.album.id + '/' + data.id;
 
 					this.images.push(new Models.Image(data));
@@ -117,7 +117,7 @@ module Shot {
 					el = $(fullScreen).find('img'),
 					img = $('<img>');
 
-				el.prop('src', image.data.url);
+				el.prop('src', image.el.find('img').attr('src'));
 
 				// Load full size image
 				img

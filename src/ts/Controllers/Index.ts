@@ -11,112 +11,54 @@ module Shot {
 				var
 					thumbnailGrid = $('.thumbnail-grid'),
 					albums: Array<Models.Album> = [],
-					navItem: JQuery,
+					navItems: { createAlbum: JQuery; editAlbums: JQuery } = { createAlbum: null, editAlbums: null },
 					editAlbums: JQuery,
 					multiEdit = new MultiEdit<Models.Album>();
 
-				// Nav items
-				/*
-
-				navItems.upload = $(Mustache.render($('#template-nav-item').html(), {
-					text: 'Upload images',
-					icon: 'picture-o',
+				navItems.createAlbum = $(Mustache.render($('#template-nav-item').html(), {
+					text: 'Add album',
+					icon: 'plus-circle',
 					right: true
 				}));
 
-				navItems.upload
+				navItems.createAlbum
 					.on('click', (e) => {
-						var modal = $(Mustache.render($('#template-edit-albums-upload').html(), {}));
+						var modal = $(Mustache.render($('#template-modals-albums-create').html(), {}));
+
+						e.preventDefault();
+
+						$(e.target).blur();
 
 						modal
-							.on('change', ':input[type="file"]', (e: any) => {
+							.on('submit', 'form', (e) => {
 								var
-									thumbnailSize = 480,
-									thumbnailQueue: Models.Thumbnail[] = [],
-									fileTypes = [
-										'image/jpg',
-										'image/jpeg',
-										'image/png',
-										'image/gif',
-										'image/bmp'
-									];
+									title = modal.find(':input[name="title"]').val(),
+									album: Models.Album;
 
-								e.preventDefault();
+								if ( title ) {
+									album = new Models.Album({ title: title });
 
-								$.each(e.target.files, (i, file) => {
-									var
-										thumbnail,
-										progressBar;
+									album
+										.save()
+										.done(() => {
+											album.data.link = SHOT.rootPath + 'album/grid/' + album.data.id;
+											album.data.pending = false;
 
-									if ( file.name && $.inArray(file.type, fileTypes) !== -1 ) {
-										thumbnail   = new Models.Thumbnail({ title: file.name.replace(/\..{1,4}$/, ''), file: file, formData: new FormData() }).render();
-										progressBar = new Models.ProgressBar().render();
+											album.render();
+										})
+										.fail(() => {
+											album.data.pending = false;
+											album.data.error = true;
 
-										thumbnail.data.formData.append('image', file);
-										thumbnail.data.formData.append('albumId', SHOT.album.id);
-
-										thumbnail.el.find('.container').append(progressBar.el);
-
-										thumbnailGrid.prepend(thumbnail.el);
-
-										$(thumbnail).on('delete', () => {
-											thumbnail.el.remove();
-
-											thumbnail = null;
+											album.render();
 										});
 
-										thumbnail.save()
-											.done((data) => {
-												progressBar.set(100, () => {
-													var image = $('<img/>');
+									thumbnailGrid.append(album.render().el);
 
-													image
-														.hide()
-														.on('load', (e) => {
-															// Replace temporary thumbnail with processed image
-															thumbnail.el.find('.temporary').fadeOut('fast', function() {
-																$(this).remove();
-															});
+									multiEdit.push(album);
+								}
 
-															// Remove processing indicator
-															thumbnail.el.find('.processing').fadeOut('fast');
-
-															// Reveal the processed image
-															$(e.target).fadeIn('fast', () => {
-																thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + data.id;
-
-																thumbnail.render();
-															});
-														})
-														.prependTo(thumbnail.el.find('.container'))
-														.prop('src', data.path);
-
-													multiEdit.push(thumbnail);
-												});
-											})
-											.progress((data) => {
-												progressBar.set(data);
-											})
-											.fail((e) => {
-												progressBar.set(0);
-
-												thumbnail.el.find('.container').addClass('error');
-
-												console.log('fail');
-											});
-
-										thumbnailQueue.push(thumbnail);
-									}
-								});
-
-
-								// Pre render all thumbnails, one at a time
-								(function nextThumbnail() {
-									if ( thumbnailQueue.length ) {
-										this.preRender(thumbnailQueue.shift(), () => nextThumbnail());
-									}
-								})();
-
+								modal.remove();
 							})
 							.on('click', '.cancel', (e) => {
 								modal.remove();
@@ -125,20 +67,16 @@ module Shot {
 							.show()
 							.find('.modal-content')
 							.css({ marginTop: $(document).scrollTop() + 'px' });
-
-						e.preventDefault();
 					})
 					.appendTo('.top-bar .right');
 
-				*/
-
-				navItem = $(Mustache.render($('#template-nav-item').html(), {
+				navItems.editAlbums = $(Mustache.render($('#template-nav-item').html(), {
 					text: 'Edit albums',
 					icon: 'pencil',
 					right: true
 				}));
 
-				navItem
+				navItems.editAlbums
 					.on('click', (e) => {
 						e.preventDefault();
 
@@ -147,7 +85,7 @@ module Shot {
 					.appendTo('.top-bar .right');
 
 				// Edit albums
-				editAlbums = $(Mustache.render($('#template-edit-albums').html(), {}));
+				editAlbums = $(Mustache.render($('#template-dock-albums').html(), {}));
 
 				editAlbums
 					.on('click', '.select-all', (e) => {
@@ -173,7 +111,7 @@ module Shot {
 					})
 					.on('click', '.edit', (e) => {
 						var
-							modal = $(Mustache.render($('#template-edit-albums-edit').html(), {})),
+							modal = $(Mustache.render($('#template-modals-albums-edit-selection').html(), {})),
 							selection = multiEdit.getSelection();
 
 						modal
@@ -231,7 +169,7 @@ module Shot {
 					})
 					.on('click', '.delete', (e) => {
 						var
-							modal = $(Mustache.render($('#template-edit-albums-delete').html(), {})),
+							modal = $(Mustache.render($('#template-modals-albums-delete-selection').html(), {})),
 							selection = multiEdit.getSelection();
 
 						e.preventDefault();
@@ -295,8 +233,6 @@ module Shot {
 					})
 					.trigger('change');
 
-				multiEdit.toggle(true);
-
 				if ( SHOT.albums ) {
 					SHOT.albums.forEach((albumData) => {
 						var album = new Models.Album(albumData);
@@ -311,55 +247,6 @@ module Shot {
 					});
 				}
 			}
-
-			/**
-			 * Pre render thumbnail
-			 */
-			/*
-			private preRender = (thumbnail: Models.Thumbnail, callback: () => void) => {
-				var reader = new FileReader();
-
-				callback = typeof callback === 'function' ? callback : () => {};
-
-				// Generate temporary thumbnail
-				reader.onload = (e) => {
-					var image = $('<img/>');
-
-					image.on('load', (e: any) => {
-						var
-							canvas = $('<canvas/>').get(0),
-							size = {
-								x: e.target.width  < e.target.height ? thumbnailSize : e.target.width  * thumbnailSize / e.target.height,
-								y: e.target.height < e.target.width  ? thumbnailSize : e.target.height * thumbnailSize / e.target.width
-								};
-
-						canvas.width  = thumbnailSize;
-						canvas.height = thumbnailSize;
-
-						// Center image on canvas
-						canvas
-							.getContext('2d')
-							.drawImage(e.target, ( canvas.width - size.x ) / 2, ( canvas.height - size.y ) / 2, size.x, size.y);
-
-						$(canvas)
-							.hide()
-							.fadeIn('fast')
-							.addClass('temporary')
-							.prependTo(thumbnail.el.find('.container'));
-
-						callback();
-					});
-
-					image.on('error', () => callback());
-
-					image.prop('src', e.target.result);
-				}
-
-				reader.onerror = () => callback();
-
-				reader.readAsDataURL(thumbnail.data.file);
-			};
-			*/
 		}
 	}
 }

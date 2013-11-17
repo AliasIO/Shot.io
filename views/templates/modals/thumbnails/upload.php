@@ -1,4 +1,4 @@
-<script id="template-edit-albums-upload" type="text/template">
+<script id="template-modals-thumbnails-upload" type="text/template">
 	<div class="modal">
 		<div class="modal-background"></div>
 

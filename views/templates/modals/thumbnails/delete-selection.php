@@ -1,4 +1,4 @@
-<script id="template-edit-albums-delete" type="text/template">
+<script id="template-modals-thumbnails-delete-selection" type="text/template">
 	<div class="modal">
 		<div class="modal-background"></div>
 
@@ -10,7 +10,7 @@
 							<legend>Are you sure you?</legend>
 
 							<p>
-								The selected image will be permanently deleted.
+								The selected images will be permanently deleted.
 							</p>
 
 							<div class="row">

@@ -1,4 +1,4 @@
-<script id="template-edit-albums-delete" type="text/template">
+<script id="template-modals-albums-delete-selection" type="text/template">
 	<div class="modal">
 		<div class="modal-background"></div>
 

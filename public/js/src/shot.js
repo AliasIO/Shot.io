@@ -72,29 +72,330 @@ var Shot;
     (function (Controllers) {
         var Album = (function () {
             function Album() {
+                this.preRender = function (thumbnail, callback) {
+                    var reader = new FileReader(), thumbnailSize = 480;
+
+                    callback = typeof callback === 'function' ? callback : function () {
+                    };
+
+                    reader.onload = function (e) {
+                        var image = $('<img/>');
+
+                        image.on('load', function (e) {
+                            var canvas = $('<canvas/>').get(0), size = {
+                                x: e.target.width < e.target.height ? thumbnailSize : e.target.width * thumbnailSize / e.target.height,
+                                y: e.target.height < e.target.width ? thumbnailSize : e.target.height * thumbnailSize / e.target.width
+                            };
+
+                            canvas.width = thumbnailSize;
+                            canvas.height = thumbnailSize;
+
+                            canvas.getContext('2d').drawImage(e.target, (canvas.width - size.x) / 2, (canvas.height - size.y) / 2, size.x, size.y);
+
+                            $(canvas).hide().fadeIn('fast').addClass('temporary').prependTo(thumbnail.el.find('.container'));
+
+                            callback();
+                        });
+
+                        image.on('error', function () {
+                            return callback();
+                        });
+
+                        image.prop('src', e.target.result);
+                    };
+
+                    reader.onerror = function () {
+                        return callback();
+                    };
+
+                    reader.readAsDataURL(thumbnail.data.file);
+                };
             }
             Album.prototype.grid = function () {
-                var thumbnailGrid = $('.thumbnail-grid');
+                var thumbnailGrid = $('.thumbnail-grid'), thumbnails = [], album = new Shot.Models.Album(SHOT.album), navItems = {
+                    album: null,
+                    editAlbum: null,
+                    editThumbnails: null,
+                    upload: null
+                }, editThumbnails, multiEdit = new Shot.MultiEdit(), preRender = this.preRender;
+
+                navItems.album = $(Mustache.render($('#template-nav-item').html(), {
+                    text: album.data.title,
+                    icon: 'folder',
+                    left: true,
+                    path: SHOT.rootPath + 'album/grid/' + album.data.id
+                }));
+
+                navItems.album.appendTo('.top-bar .left');
+
+                navItems.upload = $(Mustache.render($('#template-nav-item').html(), {
+                    text: 'Add images',
+                    icon: 'plus-circle',
+                    right: true
+                }));
+
+                navItems.upload.on('click', function (e) {
+                    var modal = $(Mustache.render($('#template-modals-thumbnails-upload').html(), {}));
+
+                    modal.on('change', ':input[type="file"]', function (e) {
+                        var thumbnailSize = 480, thumbnailQueue = [], fileTypes = [
+                            'image/jpg',
+                            'image/jpeg',
+                            'image/png',
+                            'image/gif',
+                            'image/bmp'
+                        ];
+
+                        e.preventDefault();
+
+                        $.each(e.target.files, function (i, file) {
+                            var thumbnail, progressBar;
+
+                            if (file.name && $.inArray(file.type, fileTypes) !== -1) {
+                                thumbnail = new Shot.Models.Thumbnail({ title: file.name.replace(/\..{1,4}$/, ''), file: file, formData: new FormData() }).render();
+                                progressBar = new Shot.Models.ProgressBar().render();
+
+                                thumbnail.data.formData.append('image', file);
+                                thumbnail.data.formData.append('albumId', album.data.id);
+
+                                thumbnailGrid.prepend(thumbnail.el);
+
+                                $(thumbnail).on('delete', function () {
+                                    thumbnail.el.remove();
+
+                                    thumbnail = null;
+                                });
+
+                                thumbnail.save().done(function (data) {
+                                    progressBar.set(100, function () {
+                                        var image = $('<img/>');
+
+                                        image.hide().on('load', function (e) {
+                                            thumbnail.el.find('.temporary').fadeOut('fast', function () {
+                                                $(this).remove();
+                                            });
+
+                                            thumbnail.el.find('.processing').fadeOut('fast');
+
+                                            $(e.target).fadeIn('fast', function () {
+                                                thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + album.data.id + '/' + data.id;
+                                                thumbnail.data.pending = false;
+
+                                                thumbnail.render();
+                                            });
+                                        }).prependTo(thumbnail.el.find('.container')).prop('src', data.path);
+                                    });
+                                }).progress(function (data) {
+                                    progressBar.set(data);
+                                }).fail(function (e) {
+                                    thumbnail.data.pending = false;
+                                    thumbnail.data.error = true;
+
+                                    thumbnail.render();
+
+                                    progressBar.set(0);
+                                });
+
+                                thumbnail.el.find('.container').append(progressBar.el);
+
+                                thumbnailQueue.push(thumbnail);
+
+                                multiEdit.push(thumbnail);
+                            }
+                        });
+
+                        (function nextThumbnail() {
+                            if (thumbnailQueue.length) {
+                                preRender(thumbnailQueue.shift(), function () {
+                                    return nextThumbnail();
+                                });
+                            }
+                        })();
+
+                        modal.remove();
+                    }).on('click', '.cancel', function (e) {
+                        modal.remove();
+                    }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
+
+                    e.preventDefault();
+                }).appendTo('.top-bar .right');
+
+                navItems.editThumbnails = $(Mustache.render($('#template-nav-item').html(), {
+                    text: 'Edit images',
+                    icon: 'pencil',
+                    right: true
+                }));
+
+                navItems.editThumbnails.on('click', function (e) {
+                    e.preventDefault();
+
+                    multiEdit.toggle();
+                }).appendTo('.top-bar .right');
+
+                navItems.editAlbum = $(Mustache.render($('#template-nav-item').html(), {
+                    text: 'Edit album',
+                    icon: 'pencil',
+                    right: true
+                }));
+
+                navItems.editAlbum.on('click', function (e) {
+                    var modal = $(Mustache.render($('#template-modals-albums-edit').html(), {}));
+
+                    e.preventDefault();
+
+                    modal.on('submit', 'form', function (e) {
+                        var title = modal.find(':input[name="title"]').val();
+
+                        e.preventDefault();
+
+                        if (title) {
+                            album.data.title = title;
+
+                            navItems.album.find('.text').text(title);
+
+                            document.title = title;
+
+                            album.save();
+                        }
+
+                        modal.remove();
+                    }).on('click', '.cancel', function (e) {
+                        modal.remove();
+                    }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
+                }).appendTo('.top-bar .right');
+
+                editThumbnails = $(Mustache.render($('#template-dock-thumbnails').html(), {}));
+
+                editThumbnails.on('click', '.select-all', function (e) {
+                    e.preventDefault();
+
+                    $(e.target).blur();
+
+                    multiEdit.selectAll(true);
+                }).on('click', '.select-none', function (e) {
+                    e.preventDefault();
+
+                    $(e.target).blur();
+
+                    multiEdit.selectAll(false);
+                }).on('click', '.close', function (e) {
+                    e.preventDefault();
+
+                    $(e.target).blur();
+
+                    multiEdit.toggle(false);
+                }).on('click', '.edit', function (e) {
+                    var modal = $(Mustache.render($('#template-modals-thumbnails-edit-selection').html(), {})), selection = multiEdit.getSelection();
+
+                    modal.on('submit', 'form', function (e) {
+                        var ids = [], selection = multiEdit.getSelection(), title = modal.find(':input[name="title"]').val();
+
+                        e.preventDefault();
+
+                        selection.forEach(function (thumbnail) {
+                            ids.push(thumbnail.data.id);
+
+                            thumbnail.data.pending = true;
+                            thumbnail.data.error = false;
+
+                            if (title) {
+                                thumbnail.data.title = title;
+                            }
+
+                            thumbnail.render();
+                        });
+
+                        $.post(SHOT.rootPath + 'ajax/saveImages', { ids: ids, title: title }).done(function () {
+                            selection.forEach(function (thumbnail) {
+                                thumbnail.data.pending = false;
+
+                                thumbnail.render();
+                            });
+                        }).fail(function () {
+                            selection.forEach(function (thumbnail) {
+                                thumbnail.data.pending = false;
+                                thumbnail.data.error = true;
+
+                                thumbnail.render();
+                            });
+                        });
+
+                        modal.remove();
+                    }).on('click', '.cancel', function (e) {
+                        modal.remove();
+                    }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
+
+                    e.preventDefault();
+
+                    $(e.target).blur();
+                }).on('click', '.delete', function (e) {
+                    var modal = $(Mustache.render($('#template-modals-thumbnails-delete-selection').html(), {})), selection = multiEdit.getSelection();
+
+                    e.preventDefault();
+
+                    $(e.target).blur();
+
+                    modal.on('submit', 'form', function (e) {
+                        var ids = [], selection = multiEdit.getSelection();
+
+                        e.preventDefault();
+
+                        selection.forEach(function (thumbnail) {
+                            ids.push(thumbnail.data.id);
+
+                            thumbnail.el.remove();
+                        });
+
+                        $.post(SHOT.rootPath + 'ajax/deleteImages', { ids: ids });
+
+                        modal.remove();
+                    }).on('click', '.cancel', function (e) {
+                        modal.remove();
+                    }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
+                }).appendTo('body');
+
+                $(multiEdit).on('change', function () {
+                    var selectedCount = multiEdit.getSelection().length;
+
+                    editThumbnails.find('.select-none, .edit, .delete').attr('disabled', !selectedCount);
+
+                    editThumbnails.find('.select-all').attr('disabled', selectedCount === thumbnails.length);
+                }).on('activate', function () {
+                    editThumbnails.stop().css({ bottom: -20, opacity: 0 }).show().animate({ bottom: 0, opacity: 1 });
+                }).on('deactivate', function () {
+                    editThumbnails.stop().animate({ bottom: -20, opacity: 0 }, 'fast');
+
+                    multiEdit.selectAll(false);
+                }).trigger('change');
 
                 if (SHOT.thumbnails) {
                     SHOT.thumbnails.forEach(function (thumbnailData) {
                         var thumbnail = new Shot.Models.Thumbnail(thumbnailData);
 
-                        thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + SHOT.album.id + '/' + thumbnail.data.id;
+                        thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + album.data.id + '/' + thumbnail.data.id;
 
-                        thumbnailGrid.append(thumbnail.render().el);
+                        thumbnailGrid.prepend(thumbnail.render().el);
 
-                        $(thumbnail).on('delete', function () {
-                            thumbnail.el.remove();
+                        thumbnails.push(thumbnail);
 
-                            thumbnail = null;
-                        });
+                        multiEdit.push(thumbnail);
                     });
                 }
             };
 
             Album.prototype.carousel = function () {
-                var carousel = new Shot.Models.Carousel(SHOT.images), id, navItem;
+                var carousel = new Shot.Models.Carousel(SHOT.images), album = new Shot.Models.Album(SHOT.album), id, navItems = {
+                    album: null,
+                    thumbnail: null
+                };
+
+                $(document).foundation('interchange', {
+                    named_queries: {
+                        '1600': 'only screen and (min-width: 1024px)',
+                        '2048': 'only screen and (min-width: 1600px)',
+                        'original': 'only screen and (min-width: 2048px)'
+                    }
+                });
 
                 carousel.render();
 
@@ -102,32 +403,43 @@ var Shot;
                     return a;
                 }));
 
+                navItems.album = $(Mustache.render($('#template-nav-item').html(), {
+                    text: album.data.title.replace(/&amp;/g, '&'),
+                    icon: 'folder',
+                    url: SHOT.rootPath + 'album/grid/' + album.data.id,
+                    left: true
+                }));
+
+                navItems.album.appendTo('.top-bar .left');
+
                 carousel.el.on('change', function (e, image) {
-                    if (navItem) {
-                        navItem.remove();
+                    if (navItems.thumbnail) {
+                        navItems.thumbnail.remove();
                     }
 
-                    navItem = $(Mustache.render($('#template-nav-item').html(), {
+                    navItems.thumbnail = $(Mustache.render($('#template-nav-item').html(), {
                         text: image.data.title.replace(/&amp;/g, '&'),
                         icon: 'picture-o',
-                        url: SHOT.rootPath + 'album/' + SHOT.album.id + '/' + image.data.id,
+                        url: SHOT.rootPath + 'album/carousel/' + album.data.id + '/' + image.data.id,
                         left: true
                     }));
 
-                    $('.top-bar .left').append(navItem);
+                    navItems.thumbnail.appendTo('.top-bar .left');
 
                     if (image.data.id !== id) {
                         id = image.data.id;
 
-                        history.pushState({ id: id }, '', '/album/carousel/' + SHOT.album.id + '/' + id);
+                        history.pushState({ id: id }, '', '/album/carousel/' + album.data.id + '/' + id);
                     }
+
+                    $(document).foundation('interchange', 'reflow');
                 });
+
+                $('#carousel-wrap').append(carousel.el);
 
                 if (id) {
                     carousel.show(id);
                 }
-
-                $('#carousel-wrap').append(carousel.el);
 
                 $(window).on('popstate', function (e) {
                     if (e.originalEvent.state) {
@@ -192,21 +504,63 @@ var Shot;
             function Index() {
             }
             Index.prototype.index = function () {
-                var thumbnailGrid = $('.thumbnail-grid'), albums = [], navItem, editAlbums, multiEdit = new Shot.MultiEdit();
+                var thumbnailGrid = $('.thumbnail-grid'), albums = [], navItems = { createAlbum: null, editAlbums: null }, editAlbums, multiEdit = new Shot.MultiEdit();
 
-                navItem = $(Mustache.render($('#template-nav-item').html(), {
+                navItems.createAlbum = $(Mustache.render($('#template-nav-item').html(), {
+                    text: 'Add album',
+                    icon: 'plus-circle',
+                    right: true
+                }));
+
+                navItems.createAlbum.on('click', function (e) {
+                    var modal = $(Mustache.render($('#template-modals-albums-create').html(), {}));
+
+                    e.preventDefault();
+
+                    $(e.target).blur();
+
+                    modal.on('submit', 'form', function (e) {
+                        var title = modal.find(':input[name="title"]').val(), album;
+
+                        if (title) {
+                            album = new Shot.Models.Album({ title: title });
+
+                            album.save().done(function () {
+                                album.data.link = SHOT.rootPath + 'album/grid/' + album.data.id;
+                                album.data.pending = false;
+
+                                album.render();
+                            }).fail(function () {
+                                album.data.pending = false;
+                                album.data.error = true;
+
+                                album.render();
+                            });
+
+                            thumbnailGrid.append(album.render().el);
+
+                            multiEdit.push(album);
+                        }
+
+                        modal.remove();
+                    }).on('click', '.cancel', function (e) {
+                        modal.remove();
+                    }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
+                }).appendTo('.top-bar .right');
+
+                navItems.editAlbums = $(Mustache.render($('#template-nav-item').html(), {
                     text: 'Edit albums',
                     icon: 'pencil',
                     right: true
                 }));
 
-                navItem.on('click', function (e) {
+                navItems.editAlbums.on('click', function (e) {
                     e.preventDefault();
 
                     multiEdit.toggle();
                 }).appendTo('.top-bar .right');
 
-                editAlbums = $(Mustache.render($('#template-edit-albums').html(), {}));
+                editAlbums = $(Mustache.render($('#template-dock-albums').html(), {}));
 
                 editAlbums.on('click', '.select-all', function (e) {
                     e.preventDefault();
@@ -227,7 +581,7 @@ var Shot;
 
                     multiEdit.toggle(false);
                 }).on('click', '.edit', function (e) {
-                    var modal = $(Mustache.render($('#template-edit-albums-edit').html(), {})), selection = multiEdit.getSelection();
+                    var modal = $(Mustache.render($('#template-modals-albums-edit-selection').html(), {})), selection = multiEdit.getSelection();
 
                     modal.on('submit', 'form', function (e) {
                         var ids = [], selection = multiEdit.getSelection(), title = modal.find(':input[name="title"]').val();
@@ -271,7 +625,7 @@ var Shot;
 
                     $(e.target).blur();
                 }).on('click', '.delete', function (e) {
-                    var modal = $(Mustache.render($('#template-edit-albums-delete').html(), {})), selection = multiEdit.getSelection();
+                    var modal = $(Mustache.render($('#template-modals-albums-delete-selection').html(), {})), selection = multiEdit.getSelection();
 
                     e.preventDefault();
 
@@ -309,8 +663,6 @@ var Shot;
 
                     multiEdit.selectAll(false);
                 }).trigger('change');
-
-                multiEdit.toggle(true);
 
                 if (SHOT.albums) {
                     SHOT.albums.forEach(function (albumData) {
@@ -355,26 +707,28 @@ var Shot;
 
                     this.render();
 
-                    if (this.id) {
-                    } else {
-                        $.post(SHOT.rootPath + 'ajax/saveAlbum', {
-                            title: this.data.title
-                        }).done(function (data) {
-                            _this.data.id = data.id;
-                            _this.data.pending = false;
-                            _this.data.error = false;
+                    $.post(SHOT.rootPath + 'ajax/saveAlbum', {
+                        id: this.data.id,
+                        title: this.data.title
+                    }).done(function (data) {
+                        _this.data.id = data.id;
+                        _this.data.pending = false;
+                        _this.data.error = false;
 
-                            deferred.resolve(data);
-                        }).fail(function (e) {
-                            _this.data.pending = false;
-                            _this.data.error = true;
+                        deferred.resolve(data);
+                    }).fail(function (e) {
+                        _this.data.pending = false;
+                        _this.data.error = true;
 
-                            deferred.reject(e);
-                        });
-                    }
+                        deferred.reject(e);
+                    });
 
                     return deferred;
                 };
+
+                if (!this.data.id) {
+                    this.data.pending = true;
+                }
 
                 this.template = $('#template-album').html();
             }
@@ -412,7 +766,7 @@ var Shot;
                 this.template = $('#template-carousel').html();
 
                 imagesData.forEach(function (data) {
-                    data.url = data.paths[2048];
+                    data.urls = data.paths;
                     data.link = SHOT.rootPath + 'album/' + SHOT.album.id + '/' + data.id;
 
                     _this.images.push(new Shot.Models.Image(data));
@@ -497,7 +851,7 @@ var Shot;
             Carousel.prototype.fullScreen = function (image) {
                 var fullScreen = $('.full-screen').get(0), el = $(fullScreen).find('img'), img = $('<img>');
 
-                el.prop('src', image.data.url);
+                el.prop('src', image.el.find('img').attr('src'));
 
                 img.on('load', function () {
                     el.replaceWith(el);

@@ -1,4 +1,4 @@
-<script id="template-edit-albums" type="text/template">
+<script id="template-dock-thumbnails" type="text/template">
 	<div id="edit-mode">
 		<div class="row">
 			<div class="large-2 small-6 columns">
@@ -8,8 +8,12 @@
 				</ul>
 			</div>
 
-			<div class="large-6 small-6 columns">
+			<div class="large-3 small-6 columns">
 				<button class="edit rename secondary expand"><i class="fa fa-pencil"></i> Edit</button>
+			</div>
+
+			<div class="large-3 small-6 columns">
+				<button class="edit rename secondary expand"><i class="fa fa-folder"></i> Albums</button>
 			</div>
 
 			<div class="large-3 small-6 columns">
@@ -23,5 +27,5 @@
 	</div>
 </script>
 
-<?php include 'views/templates/edit/albums/edit.php' ?>
-<?php include 'views/templates/edit/albums/delete.php' ?>
+<?php include 'views/templates/modals/thumbnails/edit-selection.php' ?>
+<?php include 'views/templates/modals/thumbnails/delete-selection.php' ?>

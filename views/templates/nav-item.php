@@ -7,7 +7,7 @@
 			{{#icon}}
 			<i class="fa fa-{{icon}}"></i>
 			{{/icon}}
-			{{{text}}}
+			<span class="text">{{{text}}}</span>
 		</a>
 	</li>
 	{{#left}}

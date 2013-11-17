@@ -28,9 +28,14 @@ class Ajax extends \Swiftlet\Controller
 
 		try {
 			if ( !empty($_POST) ) {
-				$title = !empty($_POST['title']) ? $_POST['title'] : '';
+				$id    = !empty($_POST['id'])    ? (int) $_POST['id']    : null;
+				$title = !empty($_POST['title']) ?       $_POST['title'] : '';
 
 				$album = $this->app->getModel('album');
+
+				if ( $id ) {
+					$album->load($id);
+				}
 
 				$album
 					->setTitle($title)

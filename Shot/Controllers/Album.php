@@ -25,7 +25,7 @@ class Album extends \Swiftlet\Controller
 		try {
 			$album = $this->app->getModel('album')->load($albumId);
 		} catch ( \Swiftlet\Exception $e ) {
-			if ( $e->getCode() == $album::EXCEPTION_NOT_FOUND ) {
+			if ( $e->getCode() == \Shot\Models\Album::EXCEPTION_NOT_FOUND ) {
 				$this->app->getLibrary('helpers')->error404();
 
 				return;
@@ -86,12 +86,6 @@ class Album extends \Swiftlet\Controller
 			'title' => $album->getTitle(),
 			'id'    => (int) $album->getId()
 			);
-
-		$this->view->breadcrumbs = array((object) array(
-			'path'  => 'album/grid/' . $album->getId(),
-			'title' => $album->getTitle(),
-			'icon'  => 'folder'
-			));
 	}
 
 	/**
