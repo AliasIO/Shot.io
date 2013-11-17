@@ -347,8 +347,7 @@ module Shot {
 							.animate({ bottom: -20, opacity: 0 }, 'fast');
 
 						multiEdit.selectAll(false);
-					})
-					.trigger('change');
+					});
 
 				if ( SHOT.thumbnails ) {
 					SHOT.thumbnails.forEach((thumbnailData) => {
@@ -356,7 +355,7 @@ module Shot {
 
 						thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + album.data.id + '/' + thumbnail.data.id;
 
-						thumbnailGrid.prepend(thumbnail.render().el);
+						thumbnailGrid.append(thumbnail.render().el);
 
 						thumbnails.push(thumbnail);
 

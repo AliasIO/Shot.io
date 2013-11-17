@@ -366,7 +366,7 @@ var Shot;
                     editThumbnails.stop().animate({ bottom: -20, opacity: 0 }, 'fast');
 
                     multiEdit.selectAll(false);
-                }).trigger('change');
+                });
 
                 if (SHOT.thumbnails) {
                     SHOT.thumbnails.forEach(function (thumbnailData) {
@@ -374,7 +374,7 @@ var Shot;
 
                         thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + album.data.id + '/' + thumbnail.data.id;
 
-                        thumbnailGrid.prepend(thumbnail.render().el);
+                        thumbnailGrid.append(thumbnail.render().el);
 
                         thumbnails.push(thumbnail);
 
@@ -662,7 +662,7 @@ var Shot;
                     editAlbums.stop().animate({ bottom: -20, opacity: 0 }, 'fast');
 
                     multiEdit.selectAll(false);
-                }).trigger('change');
+                });
 
                 if (SHOT.albums) {
                     SHOT.albums.forEach(function (albumData) {
@@ -1193,6 +1193,8 @@ var Shot;
             } else {
                 $(this).trigger('deactivate');
             }
+
+            $(this).trigger('change');
 
             return this;
         };

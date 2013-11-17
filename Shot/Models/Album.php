@@ -142,14 +142,15 @@ class Album extends \Swiftlet\Model
 		if ( !$this->filename ) {
 			$sth = $dbh->prepare('
 				SELECT
+					images.id,
 					images.filename,
 					images.thumb_crop
 				FROM       albums_images
 				INNER JOIN images ON albums_images.image_id = images.id
 				WHERE
 					albums_images.album_id = :id
-				GROUP BY albums_images.album_id
-				ORDER BY albums_images.sort_order DESC, images.id DESC
+				ORDER BY albums_images.sort_order DESC, images.id ASC
+				LIMIT 1
 				');
 
 			$sth->bindParam('id', $id, \PDO::PARAM_INT);

@@ -65,6 +65,8 @@ module Shot {
 				$(this).trigger('deactivate');
 			}
 
+			$(this).trigger('change');
+
 			return this;
 		}
 	}

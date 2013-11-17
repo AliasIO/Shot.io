@@ -43,7 +43,7 @@ class Album extends \Swiftlet\Controller
 			INNER JOIN images ON albums_images.image_id = images.id
 			WHERE
 				albums_images.album_id = :album_id
-			ORDER BY albums_images.sort_order ASC, images.id ASC
+			ORDER BY albums_images.sort_order ASC, images.id DESC
 			');
 
 		$sth->bindParam('album_id', $albumId);

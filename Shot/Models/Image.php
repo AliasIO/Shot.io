@@ -200,12 +200,22 @@ class Image extends \Swiftlet\Model
 		}
 
 		foreach ( self::$imageSizes as $size ) {
-			unlink(self::$imagePath . $size . '/' . $this->filename);
+			try {
+				unlink(self::$imagePath . $size . '/' . $this->filename);
+			} catch ( \Exception $e ) { }
 		}
 
-		unlink(self::$imagePath .              $this->filename);
-		unlink(self::$imagePath . 'preview/' . $this->filename);
-		unlink(self::$imagePath . 'thumb/'   . $this->filename);
+		try {
+			unlink(self::$imagePath . $this->filename);
+		} catch ( \Exception $e ) { }
+
+		try {
+			unlink(self::$imagePath . 'preview/' . $this->filename);
+		} catch ( \Exception $e ) { }
+
+		try {
+			unlink(self::$imagePath . 'thumb/' . $this->filename);
+		} catch ( \Exception $e ) { }
 
 		$this->id = null;
 	}

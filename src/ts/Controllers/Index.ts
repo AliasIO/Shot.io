@@ -230,8 +230,7 @@ module Shot {
 							.animate({ bottom: -20, opacity: 0 }, 'fast');
 
 						multiEdit.selectAll(false);
-					})
-					.trigger('change');
+					});
 
 				if ( SHOT.albums ) {
 					SHOT.albums.forEach((albumData) => {
