@@ -5,6 +5,7 @@ interface JQuery {
 
 interface BaseJQueryEventObject {
     originalEvent: any;
+    draggable: any;
 }
 
 interface SHOT {

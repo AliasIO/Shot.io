@@ -33,13 +33,20 @@ module Shot {
 			 * Render
 			 */
 			render(): Carousel {
-				var el = $(Mustache.render(this.template, {}));
+				var
+					el = $(Mustache.render(this.template, {})),
+					destination: number,
+					distance: number,
+					duration: number,
+					wrap: JQuery;
 
 				if ( this.el ) {
 					this.el.replaceWith(el);
 				}
 
 				this.el = el;
+
+				wrap = this.el.find('.wrap');
 
 				$(window).on('resize', () => {
 					this.cutOff = $(window).width() / 2;
@@ -57,7 +64,49 @@ module Shot {
 					});
 				});
 
-				this.el.swipe((e, swipe) => this.swipe(e, swipe));
+				this.el.swipe()
+					.on('swipeStart', (e) => {
+						wrap.stop();
+
+						this.offset = wrap.position().left;
+					})
+					.on('swipeMove', (e) => {
+						if ( !this.animating ) {
+							this.el.addClass('animating');
+
+							this.animating = true;
+						}
+
+						wrap.css({ opacity: ( this.cutOff - Math.min(this.cutOff, Math.abs(e.swipe.x)) ) / this.cutOff, left: this.offset - Math.min(this.cutOff, Math.max(- this.cutOff, e.swipe.x)) });
+					})
+					.on('swipeEnd', (e) => {
+						if ( e.swipe.distance < 50 || e.swipe.speed < this.cutOff || ( e.swipe.direction === 'right' && this.index === 0 ) || ( e.swipe.direction === 'left' && this.index === this.images.length - 1 ) ) {
+							// Cancel animation
+							wrap.stop().animate({ opacity: 1, left: '-100%' }, 'normal', 'easeOutQuad', () => {
+								this.el.removeClass('animating');
+
+								this.animating = false;
+							});
+						} else {
+							// Finish animation
+							destination = this.offset + ( e.swipe.direction === 'right' ? this.cutOff : - this.cutOff );
+							distance = Math.abs(destination - wrap.position().left);
+							duration = distance / e.swipe.speed * 1000;
+
+							wrap.stop().animate({ opacity: 0, left: destination }, duration, 'easeOutQuad', () => {
+								wrap
+									.stop()
+									.css({ left: '-100%'})
+									.animate({ opacity: 1 }, duration / 2, 'easeInQuad');
+
+								this.el.removeClass('animating');
+
+								this.animating = false;
+
+								this.show(e.swipe.direction === 'right' ? ( this.previous ? this.previous.data.id : null ) : ( this.next ? this.next.data.id : null ));
+							});
+						}
+					});
 
 				return this;
 			}
@@ -137,62 +186,6 @@ module Shot {
 				});
 
 				return this;
-			}
-
-			/**
-			 * On swipe
-			 */
-			swipe(e, swipe) {
-				var
-					destination: number,
-					distance: number,
-					duration: number,
-					wrap = this.el.find('.wrap');
-
-				if ( e === 'start' ) {
-					wrap.stop();
-
-					this.offset = wrap.position().left;
-				}
-
-				if ( e === 'move' ) {
-					if ( !this.animating ) {
-						this.el.addClass('animating');
-
-						this.animating = true;
-					}
-
-					wrap.css({ opacity: ( this.cutOff - Math.min(this.cutOff, Math.abs(swipe.x)) ) / this.cutOff, left: this.offset - Math.min(this.cutOff, Math.max(- this.cutOff, swipe.x)) });
-				}
-
-				if ( e === 'end' ) {
-					if ( swipe.distance < 50 || swipe.speed < this.cutOff || ( swipe.direction === 'right' && this.index === 0 ) || ( swipe.direction === 'left' && this.index === this.images.length - 1 ) ) {
-						// Cancel animation
-						wrap.stop().animate({ opacity: 1, left: '-100%' }, 'normal', 'easeOutQuad', () => {
-							this.el.removeClass('animating');
-
-							this.animating = false;
-						});
-					} else {
-						// Finish animation
-						destination = this.offset + ( swipe.direction === 'right' ? this.cutOff : - this.cutOff );
-						distance = Math.abs(destination - wrap.position().left);
-						duration = distance / swipe.speed * 1000;
-
-						wrap.stop().animate({ opacity: 0, left: destination }, duration, 'easeOutQuad', () => {
-							wrap
-								.stop()
-								.css({ left: '-100%'})
-								.animate({ opacity: 1 }, duration / 2, 'easeInQuad');
-
-							this.el.removeClass('animating');
-
-							this.animating = false;
-
-							this.show(swipe.direction === 'right' ? ( this.previous ? this.previous.data.id : null ) : ( this.next ? this.next.data.id : null ));
-						});
-					}
-				}
 			}
 		}
 	}

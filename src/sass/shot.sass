@@ -360,6 +360,20 @@ li
 				&:before
 					opacity: .9
 
+		&.drop-target
+
+			.container
+				background: none
+				+box-shadow(none)
+
+		&.draggable
+
+			.container
+				+box-shadow(none)
+
+				.bar
+					+box-shadow(none)
+
 	img, canvas
 		position: absolute
 

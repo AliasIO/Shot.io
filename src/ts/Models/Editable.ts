@@ -16,6 +16,8 @@ module Shot {
 			 * Render
 			 */
 			render(): Editable {
+				var offset: { x: number; y: number } = { x: null, y: null };
+
 				this.el.on('click', (e) => {
 					var event = $.Event('click');
 

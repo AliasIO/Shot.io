@@ -1,9 +1,8 @@
 (function($) {
-	var Swipe = function(el, callback) {
+	var Swipe = function(el) {
 		var self = this;
 
 		this.el = $(el);
-		this.callback = callback;
 		this.pos = { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } };
 		this.startTime;
 
@@ -17,36 +16,36 @@
 		touchStart: function(e) {
 			var touch = e.originalEvent.touches[0];
 
-			this.swipeStart(touch.pageX, touch.pageY);
+			this.swipeStart(e, touch.pageX, touch.pageY);
 		},
 
 		touchMove: function(e) {
 			var touch = e.originalEvent.touches[0];
 
-			this.swipeMove(touch.pageX, touch.pageY);
+			this.swipeMove(e, touch.pageX, touch.pageY);
 		},
 
 		mouseDown: function(e) {
 			var self = this;
 
-			this.swipeStart(e.pageX, e.pageY);
+			this.swipeStart(e, e.pageX, e.pageY);
 
 			this.el.on('mousemove', function(e) { self.mouseMove(e); });
 			this.el.on('mouseup', function() { self.mouseUp(); });
 		},
 
 		mouseMove: function(e) {
-			this.swipeMove(e.pageX, e.pageY);
+			this.swipeMove(e, e.pageX, e.pageY);
 		},
 
-		mouseUp: function() {
-			this.swipeEnd();
+		mouseUp: function(e) {
+			this.swipeEnd(e);
 
 			this.el.off('mousemove');
 			this.el.off('mouseup');
 		},
 
-		swipeStart: function(x, y) {
+		swipeStart: function(e, x, y) {
 			this.pos.start.x = x;
 			this.pos.start.y = y;
 			this.pos.end.x = x;
@@ -54,29 +53,32 @@
 
 			this.startTime = new Date().getTime();
 
-			this.trigger('start');
+			this.trigger('swipeStart', e);
 		},
 
-		swipeMove: function(x, y) {
+		swipeMove: function(e, x, y) {
 			this.pos.end.x = x;
 			this.pos.end.y = y;
 
-			this.trigger('move');
+			this.trigger('swipeMove', e);
 		},
 
-		swipeEnd: function() {
-			this.trigger('end');
+		swipeEnd: function(e) {
+			this.trigger('swipeEnd', e);
 		},
 
-		trigger: function(e) {
+		trigger: function(e, originalEvent) {
+			var self = this;
+
 			var
-				x = this.pos.start.x - this.pos.end.x,
-				y = this.pos.end.y - this.pos.start.y,
+				event = $.Event(e),
+				x = self.pos.start.x - self.pos.end.x,
+				y = self.pos.end.y - self.pos.start.y,
 				radians = Math.atan2(y, x),
 				direction = 'up',
 				distance = Math.round(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))),
 				angle = Math.round(radians * 180 / Math.PI),
-				speed = Math.round(distance / ( new Date().getTime() - this.startTime ) * 1000);
+				speed = Math.round(distance / ( new Date().getTime() - self.startTime ) * 1000);
 
 			if ( angle < 0 ) {
 				angle = 360 - Math.abs(angle);
@@ -90,11 +92,17 @@
 				direction = 'down';
 			}
 
-			this.callback.apply(this.el, [ e, { x: x, y: y, direction: direction, distance: distance, angle: angle, speed: speed } ]);
+			event.originalEvent = originalEvent;
+
+			event.swipe = { x: x, y: y, direction: direction, distance: distance, angle: angle, speed: speed };
+
+			$(self.el).trigger(event);
 		}
 	};
 
-	$.fn.swipe = function(callback) {
-		var swipe = new Swipe(this, callback);
+	$.fn.swipe = function() {
+		var swipe = new Swipe(this);
+
+		return this;
 	};
 })(jQuery);

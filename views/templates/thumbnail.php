@@ -10,7 +10,7 @@
 			<div class="bar-wrap">
 				<ul class="bar">
 					<li class="title">
-						<i class="fa fa-picture-o"></i> {{{title}}}
+						<i class="fa fa-picture-o"></i> {{{title}}} ({{id}})
 					</li>
 					{{#pending}}
 					<li class="icon" title="Processing changes...">

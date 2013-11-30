@@ -7,6 +7,8 @@ var Shot;
             }
             Editable.prototype.render = function () {
                 var _this = this;
+                var offset = { x: null, y: null };
+
                 this.el.on('click', function (e) {
                     var event = $.Event('click');
 
@@ -117,7 +119,7 @@ var Shot;
                     editAlbum: null,
                     editThumbnails: null,
                     upload: null
-                }, editThumbnails, multiEdit = new Shot.MultiEdit(), preRender = this.preRender;
+                }, editThumbnails, multiEdit = new Shot.MultiEdit(), dragDrop = new Shot.DragDrop(), preRender = this.preRender;
 
                 navItems.album = $(Mustache.render($('#template-nav-item').html(), {
                     text: album.data.title,
@@ -201,6 +203,7 @@ var Shot;
                                 thumbnailQueue.push(thumbnail);
 
                                 multiEdit.push(thumbnail);
+                                dragDrop.push(thumbnail);
                             }
                         });
 
@@ -379,6 +382,11 @@ var Shot;
                         thumbnails.push(thumbnail);
 
                         multiEdit.push(thumbnail);
+                        dragDrop.push(thumbnail);
+
+                        thumbnail.el.on('click', function (e) {
+                            console.log(thumbnail.el.offset());
+                        });
                     });
                 }
             };
@@ -684,6 +692,115 @@ var Shot;
     })(Shot.Controllers || (Shot.Controllers = {}));
     var Controllers = Shot.Controllers;
 })(Shot || (Shot = {}));
+var Shot;
+(function (Shot) {
+    var DragDrop = (function () {
+        function DragDrop() {
+            var _this = this;
+            this.editables = [];
+            this.positions = [];
+            var offset = { x: 0, y: 0 }, draggable = null, lastHover = null, placeholder = $('<li class="drop-target"><div class="container"></li>');
+
+            $(document).swipe().on('swipeStart', function (e) {
+                e.originalEvent.originalEvent.preventDefault();
+
+                _this.editables.forEach(function (editable) {
+                    if (editable.el.has(e.originalEvent.target).length > 0) {
+                        draggable = editable;
+
+                        draggable.el.addClass('draggable');
+
+                        offset.x = draggable.el.position().left;
+                        offset.y = draggable.el.position().top;
+
+                        draggable.el.before(placeholder);
+
+                        draggable.el.appendTo(draggable.el.parent()).css({
+                            left: offset.x + e.swipe.x,
+                            top: offset.y + e.swipe.y,
+                            position: 'absolute',
+                            zIndex: 999
+                        });
+
+                        _this.getPositions(draggable);
+                    }
+                });
+            }).on('swipeMove', function (e) {
+                setTimeout(function () {
+                    var mouse = { x: null, y: null };
+
+                    if (e.originalEvent.originalEvent.changedTouches !== undefined) {
+                        mouse.x = e.originalEvent.originalEvent.changedTouches[0].clientX, mouse.y = e.originalEvent.originalEvent.changedTouches[0].clientY + $(window).scrollTop();
+                    } else {
+                        mouse.x = e.originalEvent.clientX, mouse.y = e.originalEvent.clientY + $(window).scrollTop();
+                    }
+
+                    draggable.el.css({
+                        left: offset.x - e.swipe.x,
+                        top: offset.y + e.swipe.y
+                    });
+
+                    _this.positions.forEach(function (obj) {
+                        if (mouse.x > obj.x && mouse.x < obj.x + obj.width && mouse.y > obj.y && mouse.y < obj.y + obj.height) {
+                            if (obj.editable === lastHover) {
+                                return;
+                            }
+
+                            if (placeholder.index() > obj.editable.el.index()) {
+                                obj.editable.el.before(placeholder);
+                            } else {
+                                obj.editable.el.after(placeholder);
+                            }
+
+                            _this.getPositions(draggable);
+
+                            lastHover = obj.editable;
+
+                            return;
+                        }
+
+                        lastHover = null;
+                    });
+                }, 0);
+            }).on('swipeEnd', function (e) {
+                draggable.el.animate({
+                    left: placeholder.position().left,
+                    top: placeholder.position().top
+                }, 'fast', 'easeOutBack', function () {
+                    draggable.el.removeClass('draggable').css({ position: 'inherit', zIndex: 'inherit' });
+
+                    placeholder.replaceWith(draggable.el);
+                });
+            });
+        }
+        DragDrop.prototype.push = function (editable) {
+            this.editables.push(editable);
+
+            return this;
+        };
+
+        DragDrop.prototype.getPositions = function (draggable) {
+            var _this = this;
+            this.positions = [];
+
+            this.editables.forEach(function (editable) {
+                if (editable === draggable) {
+                    return;
+                }
+
+                _this.positions.push({
+                    editable: editable,
+                    x: editable.el.offset().left,
+                    y: editable.el.offset().top,
+                    width: editable.el.width(),
+                    height: editable.el.height()
+                });
+            });
+        };
+        return DragDrop;
+    })();
+    Shot.DragDrop = DragDrop;
+})(Shot || (Shot = {}));
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -776,13 +893,15 @@ var Shot;
             }
             Carousel.prototype.render = function () {
                 var _this = this;
-                var el = $(Mustache.render(this.template, {}));
+                var el = $(Mustache.render(this.template, {})), destination, distance, duration, wrap;
 
                 if (this.el) {
                     this.el.replaceWith(el);
                 }
 
                 this.el = el;
+
+                wrap = this.el.find('.wrap');
 
                 $(window).on('resize', function () {
                     _this.cutOff = $(window).width() / 2;
@@ -798,8 +917,40 @@ var Shot;
                     });
                 });
 
-                this.el.swipe(function (e, swipe) {
-                    return _this.swipe(e, swipe);
+                this.el.swipe().on('swipeStart', function (e) {
+                    wrap.stop();
+
+                    _this.offset = wrap.position().left;
+                }).on('swipeMove', function (e) {
+                    if (!_this.animating) {
+                        _this.el.addClass('animating');
+
+                        _this.animating = true;
+                    }
+
+                    wrap.css({ opacity: (_this.cutOff - Math.min(_this.cutOff, Math.abs(e.swipe.x))) / _this.cutOff, left: _this.offset - Math.min(_this.cutOff, Math.max(-_this.cutOff, e.swipe.x)) });
+                }).on('swipeEnd', function (e) {
+                    if (e.swipe.distance < 50 || e.swipe.speed < _this.cutOff || (e.swipe.direction === 'right' && _this.index === 0) || (e.swipe.direction === 'left' && _this.index === _this.images.length - 1)) {
+                        wrap.stop().animate({ opacity: 1, left: '-100%' }, 'normal', 'easeOutQuad', function () {
+                            _this.el.removeClass('animating');
+
+                            _this.animating = false;
+                        });
+                    } else {
+                        destination = _this.offset + (e.swipe.direction === 'right' ? _this.cutOff : -_this.cutOff);
+                        distance = Math.abs(destination - wrap.position().left);
+                        duration = distance / e.swipe.speed * 1000;
+
+                        wrap.stop().animate({ opacity: 0, left: destination }, duration, 'easeOutQuad', function () {
+                            wrap.stop().css({ left: '-100%' }).animate({ opacity: 1 }, duration / 2, 'easeInQuad');
+
+                            _this.el.removeClass('animating');
+
+                            _this.animating = false;
+
+                            _this.show(e.swipe.direction === 'right' ? (_this.previous ? _this.previous.data.id : null) : (_this.next ? _this.next.data.id : null));
+                        });
+                    }
                 });
 
                 return this;
@@ -868,51 +1019,6 @@ var Shot;
                 });
 
                 return this;
-            };
-
-            Carousel.prototype.swipe = function (e, swipe) {
-                var _this = this;
-                var destination, distance, duration, wrap = this.el.find('.wrap');
-
-                if (e === 'start') {
-                    wrap.stop();
-
-                    this.offset = wrap.position().left;
-                }
-
-                if (e === 'move') {
-                    if (!this.animating) {
-                        this.el.addClass('animating');
-
-                        this.animating = true;
-                    }
-
-                    wrap.css({ opacity: (this.cutOff - Math.min(this.cutOff, Math.abs(swipe.x))) / this.cutOff, left: this.offset - Math.min(this.cutOff, Math.max(-this.cutOff, swipe.x)) });
-                }
-
-                if (e === 'end') {
-                    if (swipe.distance < 50 || swipe.speed < this.cutOff || (swipe.direction === 'right' && this.index === 0) || (swipe.direction === 'left' && this.index === this.images.length - 1)) {
-                        wrap.stop().animate({ opacity: 1, left: '-100%' }, 'normal', 'easeOutQuad', function () {
-                            _this.el.removeClass('animating');
-
-                            _this.animating = false;
-                        });
-                    } else {
-                        destination = this.offset + (swipe.direction === 'right' ? this.cutOff : -this.cutOff);
-                        distance = Math.abs(destination - wrap.position().left);
-                        duration = distance / swipe.speed * 1000;
-
-                        wrap.stop().animate({ opacity: 0, left: destination }, duration, 'easeOutQuad', function () {
-                            wrap.stop().css({ left: '-100%' }).animate({ opacity: 1 }, duration / 2, 'easeInQuad');
-
-                            _this.el.removeClass('animating');
-
-                            _this.animating = false;
-
-                            _this.show(swipe.direction === 'right' ? (_this.previous ? _this.previous.data.id : null) : (_this.next ? _this.next.data.id : null));
-                        });
-                    }
-                }
             };
             return Carousel;
         })();

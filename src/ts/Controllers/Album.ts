@@ -20,6 +20,7 @@ module Shot {
 					},
 					editThumbnails: JQuery,
 					multiEdit = new MultiEdit<Models.Thumbnail>(),
+					dragDrop = new DragDrop<Models.Thumbnail>(),
 					preRender = this.preRender;
 
 				// Nav items
@@ -122,6 +123,7 @@ module Shot {
 										thumbnailQueue.push(thumbnail);
 
 										multiEdit.push(thumbnail);
+										dragDrop.push(thumbnail);
 									}
 								});
 
@@ -360,6 +362,11 @@ module Shot {
 						thumbnails.push(thumbnail);
 
 						multiEdit.push(thumbnail);
+						dragDrop.push(thumbnail);
+
+						thumbnail.el.on('click', (e) => {
+							console.log(thumbnail.el.offset());
+						});
 					});
 				}
 			}
@@ -531,7 +538,7 @@ module Shot {
 				reader.onerror = () => callback();
 
 				reader.readAsDataURL(thumbnail.data.file);
-			};
+			}
 		}
 	}
 }
