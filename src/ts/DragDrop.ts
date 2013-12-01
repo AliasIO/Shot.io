@@ -32,9 +32,11 @@ module Shot {
 							draggable.el
 								.appendTo(draggable.el.parent())
 								.css({
+									height: placeholder.outerHeight(),
 									left: offset.x + e.swipe.x,
 									top: offset.y + e.swipe.y,
 									position: 'absolute',
+									width: placeholder.outerWidth(),
 									zIndex: 999
 								});
 
@@ -89,7 +91,7 @@ module Shot {
 					}, 'fast', 'easeOutBack', () => {
 						draggable.el
 							.removeClass('draggable')
-							.css({ position: 'inherit', zIndex: 'inherit' });
+							.removeAttr('style');
 
 						placeholder.replaceWith(draggable.el);
 					});

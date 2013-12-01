@@ -716,9 +716,11 @@ var Shot;
                         draggable.el.before(placeholder);
 
                         draggable.el.appendTo(draggable.el.parent()).css({
+                            height: placeholder.outerHeight(),
                             left: offset.x + e.swipe.x,
                             top: offset.y + e.swipe.y,
                             position: 'absolute',
+                            width: placeholder.outerWidth(),
                             zIndex: 999
                         });
 
@@ -767,7 +769,7 @@ var Shot;
                     left: placeholder.position().left,
                     top: placeholder.position().top
                 }, 'fast', 'easeOutBack', function () {
-                    draggable.el.removeClass('draggable').css({ position: 'inherit', zIndex: 'inherit' });
+                    draggable.el.removeClass('draggable').removeAttr('style');
 
                     placeholder.replaceWith(draggable.el);
                 });
