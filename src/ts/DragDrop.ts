@@ -12,7 +12,7 @@ module Shot {
 				offset: { x: number; y: number } = { x: 0, y: 0 },
 				draggable: T = null,
 				lastHover: T = null,
-				placeholder = $('<li class="drop-target"><div class="container"></li>');
+				placeholder = $('<li class="drop-target"><div class="container"><div/></li>');
 
 			$(document).swipe()
 				.on('swipeStart', (e) => {

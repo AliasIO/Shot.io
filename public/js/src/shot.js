@@ -699,7 +699,7 @@ var Shot;
             var _this = this;
             this.editables = [];
             this.positions = [];
-            var offset = { x: 0, y: 0 }, draggable = null, lastHover = null, placeholder = $('<li class="drop-target"><div class="container"></li>');
+            var offset = { x: 0, y: 0 }, draggable = null, lastHover = null, placeholder = $('<li class="drop-target"><div class="container"><div/></li>');
 
             $(document).swipe().on('swipeStart', function (e) {
                 e.originalEvent.originalEvent.preventDefault();
