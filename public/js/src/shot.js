@@ -365,10 +365,32 @@ var Shot;
                     editThumbnails.find('.select-all').attr('disabled', selectedCount === thumbnails.length);
                 }).on('activate', function () {
                     editThumbnails.stop().css({ bottom: -20, opacity: 0 }).show().animate({ bottom: 0, opacity: 1 });
+
+                    thumbnails.forEach(function (thumbnail) {
+                        thumbnail.data.draggable = true;
+
+                        thumbnail.render();
+                    });
                 }).on('deactivate', function () {
                     editThumbnails.stop().animate({ bottom: -20, opacity: 0 }, 'fast');
 
+                    thumbnails.forEach(function (thumbnail) {
+                        thumbnail.data.draggable = false;
+
+                        thumbnail.render();
+                    });
+
                     multiEdit.selectAll(false);
+                });
+
+                $(dragDrop).on('change', function () {
+                    var items = {};
+
+                    thumbnailGrid.find('> li').each(function (i, el) {
+                        items[$(el).data('id')] = i;
+                    });
+
+                    $.post(SHOT.rootPath + 'ajax/saveImagesOrder', { albumId: album.data.id, items: items });
                 });
 
                 if (SHOT.thumbnails) {
@@ -705,7 +727,7 @@ var Shot;
                 e.originalEvent.originalEvent.preventDefault();
 
                 _this.editables.forEach(function (editable) {
-                    if (editable.el.has(e.originalEvent.target).length > 0) {
+                    if (editable.el.find('.icon.drag-handle').has(e.originalEvent.target).length > 0) {
                         draggable = editable;
 
                         draggable.el.addClass('draggable');
@@ -728,51 +750,61 @@ var Shot;
                     }
                 });
             }).on('swipeMove', function (e) {
-                setTimeout(function () {
-                    var mouse = { x: null, y: null };
+                if (draggable) {
+                    setTimeout(function () {
+                        var mouse = { x: null, y: null };
 
-                    if (e.originalEvent.originalEvent.changedTouches !== undefined) {
-                        mouse.x = e.originalEvent.originalEvent.changedTouches[0].clientX, mouse.y = e.originalEvent.originalEvent.changedTouches[0].clientY + $(window).scrollTop();
-                    } else {
-                        mouse.x = e.originalEvent.clientX, mouse.y = e.originalEvent.clientY + $(window).scrollTop();
-                    }
+                        if (e.originalEvent.originalEvent.changedTouches !== undefined) {
+                            mouse.x = e.originalEvent.originalEvent.changedTouches[0].clientX, mouse.y = e.originalEvent.originalEvent.changedTouches[0].clientY + $(window).scrollTop();
+                        } else {
+                            mouse.x = e.originalEvent.clientX, mouse.y = e.originalEvent.clientY + $(window).scrollTop();
+                        }
 
-                    draggable.el.css({
-                        left: offset.x - e.swipe.x,
-                        top: offset.y + e.swipe.y
-                    });
+                        draggable.el.css({
+                            left: offset.x - e.swipe.x,
+                            top: offset.y + e.swipe.y
+                        });
 
-                    _this.positions.forEach(function (obj) {
-                        if (mouse.x > obj.x && mouse.x < obj.x + obj.width && mouse.y > obj.y && mouse.y < obj.y + obj.height) {
-                            if (obj.editable === lastHover) {
+                        _this.positions.forEach(function (obj) {
+                            if (mouse.x > obj.x && mouse.x < obj.x + obj.width && mouse.y > obj.y && mouse.y < obj.y + obj.height) {
+                                if (obj.editable === lastHover) {
+                                    return;
+                                }
+
+                                if (placeholder.index() > obj.editable.el.index()) {
+                                    obj.editable.el.before(placeholder);
+                                } else {
+                                    obj.editable.el.after(placeholder);
+                                }
+
+                                _this.getPositions(draggable);
+
+                                lastHover = obj.editable;
+
                                 return;
                             }
 
-                            if (placeholder.index() > obj.editable.el.index()) {
-                                obj.editable.el.before(placeholder);
-                            } else {
-                                obj.editable.el.after(placeholder);
-                            }
-
-                            _this.getPositions(draggable);
-
-                            lastHover = obj.editable;
-
-                            return;
-                        }
-
-                        lastHover = null;
-                    });
-                }, 0);
+                            lastHover = null;
+                        });
+                    }, 0);
+                }
             }).on('swipeEnd', function (e) {
-                draggable.el.animate({
-                    left: placeholder.position().left,
-                    top: placeholder.position().top
-                }, 'fast', 'easeOutBack', function () {
-                    draggable.el.removeClass('draggable').removeAttr('style');
+                if (draggable) {
+                    draggable.el.animate({
+                        left: placeholder.position().left,
+                        top: placeholder.position().top
+                    }, 'fast', 'easeOutBack', function () {
+                        draggable.el.removeClass('draggable').removeAttr('style');
 
-                    placeholder.replaceWith(draggable.el);
-                });
+                        placeholder.replaceWith(draggable.el);
+
+                        placeholder.remove();
+
+                        draggable = null;
+
+                        $(_this).trigger('change');
+                    });
+                }
             });
         }
         DragDrop.prototype.push = function (editable) {

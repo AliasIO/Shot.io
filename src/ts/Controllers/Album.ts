@@ -342,13 +342,37 @@ module Shot {
 							.css({ bottom: -20, opacity: 0 })
 							.show()
 							.animate({ bottom: 0, opacity: 1 });
+
+						thumbnails.forEach((thumbnail) => {
+							thumbnail.data.draggable = true;
+
+							thumbnail.render();
+						});
 					})
 					.on('deactivate', () => {
 						editThumbnails
 							.stop()
 							.animate({ bottom: -20, opacity: 0 }, 'fast');
 
+						thumbnails.forEach((thumbnail) => {
+							thumbnail.data.draggable = false;
+
+							thumbnail.render();
+						});
+
 						multiEdit.selectAll(false);
+					});
+
+				// Drag drop events
+				$(dragDrop)
+					.on('change', () => {
+						var items = {};
+
+						thumbnailGrid.find('> li').each((i, el) => {
+							items[$(el).data('id')] = i;
+						});
+
+						$.post(SHOT.rootPath + 'ajax/saveImagesOrder', { albumId: album.data.id, items: items });
 					});
 
 				if ( SHOT.thumbnails ) {

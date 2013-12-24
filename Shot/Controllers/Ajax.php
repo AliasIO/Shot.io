@@ -200,6 +200,43 @@ class Ajax extends \Swiftlet\Controller
 	}
 
 	/**
+	 * Save images order action
+	 */
+	public function saveImagesOrder()
+	{
+		header('Content-Type: application/json');
+
+		if ( !empty($_POST) ) {
+			$albumId = !empty($_POST['albumId']) ? (int) $_POST['albumId'] : null;
+			$items   = !empty($_POST['items'])   ?       $_POST['items']   : array();
+
+			$inserts = array();
+
+			if ( $albumId && is_array($items) ) {
+				foreach ( $items as $imageId => $sortOrder ) {
+					$inserts[] = (int) $albumId . ', ' . (int) $imageId . ', ' . (int) $sortOrder;
+				}
+
+				$dbh = $this->app->getLibrary('pdo')->getHandle();
+
+				$sth = $dbh->prepare('
+					REPLACE INTO albums_images (
+						album_id,
+						image_id,
+						sort_order
+					) VALUES (
+						' . join('), (', $inserts) . '
+					)
+					');
+
+				$sth->execute();
+			}
+
+			exit('{}');
+		}
+	}
+
+	/**
 	 * Delete albums action
 	 */
 	public function deleteAlbums()

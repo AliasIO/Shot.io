@@ -6,7 +6,7 @@ module Shot {
 		export class Thumbnail extends Editable {
 			private template: string;
 
-			constructor(public data: { id?: number; title?: string; path?: string; link?: string; file?: any; formData?: any; pending?: boolean; error?: boolean }) {
+			constructor(public data: { id?: number; title?: string; path?: string; link?: string; file?: any; formData?: any; pending?: boolean; error?: boolean; draggable?: boolean }) {
 				super();
 
 				this.template = $('#template-thumbnail').html();

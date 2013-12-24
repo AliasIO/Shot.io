@@ -19,7 +19,7 @@ module Shot {
 					e.originalEvent.originalEvent.preventDefault();
 
 					this.editables.forEach((editable) => {
-						if ( editable.el.has(e.originalEvent.target).length > 0 ) {
+						if ( editable.el.find('.icon.drag-handle').has(e.originalEvent.target).length > 0 ) {
 							draggable = editable;
 
 							draggable.el.addClass('draggable');
@@ -45,56 +45,66 @@ module Shot {
 					});
 				})
 				.on('swipeMove', (e) => {
-					setTimeout(() => {
-						var mouse: { x: number; y: number } = { x: null, y: null };
+					if ( draggable ) {
+						setTimeout(() => {
+							var mouse: { x: number; y: number } = { x: null, y: null };
 
-						if ( e.originalEvent.originalEvent.changedTouches !== undefined ) {
-							mouse.x = e.originalEvent.originalEvent.changedTouches[0].clientX,
-							mouse.y = e.originalEvent.originalEvent.changedTouches[0].clientY + $(window).scrollTop()
-						} else {
-							mouse.x = e.originalEvent.clientX,
-							mouse.y = e.originalEvent.clientY + $(window).scrollTop()
-						}
+							if ( e.originalEvent.originalEvent.changedTouches !== undefined ) {
+								mouse.x = e.originalEvent.originalEvent.changedTouches[0].clientX,
+								mouse.y = e.originalEvent.originalEvent.changedTouches[0].clientY + $(window).scrollTop()
+							} else {
+								mouse.x = e.originalEvent.clientX,
+								mouse.y = e.originalEvent.clientY + $(window).scrollTop()
+							}
 
-						draggable.el.css({
-							left: offset.x - e.swipe.x,
-							top: offset.y + e.swipe.y
-						});
+							draggable.el.css({
+								left: offset.x - e.swipe.x,
+								top: offset.y + e.swipe.y
+							});
 
-						this.positions.forEach((obj) => {
-							if ( mouse.x > obj.x && mouse.x < obj.x + obj.width && mouse.y > obj.y && mouse.y < obj.y + obj.height ) {
-								if ( obj.editable === lastHover ) {
+							this.positions.forEach((obj) => {
+								if ( mouse.x > obj.x && mouse.x < obj.x + obj.width && mouse.y > obj.y && mouse.y < obj.y + obj.height ) {
+									if ( obj.editable === lastHover ) {
+										return;
+									}
+
+									if ( placeholder.index() > obj.editable.el.index() ) {
+										obj.editable.el.before(placeholder);
+									} else {
+										obj.editable.el.after(placeholder);
+									}
+
+									this.getPositions(draggable);
+
+									lastHover = obj.editable;
+
 									return;
 								}
 
-								if ( placeholder.index() > obj.editable.el.index() ) {
-									obj.editable.el.before(placeholder);
-								} else {
-									obj.editable.el.after(placeholder);
-								}
-
-								this.getPositions(draggable);
-
-								lastHover = obj.editable;
-
-								return;
-							}
-
-							lastHover = null;
-						});
-					}, 0);
+								lastHover = null;
+							});
+						}, 0);
+					}
 				})
 				.on('swipeEnd', (e) => {
-					draggable.el.animate({
-						left: placeholder.position().left,
-						top: placeholder.position().top
-					}, 'fast', 'easeOutBack', () => {
-						draggable.el
-							.removeClass('draggable')
-							.removeAttr('style');
+					if ( draggable ) {
+						draggable.el.animate({
+							left: placeholder.position().left,
+							top: placeholder.position().top
+						}, 'fast', 'easeOutBack', () => {
+							draggable.el
+								.removeClass('draggable')
+								.removeAttr('style');
 
-						placeholder.replaceWith(draggable.el);
-					});
+							placeholder.replaceWith(draggable.el);
+
+							placeholder.remove();
+
+							draggable = null;
+
+							$(this).trigger('change');
+						});
+					}
 				});
 		}
 

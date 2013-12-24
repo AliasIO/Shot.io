@@ -349,6 +349,11 @@ li
 						text-align: center
 						width: 35px
 
+					&.drag-handle
+						cursor: grab
+						cursor: -moz-grab
+						cursor: -webkit-grab
+
 		&.selected
 
 			.selection
@@ -379,6 +384,9 @@ li
 
 				.bar
 					+box-shadow(none)
+
+			.drag-handle
+				cursor: move !important
 
 	img, canvas
 		position: absolute
