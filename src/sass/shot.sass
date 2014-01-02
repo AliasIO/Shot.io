@@ -151,7 +151,7 @@ li
 	display: none
 
 .modal-background
-	background: rgba(darken($secondary-color, 20%), .7)
+	background: rgba(darken($secondary-color, 20%), .3)
 	bottom: 0
 	left: 0
 	position: fixed
@@ -164,6 +164,12 @@ li
 	top: 100px
 	z-index: 99
 	width: 100%
+
+	form
+		background: lighten($secondary-color, 10%)
+		+box-shadow(0 0 50px #000)
+		overflow: hidden
+		padding: 1em 2.4em 0
 
 #edit-mode
 	background: lighten($secondary-color, 5%)
