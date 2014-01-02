@@ -10,11 +10,13 @@ var Shot;
                 var offset = { x: null, y: null };
 
                 this.el.on('click', function (e) {
-                    var event = $.Event('click');
+                    if (!$(e.target).closest('.drag-handle').length) {
+                        var event = $.Event('click');
 
-                    event.originalEvent = e;
+                        event.originalEvent = e;
 
-                    $(_this).trigger(event);
+                        $(_this).trigger(event);
+                    }
                 });
 
                 return this;
@@ -139,6 +141,8 @@ var Shot;
                 navItems.upload.on('click', function (e) {
                     var modal = $(Mustache.render($('#template-modals-thumbnails-upload').html(), {}));
 
+                    multiEdit.toggle(false);
+
                     modal.on('change', ':input[type="file"]', function (e) {
                         var thumbnailSize = 480, thumbnailQueue = [], fileTypes = [
                             'image/jpg',
@@ -202,6 +206,7 @@ var Shot;
 
                                 thumbnailQueue.push(thumbnail);
 
+                                thumbnails.push(thumbnail);
                                 multiEdit.push(thumbnail);
                                 dragDrop.push(thumbnail);
                             }
@@ -402,7 +407,6 @@ var Shot;
                         thumbnailGrid.append(thumbnail.render().el);
 
                         thumbnails.push(thumbnail);
-
                         multiEdit.push(thumbnail);
                         dragDrop.push(thumbnail);
 
@@ -534,7 +538,7 @@ var Shot;
             function Index() {
             }
             Index.prototype.index = function () {
-                var thumbnailGrid = $('.thumbnail-grid'), albums = [], navItems = { createAlbum: null, editAlbums: null }, editAlbums, multiEdit = new Shot.MultiEdit();
+                var thumbnailGrid = $('.thumbnail-grid'), albums = [], navItems = { createAlbum: null, editAlbums: null }, editAlbums, multiEdit = new Shot.MultiEdit(), dragDrop = new Shot.DragDrop();
 
                 navItems.createAlbum = $(Mustache.render($('#template-nav-item').html(), {
                     text: 'Add album',
@@ -544,6 +548,8 @@ var Shot;
 
                 navItems.createAlbum.on('click', function (e) {
                     var modal = $(Mustache.render($('#template-modals-albums-create').html(), {}));
+
+                    multiEdit.toggle(false);
 
                     e.preventDefault();
 
@@ -569,7 +575,9 @@ var Shot;
 
                             thumbnailGrid.append(album.render().el);
 
+                            albums.push(album);
                             multiEdit.push(album);
+                            dragDrop.push(album);
                         }
 
                         modal.remove();
@@ -688,10 +696,32 @@ var Shot;
                     editAlbums.find('.select-all').attr('disabled', selectedCount === albums.length);
                 }).on('activate', function () {
                     editAlbums.stop().css({ bottom: -20, opacity: 0 }).show().animate({ bottom: 0, opacity: 1 });
+
+                    albums.forEach(function (album) {
+                        album.data.draggable = true;
+
+                        album.render();
+                    });
                 }).on('deactivate', function () {
                     editAlbums.stop().animate({ bottom: -20, opacity: 0 }, 'fast');
 
+                    albums.forEach(function (album) {
+                        album.data.draggable = false;
+
+                        album.render();
+                    });
+
                     multiEdit.selectAll(false);
+                });
+
+                $(dragDrop).on('change', function () {
+                    var items = {};
+
+                    thumbnailGrid.find('> li').each(function (i, el) {
+                        items[$(el).data('id')] = i;
+                    });
+
+                    $.post(SHOT.rootPath + 'ajax/saveAlbumsOrder', { items: items });
                 });
 
                 if (SHOT.albums) {
@@ -700,11 +730,11 @@ var Shot;
 
                         album.data.link = SHOT.rootPath + 'album/grid/' + album.data.id;
 
-                        thumbnailGrid.prepend(album.render().el);
+                        thumbnailGrid.append(album.render().el);
 
                         albums.push(album);
-
                         multiEdit.push(album);
+                        dragDrop.push(album);
                     });
                 }
             };

@@ -36,6 +36,11 @@
 						<i class="fa fa-exclamation-triangle"></i>
 					</li>
 					{{/error}}
+					{{#draggable}}
+					<li class="icon drag-handle" title="Drag to re-order">
+						<i class="fa fa-move"></i>
+					</li>
+					{{/draggable}}
 				</ul>
 			</div>
 		</div>

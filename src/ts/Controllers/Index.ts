@@ -13,7 +13,8 @@ module Shot {
 					albums: Array<Models.Album> = [],
 					navItems: { createAlbum: JQuery; editAlbums: JQuery } = { createAlbum: null, editAlbums: null },
 					editAlbums: JQuery,
-					multiEdit = new MultiEdit<Models.Album>();
+					multiEdit = new MultiEdit<Models.Album>(),
+					dragDrop = new DragDrop<Models.Album>();
 
 				navItems.createAlbum = $(Mustache.render($('#template-nav-item').html(), {
 					text: 'Add album',
@@ -24,6 +25,8 @@ module Shot {
 				navItems.createAlbum
 					.on('click', (e) => {
 						var modal = $(Mustache.render($('#template-modals-albums-create').html(), {}));
+
+						multiEdit.toggle(false);
 
 						e.preventDefault();
 
@@ -55,7 +58,9 @@ module Shot {
 
 									thumbnailGrid.append(album.render().el);
 
+									albums.push(album);
 									multiEdit.push(album);
+									dragDrop.push(album);
 								}
 
 								modal.remove();
@@ -223,13 +228,37 @@ module Shot {
 							.css({ bottom: -20, opacity: 0 })
 							.show()
 							.animate({ bottom: 0, opacity: 1 });
+
+						albums.forEach((album) => {
+							album.data.draggable = true;
+
+							album.render();
+						});
 					})
 					.on('deactivate', () => {
 						editAlbums
 							.stop()
 							.animate({ bottom: -20, opacity: 0 }, 'fast');
 
+						albums.forEach((album) => {
+							album.data.draggable = false;
+
+							album.render();
+						});
+
 						multiEdit.selectAll(false);
+					});
+
+				// Drag drop events
+				$(dragDrop)
+					.on('change', () => {
+						var items = {};
+
+						thumbnailGrid.find('> li').each((i, el) => {
+							items[$(el).data('id')] = i;
+						});
+
+						$.post(SHOT.rootPath + 'ajax/saveAlbumsOrder', { items: items });
 					});
 
 				if ( SHOT.albums ) {
@@ -238,11 +267,11 @@ module Shot {
 
 						album.data.link = SHOT.rootPath + 'album/grid/' + album.data.id;
 
-						thumbnailGrid.prepend(album.render().el);
+						thumbnailGrid.append(album.render().el);
 
 						albums.push(album);
-
 						multiEdit.push(album);
+						dragDrop.push(album);
 					});
 				}
 			}

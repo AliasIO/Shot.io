@@ -18,7 +18,7 @@ CREATE TABLE albums (
 	id             INTEGER PRIMARY KEY AUTOINCREMENT,
 	title          TEXT    NOT NULL,
 	cover_image_id INTEGER     NULL,
-	sort_order     INTEGER     NULL,
+	sort_order     INTEGER NOT NULL DEFAULT 0,
 	FOREIGN KEY(cover_image_id) REFERENCES images(id) ON DELETE SET NULL
 );
 
@@ -27,7 +27,7 @@ DROP TABLE IF EXISTS albums_images;
 CREATE TABLE albums_images (
 	album_id   INTEGER NOT NULL,
 	image_id   INTEGER NOT NULL,
-	sort_order INTEGER     NULL,
+	sort_order INTEGER NOT NULL DEFAULT 0,
 	FOREIGN KEY(album_id) REFERENCES albums(id) ON DELETE CASCADE,
 	FOREIGN KEY(image_id) REFERENCES images(id) ON DELETE CASCADE
 );

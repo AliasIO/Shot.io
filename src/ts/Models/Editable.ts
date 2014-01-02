@@ -19,11 +19,13 @@ module Shot {
 				var offset: { x: number; y: number } = { x: null, y: null };
 
 				this.el.on('click', (e) => {
-					var event = $.Event('click');
+					if ( !$(e.target).closest('.drag-handle').length ) {
+						var event = $.Event('click');
 
-					event.originalEvent = e;
+						event.originalEvent = e;
 
-					$(this).trigger(event);
+						$(this).trigger(event);
+					}
 				});
 
 				return this;

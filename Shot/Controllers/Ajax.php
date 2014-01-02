@@ -35,6 +35,16 @@ class Ajax extends \Swiftlet\Controller
 
 				if ( $id ) {
 					$album->load($id);
+				} else {
+					$dbh = $this->app->getLibrary('pdo')->getHandle();
+
+					$sth = $dbh->prepare('SELECT MAX(sort_order) + 1 AS sort_order FROM albums');
+
+					$sth->execute();
+
+					$result = $sth->fetchObject();
+
+					$album->setSortOrder((int) $result->sort_order);
 				}
 
 				$album
@@ -213,11 +223,11 @@ class Ajax extends \Swiftlet\Controller
 			$inserts = array();
 
 			if ( $albumId && is_array($items) ) {
+				$dbh = $this->app->getLibrary('pdo')->getHandle();
+
 				foreach ( $items as $imageId => $sortOrder ) {
 					$inserts[] = (int) $albumId . ', ' . (int) $imageId . ', ' . (int) $sortOrder;
 				}
-
-				$dbh = $this->app->getLibrary('pdo')->getHandle();
 
 				$sth = $dbh->prepare('
 					REPLACE INTO albums_images (
@@ -230,6 +240,40 @@ class Ajax extends \Swiftlet\Controller
 					');
 
 				$sth->execute();
+			}
+
+			exit('{}');
+		}
+	}
+
+	/**
+	 * Save albums order action
+	 */
+	public function saveAlbumsOrder()
+	{
+		header('Content-Type: application/json');
+
+		if ( !empty($_POST) ) {
+			$items = !empty($_POST['items']) ? $_POST['items'] : array();
+
+			$inserts = array();
+
+			if ( is_array($items) ) {
+				$dbh = $this->app->getLibrary('pdo')->getHandle();
+
+				foreach ( $items as $albumId => $sortOrder ) {
+					$sth = $dbh->prepare($sql='
+						UPDATE albums SET
+							sort_order = :sort_order
+						WHERE
+							id = :id
+						');
+
+					$sth->bindParam('sort_order', $sortOrder, \PDO::PARAM_INT);
+					$sth->bindParam('id',         $albumId,   \PDO::PARAM_INT);
+
+					$sth->execute();
+				}
 			}
 
 			exit('{}');

@@ -43,6 +43,8 @@ module Shot {
 					.on('click', (e) => {
 						var modal = $(Mustache.render($('#template-modals-thumbnails-upload').html(), {}));
 
+						multiEdit.toggle(false);
+
 						modal
 							.on('change', ':input[type="file"]', (e: any) => {
 								var
@@ -122,6 +124,7 @@ module Shot {
 
 										thumbnailQueue.push(thumbnail);
 
+										thumbnails.push(thumbnail);
 										multiEdit.push(thumbnail);
 										dragDrop.push(thumbnail);
 									}
@@ -384,7 +387,6 @@ module Shot {
 						thumbnailGrid.append(thumbnail.render().el);
 
 						thumbnails.push(thumbnail);
-
 						multiEdit.push(thumbnail);
 						dragDrop.push(thumbnail);
 

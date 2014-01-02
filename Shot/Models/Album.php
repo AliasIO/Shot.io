@@ -34,6 +34,12 @@ class Album extends \Swiftlet\Model
 	public $title = '';
 
 	/**
+	 * Sort order
+	 * @var integer
+	 */
+	public $sortOrder = 0;
+
+	/**
 	 * Save album
 	 * @return Album
 	 * @throws \Swiftlet\Exception
@@ -45,26 +51,31 @@ class Album extends \Swiftlet\Model
 		if ( $this->id ) {
 			$sth = $dbh->prepare('
 				UPDATE albums SET
-					title = :title
+					title = :title,
+					sort_order = :sort_order
 				WHERE
 					id = :id
 				LIMIT 1
 				');
 
-			$sth->bindParam('title', $this->title);
-			$sth->bindParam('id',    $this->id, \PDO::PARAM_INT);
+			$sth->bindParam('title',      $this->title);
+			$sth->bindParam('sort_order', $this->sortOrder, \PDO::PARAM_INT);
+			$sth->bindParam('id',         $this->id,        \PDO::PARAM_INT);
 
 			$sth->execute();
 		} else {
 			$sth = $dbh->prepare('
 				INSERT INTO albums (
-					title
+					title,
+					sort_order
 				) VALUES (
-					:title
+					:title,
+					:sort_order
 				)
 				');
 
-			$sth->bindParam('title', $this->title);
+			$sth->bindParam('title',      $this->title);
+			$sth->bindParam('sort_order', $this->sortOrder, \PDO::PARAM_INT);
 
 			$sth->execute();
 
@@ -137,6 +148,7 @@ class Album extends \Swiftlet\Model
 		$this->title     = $result->title;
 		$this->filename  = $result->filename;
 		$this->thumbCrop = $result->thumb_crop;
+		$this->sortOrder = $result->sort_order;
 
 		// If no cover image is set get the first image in the album
 		if ( !$this->filename ) {

@@ -27,6 +27,10 @@ class Pdo extends \Swiftlet\Library
 		}
 
 		$this->handle->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+		$sth = $this->handle->prepare('PRAGMA journal_mode=WAL');
+
+		$sth->execute();
 	}
 
 	/**

@@ -28,7 +28,7 @@ class Index extends \Swiftlet\Controller
 			GROUP BY albums.id
 			-- HAVING
 				-- COUNT(albums_images.image_id) > 0
-			ORDER BY albums.id DESC
+			ORDER BY albums.sort_order ASC, albums.id DESC
 			');
 
 		$sth->execute();
