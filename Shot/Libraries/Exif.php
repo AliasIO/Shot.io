@@ -56,7 +56,9 @@ class Exif extends \Swiftlet\Library
 				list(, $field) = explode('exif:', $property);
 
 				if ( isset($this->fields[$field]) ) {
-					$exif[$this->fields[$field]['desc']] = $this->formatValue($field, $value);
+					$value = trim($this->formatValue($field, $value));
+
+					$exif[$this->fields[$field]['desc']] = $value ?: '-';
 				}
 			}
 		}
@@ -324,7 +326,7 @@ class Exif extends \Swiftlet\Library
 			case 'DateTime':
 			case 'DateTimeOriginal':
 			case 'DateTimeDigitized':
-				return date('m/d/Y H:i:s O', strtotime($value));
+				return date('Y-m-d H:i:s O', strtotime($value));
 
 			default:
 				return $value;

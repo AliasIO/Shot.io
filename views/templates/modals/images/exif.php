@@ -22,9 +22,9 @@
 												</td>
 											</tr>
 											{{/each}}
-											{{else}}
 										</tbody>
 									</table>
+									{{else}}
 									<p>
 										No Exif data available.
 									</p>
@@ -35,7 +35,7 @@
 						<fieldset>
 							<div class="row">
 								<div class="large-12 small-12 columns">
-									<button type="button" class="cancel secondary expand"><i class="fa fa-times"></i> Close</button>
+									<button type="button" class="cancel secondary expand">Close</button>
 								</div>
 							</div>
 						</fieldset>
