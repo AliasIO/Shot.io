@@ -15,7 +15,7 @@ module Shot {
 			 * Render
 			 */
 			render(): ProgressBar {
-				this.el = $(Mustache.render(this.template, {}));
+				this.el = $(Handlebars.compile(this.template)({}));
 
 				return this;
 			}

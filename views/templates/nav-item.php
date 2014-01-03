@@ -1,16 +1,16 @@
 <script id="template-nav-item" type="text/template">
-	{{#right}}
+	{{#if right}}
 	<li class="divider"></li>
-	{{/right}}
+	{{/if}}
 	<li>
 		<a href="{{url}}{{^url}}javascript: void(0);{{/url}}">
-			{{#icon}}
+			{{#if icon}}
 			<i class="fa fa-{{icon}}"></i>
-			{{/icon}}
+			{{/if}}
 			<span class="text">{{{text}}}</span>
 		</a>
 	</li>
-	{{#left}}
+	{{#if left}}
 	<li class="divider"></li>
-	{{/left}}
+	{{/if}}
 </script>

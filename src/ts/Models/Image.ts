@@ -26,7 +26,7 @@ module Shot {
 					preview;
 
 				if ( this.loaded ) {
-					el = $(Mustache.render(this.template, data));
+					el = $(Handlebars.compile(this.template)(data));
 
 					this.el.replaceWith(el);
 
@@ -34,7 +34,7 @@ module Shot {
 				} else {
 					data.url = this.data.paths.preview;
 
-					this.el = $(Mustache.render(this.template, data));
+					this.el = $(Handlebars.compile(this.template)(data));
 
 					preview = this.el.find('img');
 

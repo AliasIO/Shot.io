@@ -125,7 +125,24 @@ class Ajax extends \Swiftlet\Controller
 							->create($filename)
 							->save();
 
-						$album->addImage($image);
+						// Get sort order
+						$dbh = $this->app->getLibrary('pdo')->getHandle();
+
+						$sth = $dbh->prepare('
+							SELECT
+								MAX(sort_order) + 1 AS sort_order
+							FROM albums_images
+							WHERE
+								album_id = :album_id
+							');
+
+						$sth->bindParam('album_id', $albumId, \PDO::PARAM_INT);
+
+						$sth->execute();
+
+						$result = $sth->fetchObject();
+
+						$album->addImage($image, $result->sort_order);
 
 						echo json_encode(array(
 							'id'   => (int) $image->getId(),

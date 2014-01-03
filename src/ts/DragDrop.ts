@@ -16,33 +16,35 @@ module Shot {
 
 			$(document).swipe()
 				.on('swipeStart', (e) => {
-					e.originalEvent.originalEvent.preventDefault();
+					if ( $(e.originalEvent.target).closest('.thumbnail-grid').length ) {
+						e.originalEvent.originalEvent.preventDefault();
 
-					this.editables.forEach((editable) => {
-						if ( editable.el.find('.icon.drag-handle').has(e.originalEvent.target).length > 0 ) {
-							draggable = editable;
+						this.editables.forEach((editable) => {
+							if ( editable.el.find('.icon.drag-handle').has(e.originalEvent.target).length > 0 ) {
+								draggable = editable;
 
-							draggable.el.addClass('draggable');
+								draggable.el.addClass('draggable');
 
-							offset.x = draggable.el.position().left;
-							offset.y = draggable.el.position().top;
+								offset.x = draggable.el.position().left;
+								offset.y = draggable.el.position().top;
 
-							draggable.el.before(placeholder);
+								draggable.el.before(placeholder);
 
-							draggable.el
-								.appendTo(draggable.el.parent())
-								.css({
-									height: placeholder.outerHeight(),
-									left: offset.x + e.swipe.x,
-									top: offset.y + e.swipe.y,
-									position: 'absolute',
-									width: placeholder.outerWidth(),
-									zIndex: 999
-								});
+								draggable.el
+									.appendTo(draggable.el.parent())
+									.css({
+										height: placeholder.outerHeight(),
+										left: offset.x + e.swipe.x,
+										top: offset.y + e.swipe.y,
+										position: 'absolute',
+										width: placeholder.outerWidth(),
+										zIndex: 999
+									});
 
-							this.getPositions(draggable);
-						}
-					});
+								this.getPositions(draggable);
+							}
+						});
+					}
 				})
 				.on('swipeMove', (e) => {
 					if ( draggable ) {

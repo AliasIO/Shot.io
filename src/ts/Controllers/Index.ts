@@ -16,7 +16,7 @@ module Shot {
 					multiEdit = new MultiEdit<Models.Album>(),
 					dragDrop = new DragDrop<Models.Album>();
 
-				navItems.createAlbum = $(Mustache.render($('#template-nav-item').html(), {
+				navItems.createAlbum = $(Handlebars.compile($('#template-nav-item').html())({
 					text: 'Add album',
 					icon: 'plus-circle',
 					right: true
@@ -24,7 +24,7 @@ module Shot {
 
 				navItems.createAlbum
 					.on('click', (e) => {
-						var modal = $(Mustache.render($('#template-modals-albums-create').html(), {}));
+						var modal = $(Handlebars.compile($('#template-modals-albums-create').html())({}));
 
 						multiEdit.toggle(false);
 
@@ -61,6 +61,11 @@ module Shot {
 									albums.push(album);
 									multiEdit.push(album);
 									dragDrop.push(album);
+
+									// Scroll to last album
+									$('html, body').animate({
+										scrollTop: album.el.offset().top
+									}, 1000);
 								}
 
 								modal.remove();
@@ -75,7 +80,7 @@ module Shot {
 					})
 					.appendTo('.top-bar .right');
 
-				navItems.editAlbums = $(Mustache.render($('#template-nav-item').html(), {
+				navItems.editAlbums = $(Handlebars.compile($('#template-nav-item').html())({
 					text: 'Edit albums',
 					icon: 'pencil',
 					right: true
@@ -90,7 +95,7 @@ module Shot {
 					.appendTo('.top-bar .right');
 
 				// Edit albums
-				editAlbums = $(Mustache.render($('#template-dock-albums').html(), {}));
+				editAlbums = $(Handlebars.compile($('#template-dock-albums').html())({}));
 
 				editAlbums
 					.on('click', '.select-all', (e) => {
@@ -116,7 +121,7 @@ module Shot {
 					})
 					.on('click', '.edit', (e) => {
 						var
-							modal = $(Mustache.render($('#template-modals-albums-edit-selection').html(), {})),
+							modal = $(Handlebars.compile($('#template-modals-albums-edit-selection').html())({})),
 							selection = multiEdit.getSelection();
 
 						modal
@@ -174,7 +179,7 @@ module Shot {
 					})
 					.on('click', '.delete', (e) => {
 						var
-							modal = $(Mustache.render($('#template-modals-albums-delete-selection').html(), {})),
+							modal = $(Handlebars.compile($('#template-modals-albums-delete-selection').html())({})),
 							selection = multiEdit.getSelection();
 
 						e.preventDefault();

@@ -123,7 +123,7 @@ var Shot;
                     upload: null
                 }, editThumbnails, multiEdit = new Shot.MultiEdit(), dragDrop = new Shot.DragDrop(), preRender = this.preRender;
 
-                navItems.album = $(Mustache.render($('#template-nav-item').html(), {
+                navItems.album = $(Handlebars.compile($('#template-nav-item').html())({
                     text: album.data.title,
                     icon: 'folder',
                     left: true,
@@ -132,14 +132,14 @@ var Shot;
 
                 navItems.album.appendTo('.top-bar .left');
 
-                navItems.upload = $(Mustache.render($('#template-nav-item').html(), {
+                navItems.upload = $(Handlebars.compile($('#template-nav-item').html())({
                     text: 'Add images',
                     icon: 'plus-circle',
                     right: true
                 }));
 
                 navItems.upload.on('click', function (e) {
-                    var modal = $(Mustache.render($('#template-modals-thumbnails-upload').html(), {}));
+                    var modal = $(Handlebars.compile($('#template-modals-thumbnails-upload').html())({}));
 
                     multiEdit.toggle(false);
 
@@ -164,7 +164,7 @@ var Shot;
                                 thumbnail.data.formData.append('image', file);
                                 thumbnail.data.formData.append('albumId', album.data.id);
 
-                                thumbnailGrid.prepend(thumbnail.el);
+                                thumbnailGrid.append(thumbnail.el);
 
                                 $(thumbnail).on('delete', function () {
                                     thumbnail.el.remove();
@@ -212,6 +212,10 @@ var Shot;
                             }
                         });
 
+                        $('html, body').animate({
+                            scrollTop: thumbnails[thumbnails.length - 1].el.offset().top
+                        }, 1000);
+
                         (function nextThumbnail() {
                             if (thumbnailQueue.length) {
                                 preRender(thumbnailQueue.shift(), function () {
@@ -228,7 +232,7 @@ var Shot;
                     e.preventDefault();
                 }).appendTo('.top-bar .right');
 
-                navItems.editThumbnails = $(Mustache.render($('#template-nav-item').html(), {
+                navItems.editThumbnails = $(Handlebars.compile($('#template-nav-item').html())({
                     text: 'Edit images',
                     icon: 'pencil',
                     right: true
@@ -240,14 +244,14 @@ var Shot;
                     multiEdit.toggle();
                 }).appendTo('.top-bar .right');
 
-                navItems.editAlbum = $(Mustache.render($('#template-nav-item').html(), {
+                navItems.editAlbum = $(Handlebars.compile($('#template-nav-item').html())({
                     text: 'Edit album',
                     icon: 'pencil',
                     right: true
                 }));
 
                 navItems.editAlbum.on('click', function (e) {
-                    var modal = $(Mustache.render($('#template-modals-albums-edit').html(), {}));
+                    var modal = $(Handlebars.compile($('#template-modals-albums-edit').html())({}));
 
                     e.preventDefault();
 
@@ -272,7 +276,7 @@ var Shot;
                     }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
                 }).appendTo('.top-bar .right');
 
-                editThumbnails = $(Mustache.render($('#template-dock-thumbnails').html(), {}));
+                editThumbnails = $(Handlebars.compile($('#template-dock-thumbnails').html())({}));
 
                 editThumbnails.on('click', '.select-all', function (e) {
                     e.preventDefault();
@@ -293,7 +297,7 @@ var Shot;
 
                     multiEdit.toggle(false);
                 }).on('click', '.edit', function (e) {
-                    var modal = $(Mustache.render($('#template-modals-thumbnails-edit-selection').html(), {})), selection = multiEdit.getSelection();
+                    var modal = $(Handlebars.compile($('#template-modals-thumbnails-edit-selection').html())({})), selection = multiEdit.getSelection();
 
                     modal.on('submit', 'form', function (e) {
                         var ids = [], selection = multiEdit.getSelection(), title = modal.find(':input[name="title"]').val();
@@ -337,7 +341,7 @@ var Shot;
 
                     $(e.target).blur();
                 }).on('click', '.delete', function (e) {
-                    var modal = $(Mustache.render($('#template-modals-thumbnails-delete-selection').html(), {})), selection = multiEdit.getSelection();
+                    var modal = $(Handlebars.compile($('#template-modals-thumbnails-delete-selection').html())({})), selection = multiEdit.getSelection();
 
                     e.preventDefault();
 
@@ -409,10 +413,6 @@ var Shot;
                         thumbnails.push(thumbnail);
                         multiEdit.push(thumbnail);
                         dragDrop.push(thumbnail);
-
-                        thumbnail.el.on('click', function (e) {
-                            console.log(thumbnail.el.offset());
-                        });
                     });
                 }
             };
@@ -420,7 +420,8 @@ var Shot;
             Album.prototype.carousel = function () {
                 var carousel = new Shot.Models.Carousel(SHOT.images), album = new Shot.Models.Album(SHOT.album), id, navItems = {
                     album: null,
-                    thumbnail: null
+                    thumbnail: null,
+                    exif: null
                 };
 
                 $(document).foundation('interchange', {
@@ -437,7 +438,7 @@ var Shot;
                     return a;
                 }));
 
-                navItems.album = $(Mustache.render($('#template-nav-item').html(), {
+                navItems.album = $(Handlebars.compile($('#template-nav-item').html())({
                     text: album.data.title.replace(/&amp;/g, '&'),
                     icon: 'folder',
                     url: SHOT.rootPath + 'album/grid/' + album.data.id,
@@ -446,12 +447,30 @@ var Shot;
 
                 navItems.album.appendTo('.top-bar .left');
 
+                navItems.exif = $(Handlebars.compile($('#template-nav-item').html())({
+                    text: 'Exif',
+                    icon: 'info-circle',
+                    right: true
+                }));
+
+                navItems.exif.appendTo('.top-bar .right');
+
+                navItems.exif.on('click', function (e) {
+                    var modal = $(Handlebars.compile($('#template-modals-images-exif').html())({ exif: carousel.getCurrent().data.exif }));
+
+                    modal.on('click', '.cancel', function (e) {
+                        modal.remove();
+                    }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
+
+                    e.preventDefault();
+                }).appendTo('.top-bar .right');
+
                 carousel.el.on('change', function (e, image) {
                     if (navItems.thumbnail) {
                         navItems.thumbnail.remove();
                     }
 
-                    navItems.thumbnail = $(Mustache.render($('#template-nav-item').html(), {
+                    navItems.thumbnail = $(Handlebars.compile($('#template-nav-item').html())({
                         text: image.data.title.replace(/&amp;/g, '&'),
                         icon: 'picture-o',
                         url: SHOT.rootPath + 'album/carousel/' + album.data.id + '/' + image.data.id,
@@ -540,14 +559,14 @@ var Shot;
             Index.prototype.index = function () {
                 var thumbnailGrid = $('.thumbnail-grid'), albums = [], navItems = { createAlbum: null, editAlbums: null }, editAlbums, multiEdit = new Shot.MultiEdit(), dragDrop = new Shot.DragDrop();
 
-                navItems.createAlbum = $(Mustache.render($('#template-nav-item').html(), {
+                navItems.createAlbum = $(Handlebars.compile($('#template-nav-item').html())({
                     text: 'Add album',
                     icon: 'plus-circle',
                     right: true
                 }));
 
                 navItems.createAlbum.on('click', function (e) {
-                    var modal = $(Mustache.render($('#template-modals-albums-create').html(), {}));
+                    var modal = $(Handlebars.compile($('#template-modals-albums-create').html())({}));
 
                     multiEdit.toggle(false);
 
@@ -578,6 +597,10 @@ var Shot;
                             albums.push(album);
                             multiEdit.push(album);
                             dragDrop.push(album);
+
+                            $('html, body').animate({
+                                scrollTop: album.el.offset().top
+                            }, 1000);
                         }
 
                         modal.remove();
@@ -586,7 +609,7 @@ var Shot;
                     }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
                 }).appendTo('.top-bar .right');
 
-                navItems.editAlbums = $(Mustache.render($('#template-nav-item').html(), {
+                navItems.editAlbums = $(Handlebars.compile($('#template-nav-item').html())({
                     text: 'Edit albums',
                     icon: 'pencil',
                     right: true
@@ -598,7 +621,7 @@ var Shot;
                     multiEdit.toggle();
                 }).appendTo('.top-bar .right');
 
-                editAlbums = $(Mustache.render($('#template-dock-albums').html(), {}));
+                editAlbums = $(Handlebars.compile($('#template-dock-albums').html())({}));
 
                 editAlbums.on('click', '.select-all', function (e) {
                     e.preventDefault();
@@ -619,7 +642,7 @@ var Shot;
 
                     multiEdit.toggle(false);
                 }).on('click', '.edit', function (e) {
-                    var modal = $(Mustache.render($('#template-modals-albums-edit-selection').html(), {})), selection = multiEdit.getSelection();
+                    var modal = $(Handlebars.compile($('#template-modals-albums-edit-selection').html())({})), selection = multiEdit.getSelection();
 
                     modal.on('submit', 'form', function (e) {
                         var ids = [], selection = multiEdit.getSelection(), title = modal.find(':input[name="title"]').val();
@@ -663,7 +686,7 @@ var Shot;
 
                     $(e.target).blur();
                 }).on('click', '.delete', function (e) {
-                    var modal = $(Mustache.render($('#template-modals-albums-delete-selection').html(), {})), selection = multiEdit.getSelection();
+                    var modal = $(Handlebars.compile($('#template-modals-albums-delete-selection').html())({})), selection = multiEdit.getSelection();
 
                     e.preventDefault();
 
@@ -754,31 +777,33 @@ var Shot;
             var offset = { x: 0, y: 0 }, draggable = null, lastHover = null, placeholder = $('<li class="drop-target"><div class="container"><div/></li>');
 
             $(document).swipe().on('swipeStart', function (e) {
-                e.originalEvent.originalEvent.preventDefault();
+                if ($(e.originalEvent.target).closest('.thumbnail-grid').length) {
+                    e.originalEvent.originalEvent.preventDefault();
 
-                _this.editables.forEach(function (editable) {
-                    if (editable.el.find('.icon.drag-handle').has(e.originalEvent.target).length > 0) {
-                        draggable = editable;
+                    _this.editables.forEach(function (editable) {
+                        if (editable.el.find('.icon.drag-handle').has(e.originalEvent.target).length > 0) {
+                            draggable = editable;
 
-                        draggable.el.addClass('draggable');
+                            draggable.el.addClass('draggable');
 
-                        offset.x = draggable.el.position().left;
-                        offset.y = draggable.el.position().top;
+                            offset.x = draggable.el.position().left;
+                            offset.y = draggable.el.position().top;
 
-                        draggable.el.before(placeholder);
+                            draggable.el.before(placeholder);
 
-                        draggable.el.appendTo(draggable.el.parent()).css({
-                            height: placeholder.outerHeight(),
-                            left: offset.x + e.swipe.x,
-                            top: offset.y + e.swipe.y,
-                            position: 'absolute',
-                            width: placeholder.outerWidth(),
-                            zIndex: 999
-                        });
+                            draggable.el.appendTo(draggable.el.parent()).css({
+                                height: placeholder.outerHeight(),
+                                left: offset.x + e.swipe.x,
+                                top: offset.y + e.swipe.y,
+                                position: 'absolute',
+                                width: placeholder.outerWidth(),
+                                zIndex: 999
+                            });
 
-                        _this.getPositions(draggable);
-                    }
-                });
+                            _this.getPositions(draggable);
+                        }
+                    });
+                }
             }).on('swipeMove', function (e) {
                 if (draggable) {
                     setTimeout(function () {
@@ -914,7 +939,7 @@ var Shot;
                 this.template = $('#template-album').html();
             }
             Album.prototype.render = function () {
-                var el = $(Mustache.render(this.template, this.data, {}));
+                var el = $(Handlebars.compile(this.template)(this.data));
 
                 if (this.el) {
                     this.el.replaceWith(el);
@@ -957,7 +982,7 @@ var Shot;
             }
             Carousel.prototype.render = function () {
                 var _this = this;
-                var el = $(Mustache.render(this.template, {})), destination, distance, duration, wrap;
+                var el = $(Handlebars.compile(this.template)({})), destination, distance, duration, wrap;
 
                 if (this.el) {
                     this.el.replaceWith(el);
@@ -1084,6 +1109,10 @@ var Shot;
 
                 return this;
             };
+
+            Carousel.prototype.getCurrent = function () {
+                return this.current;
+            };
             return Carousel;
         })();
         Models.Carousel = Carousel;
@@ -1106,7 +1135,7 @@ var Shot;
                 var data = $.extend({}, this.data), id = new Date().getTime() + Math.round(Math.random() * 999), el, preview;
 
                 if (this.loaded) {
-                    el = $(Mustache.render(this.template, data));
+                    el = $(Handlebars.compile(this.template)(data));
 
                     this.el.replaceWith(el);
 
@@ -1114,7 +1143,7 @@ var Shot;
                 } else {
                     data.url = this.data.paths.preview;
 
-                    this.el = $(Mustache.render(this.template, data));
+                    this.el = $(Handlebars.compile(this.template)(data));
 
                     preview = this.el.find('img');
 
@@ -1202,7 +1231,7 @@ var Shot;
                 this.template = $('#template-progressbar').html();
             }
             ProgressBar.prototype.render = function () {
-                this.el = $(Mustache.render(this.template, {}));
+                this.el = $(Handlebars.compile(this.template)({}));
 
                 return this;
             };
@@ -1239,7 +1268,9 @@ var Shot;
                 this.template = $('#template-thumbnail').html();
             }
             Thumbnail.prototype.render = function () {
-                var el = $(Mustache.render(this.template, this.data));
+                var el = $(Handlebars.compile(this.template)(this.data));
+
+                console.log(this.data);
 
                 if (this.el) {
                     this.el.replaceWith(el);

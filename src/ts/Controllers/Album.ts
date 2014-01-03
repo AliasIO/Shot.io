@@ -24,7 +24,7 @@ module Shot {
 					preRender = this.preRender;
 
 				// Nav items
-				navItems.album = $(Mustache.render($('#template-nav-item').html(), {
+				navItems.album = $(Handlebars.compile($('#template-nav-item').html())({
 					text: album.data.title,
 					icon: 'folder',
 					left: true,
@@ -33,7 +33,7 @@ module Shot {
 
 				navItems.album.appendTo('.top-bar .left');
 
-				navItems.upload = $(Mustache.render($('#template-nav-item').html(), {
+				navItems.upload = $(Handlebars.compile($('#template-nav-item').html())({
 					text: 'Add images',
 					icon: 'plus-circle',
 					right: true
@@ -41,7 +41,7 @@ module Shot {
 
 				navItems.upload
 					.on('click', (e) => {
-						var modal = $(Mustache.render($('#template-modals-thumbnails-upload').html(), {}));
+						var modal = $(Handlebars.compile($('#template-modals-thumbnails-upload').html())({}));
 
 						multiEdit.toggle(false);
 
@@ -72,7 +72,7 @@ module Shot {
 										thumbnail.data.formData.append('image', file);
 										thumbnail.data.formData.append('albumId', album.data.id);
 
-										thumbnailGrid.prepend(thumbnail.el);
+										thumbnailGrid.append(thumbnail.el);
 
 										$(thumbnail).on('delete', () => {
 											thumbnail.el.remove();
@@ -130,6 +130,11 @@ module Shot {
 									}
 								});
 
+								// Scroll to last thumbnail
+								$('html, body').animate({
+									scrollTop: thumbnails[thumbnails.length - 1].el.offset().top
+								}, 1000);
+
 								// Pre render all thumbnails, one at a time
 								(function nextThumbnail() {
 									if ( thumbnailQueue.length ) {
@@ -151,7 +156,7 @@ module Shot {
 					})
 					.appendTo('.top-bar .right');
 
-				navItems.editThumbnails = $(Mustache.render($('#template-nav-item').html(), {
+				navItems.editThumbnails = $(Handlebars.compile($('#template-nav-item').html())({
 					text: 'Edit images',
 					icon: 'pencil',
 					right: true
@@ -166,7 +171,7 @@ module Shot {
 					.appendTo('.top-bar .right');
 
 				// Edit album
-				navItems.editAlbum = $(Mustache.render($('#template-nav-item').html(), {
+				navItems.editAlbum = $(Handlebars.compile($('#template-nav-item').html())({
 					text: 'Edit album',
 					icon: 'pencil',
 					right: true
@@ -174,7 +179,7 @@ module Shot {
 
 				navItems.editAlbum
 					.on('click', (e) => {
-						var modal = $(Mustache.render($('#template-modals-albums-edit').html(), {}));
+						var modal = $(Handlebars.compile($('#template-modals-albums-edit').html())({}));
 
 						e.preventDefault();
 
@@ -207,7 +212,7 @@ module Shot {
 					.appendTo('.top-bar .right');
 
 				// Edit thumbnails
-				editThumbnails = $(Mustache.render($('#template-dock-thumbnails').html(), {}));
+				editThumbnails = $(Handlebars.compile($('#template-dock-thumbnails').html())({}));
 
 				editThumbnails
 					.on('click', '.select-all', (e) => {
@@ -233,7 +238,7 @@ module Shot {
 					})
 					.on('click', '.edit', (e) => {
 						var
-							modal = $(Mustache.render($('#template-modals-thumbnails-edit-selection').html(), {})),
+							modal = $(Handlebars.compile($('#template-modals-thumbnails-edit-selection').html())({})),
 							selection = multiEdit.getSelection();
 
 						modal
@@ -291,7 +296,7 @@ module Shot {
 					})
 					.on('click', '.delete', (e) => {
 						var
-							modal = $(Mustache.render($('#template-modals-thumbnails-delete-selection').html(), {})),
+							modal = $(Handlebars.compile($('#template-modals-thumbnails-delete-selection').html())({})),
 							selection = multiEdit.getSelection();
 
 						e.preventDefault();
@@ -389,10 +394,6 @@ module Shot {
 						thumbnails.push(thumbnail);
 						multiEdit.push(thumbnail);
 						dragDrop.push(thumbnail);
-
-						thumbnail.el.on('click', (e) => {
-							console.log(thumbnail.el.offset());
-						});
 					});
 				}
 			}
@@ -405,9 +406,10 @@ module Shot {
 					carousel = new Models.Carousel(SHOT.images),
 					album = new Models.Album(SHOT.album),
 					id: number,
-					navItems: { album: JQuery; thumbnail: JQuery; } = {
+					navItems: { album: JQuery; thumbnail: JQuery; exif: JQuery } = {
 						album: null,
-						thumbnail: null
+						thumbnail: null,
+						exif: null
 					};
 
 				$(document).foundation('interchange', {
@@ -423,8 +425,8 @@ module Shot {
 				// Obtain image ID from URL
 				id = parseInt(location.pathname.replace(/^\/album\/carousel\/\d\/(\d)/, (match, a) => { return a; }));
 
-				// Nav item
-				navItems.album = $(Mustache.render($('#template-nav-item').html(), {
+				// Nav items
+				navItems.album = $(Handlebars.compile($('#template-nav-item').html())({
 					text: album.data.title.replace(/&amp;/g, '&'),
 					icon: 'folder',
 					url: SHOT.rootPath + 'album/grid/' + album.data.id,
@@ -433,6 +435,31 @@ module Shot {
 
 				navItems.album.appendTo('.top-bar .left');
 
+				navItems.exif = $(Handlebars.compile($('#template-nav-item').html())({
+					text: 'Exif',
+					icon: 'info-circle',
+					right: true
+				}));
+
+				navItems.exif.appendTo('.top-bar .right');
+
+				navItems.exif
+					.on('click', (e) => {
+						var modal = $(Handlebars.compile($('#template-modals-images-exif').html())({ exif: carousel.getCurrent().data.exif }));
+
+						modal
+							.on('click', '.cancel', (e) => {
+								modal.remove();
+							})
+							.appendTo('body')
+							.show()
+							.find('.modal-content')
+							.css({ marginTop: $(document).scrollTop() + 'px' });
+
+						e.preventDefault();
+					})
+					.appendTo('.top-bar .right');
+
 				// Carousel events
 				carousel.el.on('change', (e, image: Models.Image) => {
 					// Nav item
@@ -440,7 +467,7 @@ module Shot {
 						navItems.thumbnail.remove();
 					}
 
-					navItems.thumbnail = $(Mustache.render($('#template-nav-item').html(), {
+					navItems.thumbnail = $(Handlebars.compile($('#template-nav-item').html())({
 						text: image.data.title.replace(/&amp;/g, '&'),
 						icon: 'picture-o',
 						url: SHOT.rootPath + 'album/carousel/' + album.data.id + '/' + image.data.id,

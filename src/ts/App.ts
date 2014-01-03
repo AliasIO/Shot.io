@@ -1,5 +1,5 @@
 /// <reference path="definitions/jquery.d.ts"/>
-/// <reference path="definitions/mustache.d.ts"/>
+/// <reference path="definitions/handlebars.d.ts"/>
 /// <reference path="definitions/shot.d.ts"/>
 /// <reference path="Models/Editable.ts"/>
 

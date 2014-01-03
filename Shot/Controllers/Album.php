@@ -43,7 +43,7 @@ class Album extends \Swiftlet\Controller
 			INNER JOIN images ON albums_images.image_id = images.id
 			WHERE
 				albums_images.album_id = :album_id
-			ORDER BY albums_images.sort_order ASC, images.id DESC
+			ORDER BY albums_images.sort_order ASC, images.id ASC
 			');
 
 		$sth->bindParam('album_id', $albumId);
@@ -67,6 +67,8 @@ class Album extends \Swiftlet\Controller
 				$paths[$imageSize] = $image->getFilePath($imageSize);
 			}
 
+			$exif = $this->app->getLibrary('exif')->format($image->getProperties());
+
 			$thumbnails[] = (object) array(
 				'id'       => (int) $image->getId(),
 				'filename' => $image->getFilename(),
@@ -74,7 +76,8 @@ class Album extends \Swiftlet\Controller
 				'width'    => (int) $image->getWidth(),
 				'height'   => (int) $image->getHeight(),
 				'path'     => $image->getFilePath('thumb'),
-				'paths'    => $paths
+				'paths'    => $paths,
+				'exif'     => $exif
 				);
 		}
 

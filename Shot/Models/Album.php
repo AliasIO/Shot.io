@@ -161,7 +161,7 @@ class Album extends \Swiftlet\Model
 				INNER JOIN images ON albums_images.image_id = images.id
 				WHERE
 					albums_images.album_id = :id
-				ORDER BY albums_images.sort_order DESC, images.id ASC
+				ORDER BY albums_images.sort_order ASC, images.id ASC
 				LIMIT 1
 				');
 
@@ -184,7 +184,7 @@ class Album extends \Swiftlet\Model
 	 * Add image
 	 * @param Image
 	 */
-	public function addImage(Image $image)
+	public function addImage(Image $image, $sortOrder = 0)
 	{
 		$imageId = $image->getId();
 
@@ -193,15 +193,18 @@ class Album extends \Swiftlet\Model
 		$sth = $dbh->prepare('
 			INSERT OR IGNORE INTO albums_images (
 				album_id,
-				image_id
+				image_id,
+				sort_order
 			) VALUES (
 				:album_id,
-				:image_id
+				:image_id,
+				:sort_order
 			)
 			');
 
-		$sth->bindParam('album_id', $this->id, \PDO::PARAM_INT);
-		$sth->bindParam('image_id', $imageId,  \PDO::PARAM_INT);
+		$sth->bindParam('album_id',   $this->id,  \PDO::PARAM_INT);
+		$sth->bindParam('image_id',   $imageId,   \PDO::PARAM_INT);
+		$sth->bindParam('sort_order', $sortOrder, \PDO::PARAM_INT);
 
 		$sth->execute();
 	}

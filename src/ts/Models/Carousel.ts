@@ -34,7 +34,7 @@ module Shot {
 			 */
 			render(): Carousel {
 				var
-					el = $(Mustache.render(this.template, {})),
+					el = $(Handlebars.compile(this.template)({})),
 					destination: number,
 					distance: number,
 					duration: number,
@@ -186,6 +186,13 @@ module Shot {
 				});
 
 				return this;
+			}
+
+			/**
+			 * Get the current image
+			 */
+			getCurrent(): Models.Image {
+				return this.current;
 			}
 		}
 	}

@@ -16,7 +16,9 @@ module Shot {
 			 * Render
 			 */
 			render(): Thumbnail {
-				var el = $(Mustache.render(this.template, this.data));
+				var el = $(Handlebars.compile(this.template)(this.data));
+
+				console.log(this.data);
 
 				if ( this.el ) {
 					this.el.replaceWith(el);

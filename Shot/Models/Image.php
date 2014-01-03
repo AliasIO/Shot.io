@@ -296,6 +296,15 @@ class Image extends \Swiftlet\Model
 	}
 
 	/**
+	 * Get properties
+	 * @return array
+	 */
+	public function getProperties()
+	{
+		return $this->properties;
+	}
+
+	/**
 	 * Get file path
 	 * @param mixed $size
 	 * @return string
