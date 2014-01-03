@@ -114,7 +114,6 @@ h1, h2, h3, h4, h5, h6
 
 form
 	margin: 0 auto
-	max-width: 600px
 
 fieldset
 	padding-bottom: 0
@@ -167,17 +166,20 @@ li
 	top: 0
 	z-index: 99
 
-.modal-content
+.modal-wrap
+	padding-bottom: 100px
 	position: absolute
 	top: 100px
 	z-index: 99
 	width: 100%
 
-	form
-		background: lighten($secondary-color, 10%)
-		+box-shadow(0 0 50px rgba(0, 0, 0, .5))
-		overflow: hidden
-		padding: 1em 2.4em 0
+.modal-content
+	background: lighten($secondary-color, 10%)
+	+box-shadow(0 0 50px rgba(0, 0, 0, .5))
+	margin: 0 auto
+	overflow: hidden
+	padding: 1em 2.4em 0
+	max-width: 600px
 
 #edit-mode
 	background: lighten($secondary-color, 5%)

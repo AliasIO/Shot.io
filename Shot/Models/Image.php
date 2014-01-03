@@ -58,6 +58,12 @@ class Image extends \Swiftlet\Model
 	public $title;
 
 	/**
+	 * Taken at date
+	 * @var integer
+	 */
+	public $takenAt;
+
+	/**
 	 * Upload path
 	 * @var string
 	 */
@@ -92,6 +98,10 @@ class Image extends \Swiftlet\Model
 
 		$this->properties = $this->image->getImageProperties();
 
+		if ( !empty($this->properties['exif:DateTimeOriginal']) ) {
+			$this->takenAt = strtotime($this->properties['exif:DateTimeOriginal']);
+		}
+
 		$this
 			->autoRotate()
 			->exportSizes()
@@ -125,7 +135,8 @@ class Image extends \Swiftlet\Model
 					width      = :width,
 					height     = :height,
 					thumb_crop = :thumb_crop,
-					properties = :properties
+					properties = :properties,
+					taken_at   = :taken_at
 				WHERE
 					id = :id
 				LIMIT 1
@@ -138,6 +149,7 @@ class Image extends \Swiftlet\Model
 			$sth->bindParam('height',     $this->height, \PDO::PARAM_INT);
 			$sth->bindParam('thumb_crop', $this->thumbCrop);
 			$sth->bindParam('properties', $properties);
+			$sth->bindParam('taken_at',   $this->takenAt, \PDO::PARAM_INT);
 
 			$sth->execute();
 		} else {
@@ -148,14 +160,16 @@ class Image extends \Swiftlet\Model
 					width,
 					height,
 					thumb_crop,
-					properties
+					properties,
+					taken_at
 				) VALUES (
 					:filename,
 					:title,
 					:width,
 					:height,
 					:thumb_crop,
-					:properties
+					:properties,
+					:taken_at
 				)
 				');
 
@@ -165,6 +179,7 @@ class Image extends \Swiftlet\Model
 			$sth->bindParam('height',     $this->height, \PDO::PARAM_INT);
 			$sth->bindParam('thumb_crop', $this->thumbCrop);
 			$sth->bindParam('properties', $properties);
+			$sth->bindParam('taken_at',   $this->takenAt, \PDO::PARAM_INT);
 
 			$sth->execute();
 

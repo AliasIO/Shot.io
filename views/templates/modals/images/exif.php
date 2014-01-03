@@ -2,44 +2,46 @@
 	<div class="modal">
 		<div class="modal-background"></div>
 
-		<div class="modal-content">
+		<div class="modal-wrap">
 			<div class="row">
 				<div class="large-12 columns">
-					<form method="post">
-						<fieldset>
-							<div class="row">
-								<div class="large-12 small-12 columns">
-									{{#if exif}}
-									<table>
-										<tbody>
-											{{#each exif}}
-											<tr>
-												<th>
-													{{@key}}
-												</th>
-												<td>
-													{{this}}
-												</td>
-											</tr>
-											{{/each}}
-										</tbody>
-									</table>
-									{{else}}
-									<p>
-										No Exif data available.
-									</p>
-									{{/if}}
+					<div class="modal-content">
+						<form method="post">
+							<fieldset>
+								<div class="row">
+									<div class="large-12 small-12 columns">
+										{{#if exif}}
+										<table>
+											<tbody>
+												{{#each exif}}
+												<tr>
+													<th>
+														{{@key}}
+													</th>
+													<td>
+														{{this}}
+													</td>
+												</tr>
+												{{/each}}
+											</tbody>
+										</table>
+										{{else}}
+										<p>
+											No Exif data available.
+										</p>
+										{{/if}}
+									</div>
 								</div>
-							</div>
-						</fieldset>
-						<fieldset>
-							<div class="row">
-								<div class="large-12 small-12 columns">
-									<button type="button" class="cancel secondary expand">Close</button>
+							</fieldset>
+							<fieldset>
+								<div class="row">
+									<div class="large-12 small-12 columns">
+										<button type="button" class="cancel secondary expand">Close</button>
+									</div>
 								</div>
-							</div>
-						</fieldset>
-					</form>
+							</fieldset>
+						</form>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -7,10 +7,22 @@ CREATE TABLE images (
 	width      INTEGER NOT NULL,
 	height     INTEGER NOT NULL,
 	thumb_crop TEXT    NOT NULL,
-	properties TEXT        NULL
+	properties TEXT        NULL,
+	taken_at   INTEGER     NULL,
+	created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+	updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
 );
 
 CREATE UNIQUE INDEX filename ON images ( filename );
+
+CREATE TRIGGER images_update AFTER UPDATE ON images
+FOR EACH ROW
+BEGIN
+	UPDATE images SET 
+		updated_at = (strftime('%s', 'now')) 
+	WHERE 
+		id = old.id;
+END;
 
 DROP TABLE IF EXISTS albums;
 
@@ -19,8 +31,19 @@ CREATE TABLE albums (
 	title          TEXT    NOT NULL,
 	cover_image_id INTEGER     NULL,
 	sort_order     INTEGER NOT NULL DEFAULT 0,
+	created_at     INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+	updated_at     INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
 	FOREIGN KEY(cover_image_id) REFERENCES images(id) ON DELETE SET NULL
 );
+
+CREATE TRIGGER albums_update AFTER UPDATE ON albums
+FOR EACH ROW
+BEGIN
+	UPDATE albums SET 
+		updated_at = (strftime('%s', 'now')) 
+	WHERE 
+		id = old.id;
+END;
 
 DROP TABLE IF EXISTS albums_images;
 
@@ -37,11 +60,22 @@ CREATE UNIQUE INDEX album_image ON albums_images ( album_id, image_id );
 DROP TABLE IF EXISTS options;
 
 CREATE TABLE options (
-	key   TEXT NOT NULL,
-	value TEXT NOT NULL
+	key        TEXT    NOT NULL,
+	value      TEXT    NOT NULL,
+	created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+	updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
 );
 
 CREATE UNIQUE INDEX key ON options ( key );
+
+CREATE TRIGGER options_update AFTER UPDATE ON options
+FOR EACH ROW
+BEGIN
+	UPDATE options SET 
+		updated_at = (strftime('%s', 'now')) 
+	WHERE 
+		key = old.key;
+END;
 
 INSERT INTO options (
 	key,
