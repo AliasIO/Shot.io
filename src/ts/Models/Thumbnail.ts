@@ -18,8 +18,6 @@ module Shot {
 			render(): Thumbnail {
 				var el = $(Handlebars.compile(this.template)(this.data));
 
-				console.log(this.data);
-
 				if ( this.el ) {
 					this.el.replaceWith(el);
 				}

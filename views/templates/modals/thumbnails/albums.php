@@ -1,4 +1,4 @@
-<script id="template-modals-thumbnails-edit-selection" type="text/template">
+<script id="template-modals-thumbnails-albums" type="text/template">
 	<div class="modal">
 		<div class="modal-background"></div>
 
@@ -8,24 +8,24 @@
 					<div class="modal-content">
 						<form method="post">
 							<fieldset>
-								<legend>Title</legend>
+								<legend>Add to albums</legend>
 
 								<div class="row">
 									<div class="large-12 columns">
-										<input type="text" name="title" placeholder="No change">
+										{{#each albums}}
+										<label><input type="checkbox" name="album[{{id}}]"> {{title}}</label>
+										{{/each}}
 									</div>
 								</div>
 							</fieldset>
 
 							<fieldset>
-								<legend>Thumbnail</legend>
+								<legend>Remove from albums</legend>
 
 								<div class="row">
 									<div class="large-12 columns">
-										<label><input type="radio" name="thumb-crop" value="smart"> Smart</label>
-										<label><input type="radio" name="thumb-crop" value="centered"> Centred</label>
-										<label><input type="radio" name="thumb-crop" value="top-left"> Top / Left</label>
-										<label><input type="radio" name="thumb-crop" value="bottom-right"> Bottom / Right</label>
+										<label><input type="checkbox" name="remove"> This album ({{album.title}})</label>
+										<label><input type="checkbox" name="remove_other"> All other albums</label>
 									</div>
 								</div>
 							</fieldset>

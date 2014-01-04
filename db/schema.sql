@@ -21,7 +21,7 @@ BEGIN
 	UPDATE images SET 
 		updated_at = (strftime('%s', 'now')) 
 	WHERE 
-		id = old.id;
+		id = OLD.id;
 END;
 
 DROP TABLE IF EXISTS albums;
@@ -36,13 +36,25 @@ CREATE TABLE albums (
 	FOREIGN KEY(cover_image_id) REFERENCES images(id) ON DELETE SET NULL
 );
 
+CREATE TRIGGER albums_insert AFTER INSERT ON albums
+FOR EACH ROW
+BEGIN
+	UPDATE albums SET 
+		sort_order = (
+			SELECT MAX(sort_order) + 1
+			FROM albums
+		)
+	WHERE 
+		id = NEW.id;
+END;
+
 CREATE TRIGGER albums_update AFTER UPDATE ON albums
 FOR EACH ROW
 BEGIN
 	UPDATE albums SET 
 		updated_at = (strftime('%s', 'now')) 
 	WHERE 
-		id = old.id;
+		id = OLD.id;
 END;
 
 DROP TABLE IF EXISTS albums_images;
@@ -56,6 +68,21 @@ CREATE TABLE albums_images (
 );
 
 CREATE UNIQUE INDEX album_image ON albums_images ( album_id, image_id );
+
+CREATE TRIGGER albums_images_insert AFTER INSERT ON albums_images
+FOR EACH ROW
+BEGIN
+	UPDATE albums_images SET 
+		sort_order = (
+			SELECT MAX(sort_order) + 1
+			FROM albums_images
+			WHERE
+				album_id = NEW.album_id
+		)
+	WHERE 
+		album_id = NEW.album_id AND
+		image_id = NEW.image_id;
+END;
 
 DROP TABLE IF EXISTS options;
 
@@ -74,7 +101,7 @@ BEGIN
 	UPDATE options SET 
 		updated_at = (strftime('%s', 'now')) 
 	WHERE 
-		key = old.key;
+		key = OLD.key;
 END;
 
 INSERT INTO options (

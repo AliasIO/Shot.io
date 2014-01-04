@@ -116,7 +116,7 @@ var Shot;
                 };
             }
             Album.prototype.grid = function () {
-                var thumbnailGrid = $('.thumbnail-grid'), thumbnails = [], album = new Shot.Models.Album(SHOT.album), navItems = {
+                var helpers = new Shot.Helpers(), thumbnailGrid = $('.thumbnail-grid'), thumbnails = [], album = new Shot.Models.Album(SHOT.album), navItems = {
                     album: null,
                     editAlbum: null,
                     editThumbnails: null,
@@ -139,11 +139,11 @@ var Shot;
                 }));
 
                 navItems.upload.on('click', function (e) {
-                    var modal = $(Handlebars.compile($('#template-modals-thumbnails-upload').html())({}));
+                    var modal = new Shot.Models.Modal('#template-modals-thumbnails-upload').render();
 
                     multiEdit.toggle(false);
 
-                    modal.on('change', ':input[type="file"]', function (e) {
+                    modal.el.on('change', ':input[type="file"]', function (e) {
                         var thumbnailSize = 480, thumbnailQueue = [], fileTypes = [
                             'image/jpg',
                             'image/jpeg',
@@ -224,10 +224,10 @@ var Shot;
                             }
                         })();
 
-                        modal.remove();
-                    }).on('click', '.cancel', function (e) {
-                        modal.remove();
-                    }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
+                        modal.close();
+                    });
+
+                    helpers.showModal(modal);
 
                     e.preventDefault();
                 }).appendTo('.top-bar .right');
@@ -251,12 +251,12 @@ var Shot;
                 }));
 
                 navItems.editAlbum.on('click', function (e) {
-                    var modal = $(Handlebars.compile($('#template-modals-albums-edit').html())({}));
+                    var modal = new Shot.Models.Modal('#template-modals-albums-edit').render();
 
                     e.preventDefault();
 
-                    modal.on('submit', 'form', function (e) {
-                        var title = modal.find(':input[name="title"]').val();
+                    modal.el.on('submit', 'form', function (e) {
+                        var title = modal.el.find(':input[name="title"]').val();
 
                         e.preventDefault();
 
@@ -270,10 +270,10 @@ var Shot;
                             album.save();
                         }
 
-                        modal.remove();
-                    }).on('click', '.cancel', function (e) {
-                        modal.remove();
-                    }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
+                        modal.close();
+                    });
+
+                    helpers.showModal(modal);
                 }).appendTo('.top-bar .right');
 
                 editThumbnails = $(Handlebars.compile($('#template-dock-thumbnails').html())({}));
@@ -297,10 +297,10 @@ var Shot;
 
                     multiEdit.toggle(false);
                 }).on('click', '.edit', function (e) {
-                    var modal = $(Handlebars.compile($('#template-modals-thumbnails-edit-selection').html())({})), selection = multiEdit.getSelection();
+                    var modal = new Shot.Models.Modal('#template-modals-thumbnails-edit-selection').render(), selection = multiEdit.getSelection();
 
-                    modal.on('submit', 'form', function (e) {
-                        var ids = [], selection = multiEdit.getSelection(), title = modal.find(':input[name="title"]').val();
+                    modal.el.on('submit', 'form', function (e) {
+                        var ids = [], selection = multiEdit.getSelection(), title = modal.el.find(':input[name="title"]').val();
 
                         e.preventDefault();
 
@@ -332,22 +332,92 @@ var Shot;
                             });
                         });
 
-                        modal.remove();
-                    }).on('click', '.cancel', function (e) {
-                        modal.remove();
-                    }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
+                        modal.close();
+                    });
+
+                    helpers.showModal(modal);
+
+                    e.preventDefault();
+
+                    $(e.target).blur();
+                }).on('click', '.albums', function (e) {
+                    var modal, albums = [], selection = multiEdit.getSelection();
+
+                    SHOT.albums.forEach(function (album) {
+                        if (album.id !== SHOT.album.id) {
+                            albums.push(album);
+                        }
+                    });
+
+                    modal = new Shot.Models.Modal('#template-modals-thumbnails-albums', { albums: albums, album: SHOT.album }).render();
+
+                    modal.el.on('submit', 'form', function (e) {
+                        var ids = [], selection = multiEdit.getSelection(), add = [], remove = modal.el.find(':input[name="remove"]').is(':checked') ? album.data.id : null, removeOther = modal.el.find(':input[name="remove_other"]').is(':checked') ? album.data.id : null;
+
+                        e.preventDefault();
+
+                        selection.forEach(function (thumbnail) {
+                            ids.push(thumbnail.data.id);
+
+                            if (remove) {
+                                thumbnail.el.remove();
+
+                                helpers.arrayPull(thumbnails, thumbnail);
+
+                                multiEdit.pull(thumbnail);
+                                dragDrop.pull(thumbnail);
+                            } else {
+                                thumbnail.data.pending = true;
+                                thumbnail.data.error = false;
+
+                                thumbnail.render();
+                            }
+                        });
+
+                        SHOT.albums.forEach(function (album) {
+                            if (modal.el.find(':input[name="album\\[' + album.id + '\\]"]').is(':checked')) {
+                                add.push(album.id);
+                            }
+                        });
+
+                        $.post(SHOT.rootPath + 'ajax/saveImages', {
+                            ids: ids,
+                            albums: {
+                                add: add,
+                                remove: remove,
+                                removeOther: removeOther
+                            }
+                        }).done(function () {
+                            selection.forEach(function (thumbnail) {
+                                thumbnail.data.pending = false;
+
+                                thumbnail.render();
+                            });
+                        }).fail(function () {
+                            selection.forEach(function (thumbnail) {
+                                thumbnail.data.pending = false;
+                                thumbnail.data.error = true;
+
+                                thumbnail.render();
+                            });
+                        });
+
+                        modal.close();
+                    });
+
+                    helpers.showModal(modal);
 
                     e.preventDefault();
 
                     $(e.target).blur();
                 }).on('click', '.delete', function (e) {
-                    var modal = $(Handlebars.compile($('#template-modals-thumbnails-delete-selection').html())({})), selection = multiEdit.getSelection();
+                    var modal = new Shot.Models.Modal('#template-modals-thumbnails-delete-selection').render(), selection = multiEdit.getSelection();
 
                     e.preventDefault();
 
                     $(e.target).blur();
 
-                    modal.on('submit', 'form', function (e) {
+                    modal.el.on('submit', 'form', function (e) {
                         var ids = [], selection = multiEdit.getSelection();
 
                         e.preventDefault();
@@ -360,16 +430,18 @@ var Shot;
 
                         $.post(SHOT.rootPath + 'ajax/deleteImages', { ids: ids });
 
-                        modal.remove();
+                        modal.close();
                     }).on('click', '.cancel', function (e) {
-                        modal.remove();
-                    }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
+                        modal.close();
+                    });
+
+                    helpers.showModal(modal);
                 }).appendTo('body');
 
                 $(multiEdit).on('change', function () {
                     var selectedCount = multiEdit.getSelection().length;
 
-                    editThumbnails.find('.select-none, .edit, .delete').attr('disabled', !selectedCount);
+                    editThumbnails.find('.select-none, .edit, .albums, .delete').attr('disabled', !selectedCount);
 
                     editThumbnails.find('.select-all').attr('disabled', selectedCount === thumbnails.length);
                 }).on('activate', function () {
@@ -418,7 +490,7 @@ var Shot;
             };
 
             Album.prototype.carousel = function () {
-                var carousel = new Shot.Models.Carousel(SHOT.images), album = new Shot.Models.Album(SHOT.album), id, navItems = {
+                var helpers = new Shot.Helpers(), carousel = new Shot.Models.Carousel(SHOT.images), album = new Shot.Models.Album(SHOT.album), id, navItems = {
                     album: null,
                     thumbnail: null,
                     exif: null
@@ -456,11 +528,9 @@ var Shot;
                 navItems.exif.appendTo('.top-bar .right');
 
                 navItems.exif.on('click', function (e) {
-                    var modal = $(Handlebars.compile($('#template-modals-images-exif').html())({ exif: carousel.getCurrent().data.exif }));
+                    var modal = new Shot.Models.Modal('#template-modals-images-exif', { exif: carousel.getCurrent().data.exif }).render();
 
-                    modal.on('click', '.cancel', function (e) {
-                        modal.remove();
-                    }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
+                    helpers.showModal(modal);
 
                     e.preventDefault();
                 }).appendTo('.top-bar .right');
@@ -557,7 +627,7 @@ var Shot;
             function Index() {
             }
             Index.prototype.index = function () {
-                var thumbnailGrid = $('.thumbnail-grid'), albums = [], navItems = { createAlbum: null, editAlbums: null }, editAlbums, multiEdit = new Shot.MultiEdit(), dragDrop = new Shot.DragDrop();
+                var helpers = new Shot.Helpers(), thumbnailGrid = $('.thumbnail-grid'), albums = [], navItems = { createAlbum: null, editAlbums: null }, editAlbums, multiEdit = new Shot.MultiEdit(), dragDrop = new Shot.DragDrop();
 
                 navItems.createAlbum = $(Handlebars.compile($('#template-nav-item').html())({
                     text: 'Add album',
@@ -566,7 +636,7 @@ var Shot;
                 }));
 
                 navItems.createAlbum.on('click', function (e) {
-                    var modal = $(Handlebars.compile($('#template-modals-albums-create').html())({}));
+                    var modal = new Shot.Models.Modal('#template-modals-albums-create').render();
 
                     multiEdit.toggle(false);
 
@@ -574,8 +644,8 @@ var Shot;
 
                     $(e.target).blur();
 
-                    modal.on('submit', 'form', function (e) {
-                        var title = modal.find(':input[name="title"]').val(), album;
+                    modal.el.on('submit', 'form', function (e) {
+                        var title = modal.el.find(':input[name="title"]').val(), album;
 
                         if (title) {
                             album = new Shot.Models.Album({ title: title });
@@ -603,10 +673,10 @@ var Shot;
                             }, 1000);
                         }
 
-                        modal.remove();
-                    }).on('click', '.cancel', function (e) {
-                        modal.remove();
-                    }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
+                        modal.close();
+                    });
+
+                    helpers.showModal(modal);
                 }).appendTo('.top-bar .right');
 
                 navItems.editAlbums = $(Handlebars.compile($('#template-nav-item').html())({
@@ -642,10 +712,10 @@ var Shot;
 
                     multiEdit.toggle(false);
                 }).on('click', '.edit', function (e) {
-                    var modal = $(Handlebars.compile($('#template-modals-albums-edit-selection').html())({})), selection = multiEdit.getSelection();
+                    var modal = new Shot.Models.Modal('#template-modals-albums-edit-selection').render(), selection = multiEdit.getSelection();
 
-                    modal.on('submit', 'form', function (e) {
-                        var ids = [], selection = multiEdit.getSelection(), title = modal.find(':input[name="title"]').val();
+                    modal.el.on('submit', 'form', function (e) {
+                        var ids = [], selection = multiEdit.getSelection(), title = modal.el.find(':input[name="title"]').val();
 
                         e.preventDefault();
 
@@ -677,22 +747,22 @@ var Shot;
                             });
                         });
 
-                        modal.remove();
-                    }).on('click', '.cancel', function (e) {
-                        modal.remove();
-                    }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
+                        modal.close();
+                    });
+
+                    helpers.showModal(modal);
 
                     e.preventDefault();
 
                     $(e.target).blur();
                 }).on('click', '.delete', function (e) {
-                    var modal = $(Handlebars.compile($('#template-modals-albums-delete-selection').html())({})), selection = multiEdit.getSelection();
+                    var modal = new Shot.Models.Modal('#template-modals-albums-delete-selection').render(), selection = multiEdit.getSelection();
 
                     e.preventDefault();
 
                     $(e.target).blur();
 
-                    modal.on('submit', 'form', function (e) {
+                    modal.el.on('submit', 'form', function (e) {
                         var ids = [], selection = multiEdit.getSelection();
 
                         e.preventDefault();
@@ -705,10 +775,10 @@ var Shot;
 
                         $.post(SHOT.rootPath + 'ajax/deleteAlbums', { ids: ids });
 
-                        modal.remove();
-                    }).on('click', '.cancel', function (e) {
-                        modal.remove();
-                    }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
+                        modal.close();
+                    });
+
+                    helpers.showModal(modal);
                 }).appendTo('body');
 
                 $(multiEdit).on('change', function () {
@@ -868,6 +938,12 @@ var Shot;
             return this;
         };
 
+        DragDrop.prototype.pull = function (editable) {
+            new Shot.Helpers().arrayPull(this.editables, editable);
+
+            return this;
+        };
+
         DragDrop.prototype.getPositions = function (draggable) {
             var _this = this;
             this.positions = [];
@@ -889,6 +965,33 @@ var Shot;
         return DragDrop;
     })();
     Shot.DragDrop = DragDrop;
+})(Shot || (Shot = {}));
+var Shot;
+(function (Shot) {
+    var Helpers = (function () {
+        function Helpers() {
+            this.arrayPull = function (arr, item) {
+                var i = 0;
+
+                for (; i < arr.length; i++) {
+                    while (arr[i] === item) {
+                        arr.splice(i, 1)[0];
+                    }
+                }
+            };
+        }
+        Helpers.prototype.showModal = function (modal) {
+            modal.el.on('click', function (e) {
+                if (!$(e.target).closest('.modal-content').length) {
+                    modal.close();
+                }
+            }).on('click', '.cancel', function (e) {
+                modal.el.remove();
+            }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
+        };
+        return Helpers;
+    })();
+    Shot.Helpers = Helpers;
 })(Shot || (Shot = {}));
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -1226,6 +1329,46 @@ var Shot;
 var Shot;
 (function (Shot) {
     (function (Models) {
+        var Modal = (function () {
+            function Modal(selector, data) {
+                this.data = data;
+                this.id = new Date().getTime() + Math.round(Math.random() * 999);
+                this.template = $(selector).html();
+
+                this.data = data || {};
+            }
+            Modal.prototype.render = function () {
+                var _this = this;
+                this.el = $(Handlebars.compile(this.template)(this.data));
+
+                $(document).on('keydown.' + this.id, function (e) {
+                    switch (e.keyCode) {
+                        case 27:
+                            e.preventDefault();
+
+                            _this.close();
+
+                            break;
+                    }
+                });
+
+                return this;
+            };
+
+            Modal.prototype.close = function () {
+                this.el.remove();
+
+                $(document).off('keydown.' + this.id);
+            };
+            return Modal;
+        })();
+        Models.Modal = Modal;
+    })(Shot.Models || (Shot.Models = {}));
+    var Models = Shot.Models;
+})(Shot || (Shot = {}));
+var Shot;
+(function (Shot) {
+    (function (Models) {
         var ProgressBar = (function () {
             function ProgressBar() {
                 this.template = $('#template-progressbar').html();
@@ -1269,8 +1412,6 @@ var Shot;
             }
             Thumbnail.prototype.render = function () {
                 var el = $(Handlebars.compile(this.template)(this.data));
-
-                console.log(this.data);
 
                 if (this.el) {
                     this.el.replaceWith(el);
@@ -1360,6 +1501,12 @@ var Shot;
                     $(_this).trigger('change');
                 }
             });
+
+            return this;
+        };
+
+        MultiEdit.prototype.pull = function (editable) {
+            new Shot.Helpers().arrayPull(this.editables, editable);
 
             return this;
         };

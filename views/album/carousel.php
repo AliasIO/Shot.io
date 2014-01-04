@@ -2,6 +2,7 @@
 
 <script>
 	SHOT.images = <?= json_encode($this->images) ?>;
+	SHOT.albums = <?= json_encode($this->albums) ?>;
 	SHOT.album = <?= json_encode($this->album) ?>;
 </script>
 

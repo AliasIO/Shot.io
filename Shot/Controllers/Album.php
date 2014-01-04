@@ -36,6 +36,29 @@ class Album extends \Swiftlet\Controller
 
 		$dbh = $this->app->getLibrary('pdo')->getHandle();
 
+		// All albums
+		$sth = $dbh->prepare('
+			SELECT
+				id,
+				title
+			FROM albums
+			ORDER BY sort_order ASC, id ASC
+			');
+
+		$sth->execute();
+
+		$results = $sth->fetchAll(\PDO::FETCH_OBJ);
+
+		$albums = array();
+
+		foreach ( $results as $result ) {
+			$albums[] = (object) array(
+				'id'    => (int) $result->id,
+				'title' => $result->title
+			);
+		}
+
+		// All images in album
 		$sth = $dbh->prepare('
 			SELECT
 				images.id
@@ -82,6 +105,8 @@ class Album extends \Swiftlet\Controller
 		}
 
 		$this->view->pageTitle = $album->getTitle();
+
+		$this->view->albums = $albums;
 
 		$this->view->thumbnails = $thumbnails;
 

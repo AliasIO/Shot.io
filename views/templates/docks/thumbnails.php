@@ -13,7 +13,7 @@
 			</div>
 
 			<div class="large-3 small-6 columns">
-				<button class="edit rename secondary expand"><i class="fa fa-folder"></i> Albums</button>
+				<button class="albums rename secondary expand"><i class="fa fa-folder"></i> Albums</button>
 			</div>
 
 			<div class="large-3 small-6 columns">

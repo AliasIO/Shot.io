@@ -8,7 +8,7 @@
 					<div class="modal-content">
 						<form method="post">
 							<fieldset>
-								<legend>Are you sure you?</legend>
+								<legend>Are you sure?</legend>
 
 								<p>
 									The selected images will be permanently deleted.

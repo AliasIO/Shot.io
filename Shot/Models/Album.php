@@ -184,7 +184,7 @@ class Album extends \Swiftlet\Model
 	 * Add image
 	 * @param Image
 	 */
-	public function addImage(Image $image, $sortOrder = 0)
+	public function addImage(Image $image)
 	{
 		$imageId = $image->getId();
 
@@ -193,18 +193,15 @@ class Album extends \Swiftlet\Model
 		$sth = $dbh->prepare('
 			INSERT OR IGNORE INTO albums_images (
 				album_id,
-				image_id,
-				sort_order
+				image_id
 			) VALUES (
 				:album_id,
-				:image_id,
-				:sort_order
+				:image_id
 			)
 			');
 
-		$sth->bindParam('album_id',   $this->id,  \PDO::PARAM_INT);
-		$sth->bindParam('image_id',   $imageId,   \PDO::PARAM_INT);
-		$sth->bindParam('sort_order', $sortOrder, \PDO::PARAM_INT);
+		$sth->bindParam('album_id', $this->id, \PDO::PARAM_INT);
+		$sth->bindParam('image_id', $imageId,  \PDO::PARAM_INT);
 
 		$sth->execute();
 	}

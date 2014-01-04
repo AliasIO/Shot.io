@@ -119,6 +119,15 @@ module Shot {
 			return this;
 		}
 
+		/**
+		 * Remove editable
+		 */
+		pull(editable: T): DragDrop<T> {
+			new Helpers().arrayPull(this.editables, editable);
+
+			return this;
+		}
+
 		private getPositions(draggable) {
 			this.positions = [];
 

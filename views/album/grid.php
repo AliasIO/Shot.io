@@ -2,6 +2,7 @@
 
 <script>
 	SHOT.thumbnails = <?= json_encode($this->thumbnails) ?>;
+	SHOT.albums = <?= json_encode($this->albums) ?>;
 	SHOT.album = <?= json_encode($this->album) ?>;
 </script>
 
@@ -16,6 +17,7 @@
 <?php include 'views/templates/docks/thumbnails.php' ?>
 <?php include 'views/templates/album.php' ?>
 <?php include 'views/templates/modals/thumbnails/upload.php' ?>
+<?php include 'views/templates/modals/thumbnails/albums.php' ?>
 <?php include 'views/templates/modals/albums/edit.php' ?>
 
 <?php require 'views/footer.php' ?>

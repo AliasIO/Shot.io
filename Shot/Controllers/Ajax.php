@@ -35,16 +35,6 @@ class Ajax extends \Swiftlet\Controller
 
 				if ( $id ) {
 					$album->load($id);
-				} else {
-					$dbh = $this->app->getLibrary('pdo')->getHandle();
-
-					$sth = $dbh->prepare('SELECT MAX(sort_order) + 1 AS sort_order FROM albums');
-
-					$sth->execute();
-
-					$result = $sth->fetchObject();
-
-					$album->setSortOrder((int) $result->sort_order);
 				}
 
 				$album
@@ -125,24 +115,7 @@ class Ajax extends \Swiftlet\Controller
 							->create($filename)
 							->save();
 
-						// Get sort order
-						$dbh = $this->app->getLibrary('pdo')->getHandle();
-
-						$sth = $dbh->prepare('
-							SELECT
-								MAX(sort_order) + 1 AS sort_order
-							FROM albums_images
-							WHERE
-								album_id = :album_id
-							');
-
-						$sth->bindParam('album_id', $albumId, \PDO::PARAM_INT);
-
-						$sth->execute();
-
-						$result = $sth->fetchObject();
-
-						$album->addImage($image, $result->sort_order);
+						$album->addImage($image);
 
 						echo json_encode(array(
 							'id'   => (int) $image->getId(),
@@ -204,7 +177,41 @@ class Ajax extends \Swiftlet\Controller
 			$title     = !empty($_POST['title'])     ? $_POST['title']     : '';
 			$thumbCrop = !empty($_POST['thumbCrop']) ? $_POST['thumbCrop'] : '';
 
+			$albumsAdd         = !empty($_POST['albums']) && !empty($_POST['albums']['add'])         ?       $_POST['albums']['add']         : array();
+			$albumsRemove      = !empty($_POST['albums']) && !empty($_POST['albums']['remove'])      ? (int) $_POST['albums']['remove']      : null;
+			$albumsRemoveOther = !empty($_POST['albums']) && !empty($_POST['albums']['removeOther']) ? (int) $_POST['albums']['removeOther'] : null;
+
 			if ( is_array($ids) && $ids ) {
+				$dbh = $this->app->getLibrary('pdo')->getHandle();
+
+				if ( $albumsRemove ) {
+					$sth = $dbh->prepare('
+						DELETE
+						FROM albums_images
+						WHERE
+							album_id = :album_id AND
+							image_id IN ( ' . join(', ', $ids) . ' )
+						');
+
+					$sth->bindParam('album_id', $albumsRemove, \PDO::PARAM_INT);
+
+					$sth->execute();
+				}
+
+				if ( $albumsRemoveOther ) {
+					$sth = $dbh->prepare($sql='
+						DELETE
+						FROM albums_images
+						WHERE
+							album_id != :album_id AND
+							image_id IN ( ' . join(', ', $ids) . ' )
+						');
+
+					$sth->bindParam('album_id', $albumsRemoveOther, \PDO::PARAM_INT);
+
+					$sth->execute();
+				}
+
 				foreach ( $ids as $id ) {
 					try {
 						$image = $this->app->getModel('image')->load($id);
@@ -218,6 +225,27 @@ class Ajax extends \Swiftlet\Controller
 						}
 
 						$image->save();
+
+						if ( is_array($albumsAdd) ) {
+							$inserts = array();
+
+							foreach ( $albumsAdd as $albumId ) {
+								$inserts[] = $albumId . ', ' . $image->getId();
+							}
+
+							if ( $inserts ) {
+								$sth = $dbh->prepare('
+									INSERT OR IGNORE INTO albums_images (
+										album_id,
+										image_id
+									) VALUES (
+										' . join('), (', $inserts) . '
+									)
+									');
+
+								$sth->execute();
+							}
+						}
 					} catch ( \Swiftlet\Exception $e ) { }
 				}
 			}

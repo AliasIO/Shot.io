@@ -26,6 +26,15 @@ module Shot {
 		}
 
 		/**
+		 * Remove editable
+		 */
+		pull(editable: T): MultiEdit<T> {
+			new Helpers().arrayPull(this.editables, editable);
+
+			return this;
+		}
+
+		/**
 		 * Select all
 		 */
 		selectAll(select: boolean): MultiEdit<T> {

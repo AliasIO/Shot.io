@@ -9,6 +9,7 @@ module Shot {
 			 */
 			grid(): void {
 				var
+					helpers = new Helpers(),
 					thumbnailGrid = $('.thumbnail-grid'),
 					thumbnails: Array<Models.Thumbnail> = [],
 					album = new Models.Album(SHOT.album),
@@ -41,11 +42,11 @@ module Shot {
 
 				navItems.upload
 					.on('click', (e) => {
-						var modal = $(Handlebars.compile($('#template-modals-thumbnails-upload').html())({}));
+						var modal = new Models.Modal('#template-modals-thumbnails-upload').render();
 
 						multiEdit.toggle(false);
 
-						modal
+						modal.el
 							.on('change', ':input[type="file"]', (e: any) => {
 								var
 									thumbnailSize = 480,
@@ -142,15 +143,10 @@ module Shot {
 									}
 								})();
 
-								modal.remove();
-							})
-							.on('click', '.cancel', (e) => {
-								modal.remove();
-							})
-							.appendTo('body')
-							.show()
-							.find('.modal-content')
-							.css({ marginTop: $(document).scrollTop() + 'px' });
+								modal.close();
+							});
+
+						helpers.showModal(modal);
 
 						e.preventDefault();
 					})
@@ -179,13 +175,13 @@ module Shot {
 
 				navItems.editAlbum
 					.on('click', (e) => {
-						var modal = $(Handlebars.compile($('#template-modals-albums-edit').html())({}));
+						var modal = new Models.Modal('#template-modals-albums-edit').render();
 
 						e.preventDefault();
 
-						modal
+						modal.el
 							.on('submit', 'form', (e) => {
-								var title = modal.find(':input[name="title"]').val();
+								var title = modal.el.find(':input[name="title"]').val();
 
 								e.preventDefault();
 
@@ -199,15 +195,10 @@ module Shot {
 									album.save();
 								}
 
-								modal.remove();
-							})
-							.on('click', '.cancel', (e) => {
-								modal.remove();
-							})
-							.appendTo('body')
-							.show()
-							.find('.modal-content')
-							.css({ marginTop: $(document).scrollTop() + 'px' });
+								modal.close();
+							});
+
+						helpers.showModal(modal);
 					})
 					.appendTo('.top-bar .right');
 
@@ -238,15 +229,15 @@ module Shot {
 					})
 					.on('click', '.edit', (e) => {
 						var
-							modal = $(Handlebars.compile($('#template-modals-thumbnails-edit-selection').html())({})),
+							modal = new Models.Modal('#template-modals-thumbnails-edit-selection').render(),
 							selection = multiEdit.getSelection();
 
-						modal
+						modal.el
 							.on('submit', 'form', (e) => {
 								var
 									ids: Array<number> = [],
 									selection = multiEdit.getSelection(),
-									title = modal.find(':input[name="title"]').val();
+									title = modal.el.find(':input[name="title"]').val();
 
 								e.preventDefault();
 
@@ -280,15 +271,93 @@ module Shot {
 										});
 									});
 
-								modal.remove();
-							})
-							.on('click', '.cancel', (e) => {
-								modal.remove();
-							})
-							.appendTo('body')
-							.show()
-							.find('.modal-content')
-							.css({ marginTop: $(document).scrollTop() + 'px' });
+								modal.close();
+							});
+
+						helpers.showModal(modal);
+
+						e.preventDefault();
+
+						$(e.target).blur();
+					})
+					.on('click', '.albums', (e) => {
+						var
+							modal: Models.Modal,
+							albums = [],
+							selection = multiEdit.getSelection();
+
+						// All albums except the current one
+						SHOT.albums.forEach((album: any) => {
+							if ( album.id !== SHOT.album.id ) {
+								albums.push(album);
+							}
+						});
+
+						modal = new Models.Modal('#template-modals-thumbnails-albums', { albums: albums, album: SHOT.album }).render();
+
+						modal.el
+							.on('submit', 'form', (e) => {
+								var
+									ids: Array<number> = [],
+									selection = multiEdit.getSelection(),
+									add: Array<number> = [],
+									remove = modal.el.find(':input[name="remove"]').is(':checked') ? album.data.id : null,
+									removeOther = modal.el.find(':input[name="remove_other"]').is(':checked') ? album.data.id : null;
+
+								e.preventDefault();
+
+								selection.forEach((thumbnail) => {
+									ids.push(thumbnail.data.id);
+
+									if ( remove ) {
+										thumbnail.el.remove();
+
+										helpers.arrayPull(thumbnails, thumbnail);
+
+										multiEdit.pull(thumbnail);
+										dragDrop.pull(thumbnail);
+									} else {
+										thumbnail.data.pending = true;
+										thumbnail.data.error = false;
+
+										thumbnail.render();
+									}
+								});
+
+								SHOT.albums.forEach((album: any) => {
+									if ( modal.el.find(':input[name="album\\[' + album.id + '\\]"]').is(':checked') ) {
+										add.push(album.id);
+									}
+								});
+
+								$.post(SHOT.rootPath + 'ajax/saveImages', {
+									ids: ids,
+									albums: {
+										add: add,
+										remove: remove,
+										removeOther: removeOther,
+									}
+								})
+								.done(() => {
+									selection.forEach((thumbnail) => {
+										thumbnail.data.pending = false;
+
+										thumbnail.render();
+									});
+								})
+								.fail(() => {
+									selection.forEach((thumbnail) => {
+										thumbnail.data.pending = false;
+										thumbnail.data.error = true;
+
+										thumbnail.render();
+									});
+								});
+
+								modal.close();
+							});
+
+						helpers.showModal(modal);
 
 						e.preventDefault();
 
@@ -296,14 +365,14 @@ module Shot {
 					})
 					.on('click', '.delete', (e) => {
 						var
-							modal = $(Handlebars.compile($('#template-modals-thumbnails-delete-selection').html())({})),
+							modal = new Models.Modal('#template-modals-thumbnails-delete-selection').render(),
 							selection = multiEdit.getSelection();
 
 						e.preventDefault();
 
 						$(e.target).blur();
 
-						modal
+						modal.el
 							.on('submit', 'form', (e) => {
 								var
 									ids: Array<number> = [],
@@ -319,15 +388,13 @@ module Shot {
 
 								$.post(SHOT.rootPath + 'ajax/deleteImages', { ids: ids });
 
-								modal.remove();
+								modal.close();
 							})
 							.on('click', '.cancel', (e) => {
-								modal.remove();
-							})
-							.appendTo('body')
-							.show()
-							.find('.modal-content')
-							.css({ marginTop: $(document).scrollTop() + 'px' });
+								modal.close();
+							});
+
+						helpers.showModal(modal);
 					})
 					.appendTo('body');
 
@@ -337,7 +404,7 @@ module Shot {
 						var selectedCount = multiEdit.getSelection().length;
 
 						editThumbnails
-							.find('.select-none, .edit, .delete')
+							.find('.select-none, .edit, .albums, .delete')
 							.attr('disabled', !selectedCount);
 
 						editThumbnails
@@ -403,6 +470,7 @@ module Shot {
 			 */
 			carousel(): void {
 				var
+					helpers = new Helpers(),
 					carousel = new Models.Carousel(SHOT.images),
 					album = new Models.Album(SHOT.album),
 					id: number,
@@ -445,16 +513,9 @@ module Shot {
 
 				navItems.exif
 					.on('click', (e) => {
-						var modal = $(Handlebars.compile($('#template-modals-images-exif').html())({ exif: carousel.getCurrent().data.exif }));
+						var modal = new Models.Modal('#template-modals-images-exif', { exif: carousel.getCurrent().data.exif }).render();
 
-						modal
-							.on('click', '.cancel', (e) => {
-								modal.remove();
-							})
-							.appendTo('body')
-							.show()
-							.find('.modal-content')
-							.css({ marginTop: $(document).scrollTop() + 'px' });
+						helpers.showModal(modal);
 
 						e.preventDefault();
 					})
