@@ -24,8 +24,8 @@
 									<div class="large-12 columns">
 										<label><input type="radio" name="thumb-crop" value="smart"> Smart</label>
 										<label><input type="radio" name="thumb-crop" value="centered"> Centred</label>
-										<label><input type="radio" name="thumb-crop" value="top-left"> Top / Left</label>
-										<label><input type="radio" name="thumb-crop" value="bottom-right"> Bottom / Right</label>
+										<label><input type="radio" name="thumb-crop" value="topLeft"> Top / Left</label>
+										<label><input type="radio" name="thumb-crop" value="bottomRight"> Bottom / Right</label>
 									</div>
 								</div>
 							</fieldset>

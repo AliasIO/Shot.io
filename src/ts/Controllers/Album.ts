@@ -19,193 +19,25 @@ module Shot {
 						editThumbnails: null,
 						upload: null
 					},
-					editThumbnails: JQuery,
+					editThumbnails: Models.Dock,
 					multiEdit = new MultiEdit<Models.Thumbnail>(),
 					dragDrop = new DragDrop<Models.Thumbnail>(),
 					preRender = this.preRender;
 
-				// Nav items
-				navItems.album = $(Handlebars.compile($('#template-nav-item').html())({
-					text: album.data.title,
-					icon: 'folder',
-					left: true,
-					path: SHOT.rootPath + 'album/grid/' + album.data.id
-				}));
-
-				navItems.album.appendTo('.top-bar .left');
-
-				navItems.upload = $(Handlebars.compile($('#template-nav-item').html())({
-					text: 'Add images',
-					icon: 'plus-circle',
-					right: true
-				}));
-
-				navItems.upload
-					.on('click', (e) => {
-						var modal = new Models.Modal('#template-modals-thumbnails-upload').render();
-
-						multiEdit.toggle(false);
-
-						modal.el
-							.on('change', ':input[type="file"]', (e: any) => {
-								var
-									thumbnailSize = 480,
-									thumbnailQueue: Models.Thumbnail[] = [],
-									fileTypes = [
-										'image/jpg',
-										'image/jpeg',
-										'image/png',
-										'image/gif',
-										'image/bmp'
-									];
-
-								e.preventDefault();
-
-								$.each(e.target.files, (i, file) => {
-									var
-										thumbnail,
-										progressBar;
-
-									if ( file.name && $.inArray(file.type, fileTypes) !== -1 ) {
-										thumbnail   = new Models.Thumbnail({ title: file.name.replace(/\..{1,4}$/, ''), file: file, formData: new FormData() }).render();
-										progressBar = new Models.ProgressBar().render();
-
-										thumbnail.data.formData.append('image', file);
-										thumbnail.data.formData.append('albumId', album.data.id);
-
-										thumbnailGrid.append(thumbnail.el);
-
-										$(thumbnail).on('delete', () => {
-											thumbnail.el.remove();
-
-											thumbnail = null;
-										});
-
-										thumbnail.save()
-											.done((data) => {
-												progressBar.set(100, () => {
-													var image = $('<img/>');
-
-													image
-														.hide()
-														.on('load', (e) => {
-															// Replace temporary thumbnail with processed image
-															thumbnail.el.find('.temporary').fadeOut('fast', function() {
-																$(this).remove();
-															});
-
-															// Remove processing indicator
-															thumbnail.el.find('.processing').fadeOut('fast');
-
-															// Reveal the processed image
-															$(e.target).fadeIn('fast', () => {
-																thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + album.data.id + '/' + data.id;
-																thumbnail.data.pending = false;
-
-																thumbnail.render();
-															});
-														})
-														.prependTo(thumbnail.el.find('.container'))
-														.prop('src', data.path);
-												});
-											})
-											.progress((data) => {
-												progressBar.set(data);
-											})
-											.fail((e) => {
-												thumbnail.data.pending = false;
-												thumbnail.data.error = true;
-
-												thumbnail.render();
-
-												progressBar.set(0);
-											});
-
-										thumbnail.el.find('.container').append(progressBar.el);
-
-										thumbnailQueue.push(thumbnail);
-
-										thumbnails.push(thumbnail);
-										multiEdit.push(thumbnail);
-										dragDrop.push(thumbnail);
-									}
-								});
-
-								// Scroll to last thumbnail
-								$('html, body').animate({
-									scrollTop: thumbnails[thumbnails.length - 1].el.offset().top
-								}, 1000);
-
-								// Pre render all thumbnails, one at a time
-								(function nextThumbnail() {
-									if ( thumbnailQueue.length ) {
-										preRender(thumbnailQueue.shift(), () => nextThumbnail());
-									}
-								})();
-
-								modal.close();
-							});
-
-						helpers.showModal(modal);
-
-						e.preventDefault();
-					})
-					.appendTo('.top-bar .right');
-
-				navItems.editThumbnails = $(Handlebars.compile($('#template-nav-item').html())({
-					text: 'Edit images',
-					icon: 'pencil',
-					right: true
-				}));
-
-				navItems.editThumbnails
-					.on('click', (e) => {
-						e.preventDefault();
-
-						multiEdit.toggle();
-					})
-					.appendTo('.top-bar .right');
-
-				// Edit album
-				navItems.editAlbum = $(Handlebars.compile($('#template-nav-item').html())({
-					text: 'Edit album',
-					icon: 'pencil',
-					right: true
-				}));
-
-				navItems.editAlbum
-					.on('click', (e) => {
-						var modal = new Models.Modal('#template-modals-albums-edit').render();
-
-						e.preventDefault();
-
-						modal.el
-							.on('submit', 'form', (e) => {
-								var title = modal.el.find(':input[name="title"]').val();
-
-								e.preventDefault();
-
-								if ( title ) {
-									album.data.title = title;
-
-									navItems.album.find('.text').text(title);
-
-									document.title = title; // TODO Add website name
-
-									album.save();
-								}
-
-								modal.close();
-							});
-
-						helpers.showModal(modal);
-					})
-					.appendTo('.top-bar .right');
-
 				// Edit thumbnails
-				editThumbnails = $(Handlebars.compile($('#template-dock-thumbnails').html())({}));
+				editThumbnails = new Models.Dock('#template-dock-thumbnails').render();
 
-				editThumbnails
+				helpers.initDock(editThumbnails);
+
+				$(editThumbnails)
+					.on('activate', (e) => {
+						multiEdit.toggle(true);
+					})
+					.on('deactivate', (e) => {
+						multiEdit.toggle(false);
+					});
+
+				editThumbnails.el
 					.on('click', '.select-all', (e) => {
 						e.preventDefault();
 
@@ -225,7 +57,7 @@ module Shot {
 
 						$(e.target).blur();
 
-						multiEdit.toggle(false);
+						editThumbnails.toggle(false);
 					})
 					.on('click', '.edit', (e) => {
 						var
@@ -237,7 +69,8 @@ module Shot {
 								var
 									ids: Array<number> = [],
 									selection = multiEdit.getSelection(),
-									title = modal.el.find(':input[name="title"]').val();
+									title = modal.el.find(':input[name="title"]').val(),
+									thumbCrop = modal.el.find(':input[name="thumb-crop"]:checked').val();
 
 								e.preventDefault();
 
@@ -254,10 +87,14 @@ module Shot {
 									thumbnail.render();
 								});
 
-								$.post(SHOT.rootPath + 'ajax/saveImages', { ids: ids, title: title })
+								$.post(SHOT.rootPath + 'ajax/saveImages', { ids: ids, title: title, thumbCrop: thumbCrop })
 									.done(() => {
 										selection.forEach((thumbnail) => {
 											thumbnail.data.pending = false;
+
+											if ( thumbCrop ) {
+												thumbnail.data.path = thumbnail.data.path.replace(/\?.+$/, '?' + thumbCrop);
+											}
 
 											thumbnail.render();
 										});
@@ -403,21 +240,15 @@ module Shot {
 					.on('change', () => {
 						var selectedCount = multiEdit.getSelection().length;
 
-						editThumbnails
+						editThumbnails.el
 							.find('.select-none, .edit, .albums, .delete')
 							.attr('disabled', !selectedCount);
 
-						editThumbnails
+						editThumbnails.el
 							.find('.select-all')
 							.attr('disabled', selectedCount === thumbnails.length);
 					})
 					.on('activate', () => {
-						editThumbnails
-							.stop()
-							.css({ bottom: -20, opacity: 0 })
-							.show()
-							.animate({ bottom: 0, opacity: 1 });
-
 						thumbnails.forEach((thumbnail) => {
 							thumbnail.data.draggable = true;
 
@@ -425,10 +256,6 @@ module Shot {
 						});
 					})
 					.on('deactivate', () => {
-						editThumbnails
-							.stop()
-							.animate({ bottom: -20, opacity: 0 }, 'fast');
-
 						thumbnails.forEach((thumbnail) => {
 							thumbnail.data.draggable = false;
 
@@ -449,6 +276,184 @@ module Shot {
 
 						$.post(SHOT.rootPath + 'ajax/saveImagesOrder', { albumId: album.data.id, items: items });
 					});
+
+				// Nav items
+				navItems.album = $(Handlebars.compile($('#template-nav-item').html())({
+					text: album.data.title,
+					icon: 'folder',
+					left: true,
+					path: SHOT.rootPath + 'album/grid/' + album.data.id
+				}));
+
+				navItems.album.appendTo('.top-bar .left');
+
+				navItems.upload = $(Handlebars.compile($('#template-nav-item').html())({
+					text: 'Add images',
+					icon: 'plus-circle',
+					right: true
+				}));
+
+				navItems.upload
+					.on('click', (e) => {
+						var modal = new Models.Modal('#template-modals-thumbnails-upload').render();
+
+						multiEdit.toggle(false);
+
+						modal.el
+							.on('change', ':input[type="file"]', (e: any) => {
+								var
+									thumbnailSize = 480,
+									thumbnailQueue: Models.Thumbnail[] = [],
+									fileTypes = [
+										'image/jpg',
+										'image/jpeg',
+										'image/png',
+										'image/gif',
+										'image/bmp'
+									];
+
+								e.preventDefault();
+
+								$.each(e.target.files, (i, file) => {
+									var
+										thumbnail,
+										progressBar;
+
+									if ( file.name && $.inArray(file.type, fileTypes) !== -1 ) {
+										thumbnail   = new Models.Thumbnail({ title: file.name.replace(/\..{1,4}$/, ''), file: file, formData: new FormData() }).render();
+										progressBar = new Models.ProgressBar().render();
+
+										thumbnail.data.formData.append('image', file);
+										thumbnail.data.formData.append('albumId', album.data.id);
+
+										thumbnailGrid.append(thumbnail.el);
+
+										$(thumbnail).on('delete', () => {
+											thumbnail.el.remove();
+
+											thumbnail = null;
+										});
+
+										thumbnail.save()
+											.done((data) => {
+												progressBar.set(100, () => {
+													var image = $('<img/>');
+
+													image
+														.hide()
+														.on('load', (e) => {
+															// Replace temporary thumbnail with processed image
+															thumbnail.el.find('.temporary').fadeOut('fast', function() {
+																$(this).remove();
+															});
+
+															// Remove processing indicator
+															thumbnail.el.find('.processing').fadeOut('fast');
+
+															// Reveal the processed image
+															$(e.target).fadeIn('fast', () => {
+																thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + album.data.id + '/' + data.id;
+																thumbnail.data.pending = false;
+
+																thumbnail.render();
+															});
+														})
+														.prependTo(thumbnail.el.find('.container'))
+														.prop('src', data.path);
+												});
+											})
+											.progress((data) => {
+												progressBar.set(data);
+											})
+											.fail((e) => {
+												thumbnail.data.pending = false;
+												thumbnail.data.error = true;
+
+												thumbnail.render();
+
+												progressBar.set(0);
+											});
+
+										thumbnail.el.find('.container').append(progressBar.el);
+
+										thumbnailQueue.push(thumbnail);
+
+										thumbnails.push(thumbnail);
+										multiEdit.push(thumbnail);
+										dragDrop.push(thumbnail);
+									}
+								});
+
+								// Scroll to last thumbnail
+								$('html, body').animate({
+									scrollTop: thumbnails[thumbnails.length - 1].el.offset().top
+								}, 1000);
+
+								// Pre render all thumbnails, one at a time
+								(function nextThumbnail() {
+									if ( thumbnailQueue.length ) {
+										preRender(thumbnailQueue.shift(), () => nextThumbnail());
+									}
+								})();
+
+								modal.close();
+							});
+
+						helpers.showModal(modal);
+
+						e.preventDefault();
+					})
+					.appendTo('.top-bar .right');
+
+				navItems.editThumbnails = $(Handlebars.compile($('#template-nav-item').html())({
+					text: 'Edit images',
+					icon: 'pencil',
+					right: true
+				}));
+
+				navItems.editThumbnails
+					.on('click', (e) => {
+						e.preventDefault();
+
+						editThumbnails.toggle();
+					})
+					.appendTo('.top-bar .right');
+
+				// Edit album
+				navItems.editAlbum = $(Handlebars.compile($('#template-nav-item').html())({
+					text: 'Edit album',
+					icon: 'pencil',
+					right: true
+				}));
+
+				navItems.editAlbum
+					.on('click', (e) => {
+						var modal = new Models.Modal('#template-modals-albums-edit').render();
+
+						e.preventDefault();
+
+						modal.el
+							.on('submit', 'form', (e) => {
+								var title = modal.el.find(':input[name="title"]').val();
+
+								e.preventDefault();
+
+								if ( title ) {
+									album.data.title = title;
+
+									navItems.album.find('.text').text(title);
+
+									document.title = title; // TODO Add website name
+
+									album.save();
+								}
+
+								modal.close();
+							});
+
+						helpers.showModal(modal);
+					})
+					.appendTo('.top-bar .right');
 
 				if ( SHOT.thumbnails ) {
 					SHOT.thumbnails.forEach((thumbnailData) => {

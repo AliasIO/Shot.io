@@ -354,7 +354,9 @@ class Image extends \Swiftlet\Model
 
 				break;
 			case 'centered';
-				$this->exportCenteredThumbnail();
+			case 'topLeft';
+			case 'bottomRight';
+				$this->exportAlignedThumbnail($thumbCrop);
 
 				break;
 		}
@@ -562,10 +564,10 @@ class Image extends \Swiftlet\Model
 	}
 
 	/**
-	 * Generate centered thumbnail
+	 * Generate aligned thumbnail
 	 * @return Image
 	 */
-	protected function exportCenteredThumbnail()
+	protected function exportAlignedThumbnail($crop)
 	{
 		$this->loadImage();
 
@@ -576,7 +578,20 @@ class Image extends \Swiftlet\Model
 		$geometry = $thumbnail->getImageGeometry();
 
 		if ( $geometry['width'] != $geometry['height'] ) {
-			$thumbnail->cropImage(self::$thumbnailSize, self::$thumbnailSize, ( $geometry['width'] - self::$thumbnailSize ) / 2, ( $geometry['height'] - self::$thumbnailSize ) / 2);
+			switch ( $crop ) {
+				case 'centered':
+					$thumbnail->cropImage(self::$thumbnailSize, self::$thumbnailSize, ( $geometry['width'] - self::$thumbnailSize ) / 2, ( $geometry['height'] - self::$thumbnailSize ) / 2);
+
+					break;
+				case 'topLeft':
+					$thumbnail->cropImage(self::$thumbnailSize, self::$thumbnailSize, 0, 0);
+
+					break;
+				case 'bottomRight':
+					$thumbnail->cropImage(self::$thumbnailSize, self::$thumbnailSize, $geometry['width'] - self::$thumbnailSize, $geometry['height'] - self::$thumbnailSize);
+
+					break;
+			}
 
 			$thumbnail->setImagePage(self::$thumbnailSize, self::$thumbnailSize, 0, 0);
 		}

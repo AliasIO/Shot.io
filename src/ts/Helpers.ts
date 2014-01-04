@@ -22,6 +22,37 @@ module Shot {
 				.css({ marginTop: $(document).scrollTop() + 'px' });
 		}
 
+		initDock(dock: Models.Dock) {
+			$(dock)
+				.on('activate', (e) => {
+					dock.el
+						.stop()
+						.css({ bottom: -20, opacity: 0 })
+						.show()
+						.animate({ bottom: 0, opacity: 1 });
+
+					// Keyboard shortcuts
+					$(document).on('keydown.' + dock.id, (e) => {
+						switch ( e.keyCode ) {
+							case 27: // Escape
+								e.preventDefault();
+
+								dock.toggle(false);
+
+								break;
+						}
+					});
+				})
+				.on('deactivate', (e) => {
+					dock.el
+						.stop()
+						.animate({ bottom: -20, opacity: 0 }, 'fast');
+
+					// Remove keyboard shortcut
+					$(document).off('keydown.' + dock.id);
+				});
+		}
+
 		/**
 		 * Remove item from array
 		 */

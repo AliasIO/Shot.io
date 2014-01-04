@@ -13,87 +13,24 @@ module Shot {
 					thumbnailGrid = $('.thumbnail-grid'),
 					albums: Array<Models.Album> = [],
 					navItems: { createAlbum: JQuery; editAlbums: JQuery } = { createAlbum: null, editAlbums: null },
-					editAlbums: JQuery,
+					editAlbums: Models.Dock,
 					multiEdit = new MultiEdit<Models.Album>(),
 					dragDrop = new DragDrop<Models.Album>();
 
-				navItems.createAlbum = $(Handlebars.compile($('#template-nav-item').html())({
-					text: 'Add album',
-					icon: 'plus-circle',
-					right: true
-				}));
-
-				navItems.createAlbum
-					.on('click', (e) => {
-						var modal = new Models.Modal('#template-modals-albums-create').render();
-
-						multiEdit.toggle(false);
-
-						e.preventDefault();
-
-						$(e.target).blur();
-
-						modal.el
-							.on('submit', 'form', (e) => {
-								var
-									title = modal.el.find(':input[name="title"]').val(),
-									album: Models.Album;
-
-								if ( title ) {
-									album = new Models.Album({ title: title });
-
-									album
-										.save()
-										.done(() => {
-											album.data.link = SHOT.rootPath + 'album/grid/' + album.data.id;
-											album.data.pending = false;
-
-											album.render();
-										})
-										.fail(() => {
-											album.data.pending = false;
-											album.data.error = true;
-
-											album.render();
-										});
-
-									thumbnailGrid.append(album.render().el);
-
-									albums.push(album);
-									multiEdit.push(album);
-									dragDrop.push(album);
-
-									// Scroll to last album
-									$('html, body').animate({
-										scrollTop: album.el.offset().top
-									}, 1000);
-								}
-
-								modal.close();
-							});
-
-						helpers.showModal(modal);
-					})
-					.appendTo('.top-bar .right');
-
-				navItems.editAlbums = $(Handlebars.compile($('#template-nav-item').html())({
-					text: 'Edit albums',
-					icon: 'pencil',
-					right: true
-				}));
-
-				navItems.editAlbums
-					.on('click', (e) => {
-						e.preventDefault();
-
-						multiEdit.toggle();
-					})
-					.appendTo('.top-bar .right');
-
 				// Edit albums
-				editAlbums = $(Handlebars.compile($('#template-dock-albums').html())({}));
+				editAlbums = new Models.Dock('#template-dock-albums').render();
 
-				editAlbums
+				helpers.initDock(editAlbums);
+
+				$(editAlbums)
+					.on('activate', (e) => {
+						multiEdit.toggle(true);
+					})
+					.on('deactivate', (e) => {
+						multiEdit.toggle(false);
+					});
+
+				editAlbums.el
 					.on('click', '.select-all', (e) => {
 						e.preventDefault();
 
@@ -113,7 +50,7 @@ module Shot {
 
 						$(e.target).blur();
 
-						multiEdit.toggle(false);
+						editAlbums.toggle(false);
 					})
 					.on('click', '.edit', (e) => {
 						var
@@ -205,21 +142,15 @@ module Shot {
 					.on('change', () => {
 						var selectedCount = multiEdit.getSelection().length;
 
-						editAlbums
+						editAlbums.el
 							.find('.select-none, .edit, .delete')
 							.attr('disabled', !selectedCount);
 
-						editAlbums
+						editAlbums.el
 							.find('.select-all')
 							.attr('disabled', selectedCount === albums.length);
 					})
 					.on('activate', () => {
-						editAlbums
-							.stop()
-							.css({ bottom: -20, opacity: 0 })
-							.show()
-							.animate({ bottom: 0, opacity: 1 });
-
 						albums.forEach((album) => {
 							album.data.draggable = true;
 
@@ -227,10 +158,6 @@ module Shot {
 						});
 					})
 					.on('deactivate', () => {
-						editAlbums
-							.stop()
-							.animate({ bottom: -20, opacity: 0 }, 'fast');
-
 						albums.forEach((album) => {
 							album.data.draggable = false;
 
@@ -251,6 +178,79 @@ module Shot {
 
 						$.post(SHOT.rootPath + 'ajax/saveAlbumsOrder', { items: items });
 					});
+
+				navItems.createAlbum = $(Handlebars.compile($('#template-nav-item').html())({
+					text: 'Add album',
+					icon: 'plus-circle',
+					right: true
+				}));
+
+				navItems.createAlbum
+					.on('click', (e) => {
+						var modal = new Models.Modal('#template-modals-albums-create').render();
+
+						multiEdit.toggle(false);
+
+						e.preventDefault();
+
+						$(e.target).blur();
+
+						modal.el
+							.on('submit', 'form', (e) => {
+								var
+									title = modal.el.find(':input[name="title"]').val(),
+									album: Models.Album;
+
+								if ( title ) {
+									album = new Models.Album({ title: title });
+
+									album
+										.save()
+										.done(() => {
+											album.data.link = SHOT.rootPath + 'album/grid/' + album.data.id;
+											album.data.pending = false;
+
+											album.render();
+										})
+										.fail(() => {
+											album.data.pending = false;
+											album.data.error = true;
+
+											album.render();
+										});
+
+									thumbnailGrid.append(album.render().el);
+
+									albums.push(album);
+									multiEdit.push(album);
+									dragDrop.push(album);
+
+									// Scroll to last album
+									$('html, body').animate({
+										scrollTop: album.el.offset().top
+									}, 1000);
+								}
+
+								modal.close();
+							});
+
+						helpers.showModal(modal);
+					})
+					.appendTo('.top-bar .right');
+
+				navItems.editAlbums = $(Handlebars.compile($('#template-nav-item').html())({
+					text: 'Edit albums',
+					icon: 'pencil',
+					right: true
+				}));
+
+				navItems.editAlbums
+					.on('click', (e) => {
+						e.preventDefault();
+
+						editAlbums.toggle();
+					})
+					.appendTo('.top-bar .right');
 
 				if ( SHOT.albums ) {
 					SHOT.albums.forEach((albumData) => {
