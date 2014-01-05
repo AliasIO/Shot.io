@@ -16,11 +16,15 @@ module Shot {
 
 			$(document).swipe()
 				.on('swipeStart', (e) => {
+					var dragHandle: JQuery;
+
 					if ( $(e.originalEvent.target).closest('.thumbnail-grid').length ) {
 						e.originalEvent.originalEvent.preventDefault();
 
 						this.editables.forEach((editable) => {
-							if ( editable.el.find('.icon.drag-handle').has(e.originalEvent.target).length > 0 ) {
+							dragHandle = editable.el.find('.drag-handle');
+
+							if ( dragHandle.is(e.originalEvent.target) || dragHandle.has(e.originalEvent.target).length > 0 ) {
 								draggable = editable;
 
 								draggable.el.addClass('draggable');

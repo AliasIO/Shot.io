@@ -859,11 +859,15 @@ var Shot;
             var offset = { x: 0, y: 0 }, draggable = null, lastHover = null, placeholder = $('<li class="drop-target"><div class="container"><div/></li>');
 
             $(document).swipe().on('swipeStart', function (e) {
+                var dragHandle;
+
                 if ($(e.originalEvent.target).closest('.thumbnail-grid').length) {
                     e.originalEvent.originalEvent.preventDefault();
 
                     _this.editables.forEach(function (editable) {
-                        if (editable.el.find('.icon.drag-handle').has(e.originalEvent.target).length > 0) {
+                        dragHandle = editable.el.find('.drag-handle');
+
+                        if (dragHandle.is(e.originalEvent.target) || dragHandle.has(e.originalEvent.target).length > 0) {
                             draggable = editable;
 
                             draggable.el.addClass('draggable');
