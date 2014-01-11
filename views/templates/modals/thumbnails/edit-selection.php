@@ -12,7 +12,7 @@
 
 								<div class="row">
 									<div class="large-12 columns">
-										<input type="text" name="title" placeholder="No change">
+										<input type="text" name="title" placeholder="No change" value="{{{title}}}">
 									</div>
 								</div>
 							</fieldset>

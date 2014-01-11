@@ -5,7 +5,6 @@
 			<a href="{{link}}">
 				<img src="{{path}}" width="100%" height="100%">
 				<div class="selection"></div>
-			</a>
 			{{/if}}
 			<div class="bar-wrap">
 				<ul class="bar">
@@ -29,6 +28,9 @@
 					{{/if}}
 				</ul>
 			</div>
+			{{#if id}}
+			</a>
+			{{/if}}
 		</div>
 	</li>
 </script>

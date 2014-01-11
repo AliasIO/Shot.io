@@ -17,6 +17,7 @@ interface SHOT {
 	images: Array;
 	rootPath: string;
 	thumbnails: Array;
+	siteName: string;
 }
 
 declare var SHOT: SHOT;

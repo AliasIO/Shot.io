@@ -54,15 +54,22 @@ module Shot {
 					})
 					.on('click', '.edit', (e) => {
 						var
-							modal = new Models.Modal('#template-modals-albums-edit-selection').render(),
+							data,
+							modal: Models.Modal,
 							selection = multiEdit.getSelection();
+
+						if ( selection.length === 1 ) {
+							data = selection[0].data;
+						}
+
+						modal = new Models.Modal('#template-modals-albums-edit-selection', data).render();
 
 						modal.el
 							.on('submit', 'form', (e) => {
 								var
 									ids: Array<number> = [],
 									selection = multiEdit.getSelection(),
-									title = modal.el.find(':input[name="title"]').val();
+									title = helpers.htmlEncode(modal.el.find(':input[name="title"]').val());
 
 								e.preventDefault();
 
@@ -79,7 +86,7 @@ module Shot {
 									album.render();
 								});
 
-								$.post(SHOT.rootPath + 'ajax/saveAlbums', { ids: ids, title: title })
+								$.post(SHOT.rootPath + 'ajax/saveAlbums', { ids: ids, title: helpers.htmlDecode(title) })
 									.done(() => {
 										selection.forEach((album) => {
 											album.data.pending = false;
@@ -151,6 +158,8 @@ module Shot {
 							.attr('disabled', selectedCount === albums.length);
 					})
 					.on('activate', () => {
+						thumbnailGrid.addClass('multi-edit');
+
 						albums.forEach((album) => {
 							album.data.draggable = true;
 
@@ -158,6 +167,8 @@ module Shot {
 						});
 					})
 					.on('deactivate', () => {
+						thumbnailGrid.removeClass('multi-edit');
+
 						albums.forEach((album) => {
 							album.data.draggable = false;
 

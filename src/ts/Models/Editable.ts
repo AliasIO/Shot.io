@@ -16,10 +16,10 @@ module Shot {
 			 * Render
 			 */
 			render(): Editable {
-				var offset: { x: number; y: number } = { x: null, y: null };
-
 				this.el.on('click', (e) => {
-					if ( !$(e.target).closest('.drag-handle').length ) {
+					if ( $(e.target).closest('.drag-handle').length ) {
+						e.preventDefault();
+					} else {
 						var event = $.Event('click');
 
 						event.originalEvent = e;

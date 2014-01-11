@@ -7,10 +7,10 @@ var Shot;
             }
             Editable.prototype.render = function () {
                 var _this = this;
-                var offset = { x: null, y: null };
-
                 this.el.on('click', function (e) {
-                    if (!$(e.target).closest('.drag-handle').length) {
+                    if ($(e.target).closest('.drag-handle').length) {
+                        e.preventDefault();
+                    } else {
                         var event = $.Event('click');
 
                         event.originalEvent = e;
@@ -152,10 +152,16 @@ var Shot;
 
                     editThumbnails.toggle(false);
                 }).on('click', '.edit', function (e) {
-                    var modal = new Shot.Models.Modal('#template-modals-thumbnails-edit-selection').render(), selection = multiEdit.getSelection();
+                    var data, modal, selection = multiEdit.getSelection();
+
+                    if (selection.length === 1) {
+                        data = selection[0].data;
+                    }
+
+                    modal = new Shot.Models.Modal('#template-modals-thumbnails-edit-selection', data).render();
 
                     modal.el.on('submit', 'form', function (e) {
-                        var ids = [], selection = multiEdit.getSelection(), title = modal.el.find(':input[name="title"]').val(), thumbCrop = modal.el.find(':input[name="thumb-crop"]:checked').val();
+                        var ids = [], selection = multiEdit.getSelection(), title = helpers.htmlEncode(modal.el.find(':input[name="title"]').val()), thumbCrop = modal.el.find(':input[name="thumb-crop"]:checked').val();
 
                         e.preventDefault();
 
@@ -172,7 +178,7 @@ var Shot;
                             thumbnail.render();
                         });
 
-                        $.post(SHOT.rootPath + 'ajax/saveImages', { ids: ids, title: title, thumbCrop: thumbCrop }).done(function () {
+                        $.post(SHOT.rootPath + 'ajax/saveImages', { ids: ids, title: helpers.htmlDecode(title), thumbCrop: thumbCrop }).done(function () {
                             selection.forEach(function (thumbnail) {
                                 thumbnail.data.pending = false;
 
@@ -304,12 +310,16 @@ var Shot;
 
                     editThumbnails.el.find('.select-all').attr('disabled', selectedCount === thumbnails.length);
                 }).on('activate', function () {
+                    thumbnailGrid.addClass('multi-edit');
+
                     thumbnails.forEach(function (thumbnail) {
                         thumbnail.data.draggable = true;
 
                         thumbnail.render();
                     });
                 }).on('deactivate', function () {
+                    thumbnailGrid.removeClass('multi-edit');
+
                     thumbnails.forEach(function (thumbnail) {
                         thumbnail.data.draggable = false;
 
@@ -331,6 +341,7 @@ var Shot;
 
                 navItems.album = $(Handlebars.compile($('#template-nav-item').html())({
                     text: album.data.title,
+                    url: SHOT.rootPath + 'album/grid/' + album.data.id,
                     icon: 'folder',
                     left: true,
                     path: SHOT.rootPath + 'album/grid/' + album.data.id
@@ -457,21 +468,21 @@ var Shot;
                 }));
 
                 navItems.editAlbum.on('click', function (e) {
-                    var modal = new Shot.Models.Modal('#template-modals-albums-edit').render();
+                    var modal = new Shot.Models.Modal('#template-modals-albums-edit', album.data).render();
 
                     e.preventDefault();
 
                     modal.el.on('submit', 'form', function (e) {
-                        var title = modal.el.find(':input[name="title"]').val();
+                        var title = helpers.htmlEncode(modal.el.find(':input[name="title"]').val());
 
                         e.preventDefault();
 
                         if (title) {
                             album.data.title = title;
 
-                            navItems.album.find('.text').text(title);
+                            navItems.album.find('.text').text(helpers.htmlDecode(title));
 
-                            document.title = title;
+                            document.title = SHOT.siteName + ' - ' + helpers.htmlDecode(title);
 
                             album.save();
                         }
@@ -519,7 +530,7 @@ var Shot;
                 }));
 
                 navItems.album = $(Handlebars.compile($('#template-nav-item').html())({
-                    text: album.data.title.replace(/&amp;/g, '&'),
+                    text: album.data.title,
                     icon: 'folder',
                     url: SHOT.rootPath + 'album/grid/' + album.data.id,
                     left: true
@@ -549,7 +560,7 @@ var Shot;
                     }
 
                     navItems.thumbnail = $(Handlebars.compile($('#template-nav-item').html())({
-                        text: image.data.title.replace(/&amp;/g, '&'),
+                        text: image.data.title,
                         icon: 'picture-o',
                         url: SHOT.rootPath + 'album/carousel/' + album.data.id + '/' + image.data.id,
                         left: true
@@ -666,10 +677,16 @@ var Shot;
 
                     editAlbums.toggle(false);
                 }).on('click', '.edit', function (e) {
-                    var modal = new Shot.Models.Modal('#template-modals-albums-edit-selection').render(), selection = multiEdit.getSelection();
+                    var data, modal, selection = multiEdit.getSelection();
+
+                    if (selection.length === 1) {
+                        data = selection[0].data;
+                    }
+
+                    modal = new Shot.Models.Modal('#template-modals-albums-edit-selection', data).render();
 
                     modal.el.on('submit', 'form', function (e) {
-                        var ids = [], selection = multiEdit.getSelection(), title = modal.el.find(':input[name="title"]').val();
+                        var ids = [], selection = multiEdit.getSelection(), title = helpers.htmlEncode(modal.el.find(':input[name="title"]').val());
 
                         e.preventDefault();
 
@@ -686,7 +703,7 @@ var Shot;
                             album.render();
                         });
 
-                        $.post(SHOT.rootPath + 'ajax/saveAlbums', { ids: ids, title: title }).done(function () {
+                        $.post(SHOT.rootPath + 'ajax/saveAlbums', { ids: ids, title: helpers.htmlDecode(title) }).done(function () {
                             selection.forEach(function (album) {
                                 album.data.pending = false;
 
@@ -742,12 +759,16 @@ var Shot;
 
                     editAlbums.el.find('.select-all').attr('disabled', selectedCount === albums.length);
                 }).on('activate', function () {
+                    thumbnailGrid.addClass('multi-edit');
+
                     albums.forEach(function (album) {
                         album.data.draggable = true;
 
                         album.render();
                     });
                 }).on('deactivate', function () {
+                    thumbnailGrid.removeClass('multi-edit');
+
                     albums.forEach(function (album) {
                         album.data.draggable = false;
 
@@ -986,15 +1007,6 @@ var Shot;
 (function (Shot) {
     var Helpers = (function () {
         function Helpers() {
-            this.arrayPull = function (arr, item) {
-                var i = 0;
-
-                for (; i < arr.length; i++) {
-                    while (arr[i] === item) {
-                        arr.splice(i, 1)[0];
-                    }
-                }
-            };
         }
         Helpers.prototype.showModal = function (modal) {
             modal.el.on('click', function (e) {
@@ -1026,6 +1038,26 @@ var Shot;
                 $(document).off('keydown.' + dock.id);
             });
         };
+
+        Helpers.prototype.arrayPull = function (arr, item) {
+            var i = 0;
+
+            for (; i < arr.length; i++) {
+                while (arr[i] === item) {
+                    arr.splice(i, 1)[0];
+                }
+            }
+
+            return arr;
+        };
+
+        Helpers.prototype.htmlEncode = function (str) {
+            return str.replace(/&/g, '&amp;').replace(/>/g, '&gt;').replace(/</g, '&lt;').replace(/'/g, '&#039;').replace(/"/g, '&quot;');
+        };
+
+        Helpers.prototype.htmlDecode = function (str) {
+            return str.replace(/&amp;/g, '&').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&#039;/g, '\'').replace(/&quot;/g, '"');
+        };
         return Helpers;
     })();
     Shot.Helpers = Helpers;
@@ -1053,9 +1085,11 @@ var Shot;
 
                     this.render();
 
+                    console.log(this.data.title);
+
                     $.post(SHOT.rootPath + 'ajax/saveAlbum', {
                         id: this.data.id,
-                        title: this.data.title
+                        title: new Shot.Helpers().htmlDecode(this.data.title)
                     }).done(function (data) {
                         _this.data.id = data.id;
                         _this.data.pending = false;
@@ -1511,7 +1545,7 @@ var Shot;
 
                 if (this.data.id) {
                 } else {
-                    this.data.formData.append('title', this.data.title);
+                    this.data.formData.append('title', new Shot.Helpers().htmlDecode(this.data.title));
 
                     $.ajax(SHOT.rootPath + 'ajax/saveImage', {
                         type: 'POST',

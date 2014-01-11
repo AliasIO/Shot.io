@@ -123,7 +123,7 @@ class Album extends \Swiftlet\Controller
 	{
 		$this->grid();
 
-		$this->view->images = $this->view->thumbnails;
+		$this->view->images = $this->view->get('thumbnails', false);
 
 		$this->view->name = 'album/carousel';
 	}

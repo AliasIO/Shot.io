@@ -14,6 +14,7 @@
 
 		<script>
 			var SHOT = {
+				siteName: '<?= $this->htmlEncode($this->app->getConfig('siteName')) ?>',
 				rootPath: '<?= $this->app->getRootPath() ?>',
 				controller: '<?= $this->app->getControllerName() ?>',
 				action: '<?= $this->app->getAction() ?>'

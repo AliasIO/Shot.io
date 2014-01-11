@@ -3,7 +3,7 @@
 	<li class="divider"></li>
 	{{/if}}
 	<li>
-		<a href="{{url}}{{^url}}javascript: void(0);{{/url}}">
+		<a href="{{url}}{{^url}}javascript:void(0);{{/url}}">
 			{{#if icon}}
 			<i class="fa fa-{{icon}}"></i>
 			{{/if}}

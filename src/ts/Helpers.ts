@@ -6,7 +6,7 @@ module Shot {
 		/**
 		 * Add modal to DOM
 		 */
-		showModal(modal: Models.Modal) {
+		showModal(modal: Models.Modal): void {
 			modal.el
 				.on('click', (e) => {
 					if ( !$(e.target).closest('.modal-content').length ) {
@@ -22,7 +22,7 @@ module Shot {
 				.css({ marginTop: $(document).scrollTop() + 'px' });
 		}
 
-		initDock(dock: Models.Dock) {
+		initDock(dock: Models.Dock): void {
 			$(dock)
 				.on('activate', (e) => {
 					dock.el
@@ -56,7 +56,7 @@ module Shot {
 		/**
 		 * Remove item from array
 		 */
-		arrayPull = function(arr, item) {
+		arrayPull(arr: Array, item): Array {
 			var i = 0;
 
 			for ( ; i < arr.length; i ++ ) {
@@ -64,6 +64,32 @@ module Shot {
 					arr.splice(i, 1)[0];
 				}
 			}
+
+			return arr;
+		}
+
+		/**
+		 * Encode HTML entities
+		 */
+		htmlEncode(str: string): string {
+			return str
+				.replace(/&/g, '&amp;')
+				.replace(/>/g, '&gt;')
+				.replace(/</g, '&lt;')
+				.replace(/'/g, '&#039;')
+				.replace(/"/g, '&quot;');
+		}
+
+		/**
+		 * Decode HTML entities
+		 */
+		htmlDecode(str: string): string {
+			return str
+				.replace(/&amp;/g,  '&')
+				.replace(/&gt;/g,   '>')
+				.replace(/&lt;/g,   '<')
+				.replace(/&#039;/g, '\'')
+				.replace(/&quot;/g, '"');
 		}
 	}
 }

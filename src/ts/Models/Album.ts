@@ -46,9 +46,11 @@ module Shot {
 
 				this.render();
 
+				console.log(this.data.title);
+
 				$.post(SHOT.rootPath + 'ajax/saveAlbum', {
 					id: this.data.id,
-					title: this.data.title
+					title: new Helpers().htmlDecode(this.data.title)
 				})
 				.done((data) => {
 					this.data.id = data.id;

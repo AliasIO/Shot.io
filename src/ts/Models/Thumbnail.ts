@@ -45,7 +45,7 @@ module Shot {
 				if ( this.data.id ) {
 					// TODO
 				} else {
-					this.data.formData.append('title', this.data.title);
+					this.data.formData.append('title', new Helpers().htmlDecode(this.data.title));
 
 					$.ajax(SHOT.rootPath + 'ajax/saveImage', {
 						type: 'POST',

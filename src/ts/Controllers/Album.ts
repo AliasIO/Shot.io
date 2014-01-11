@@ -61,15 +61,22 @@ module Shot {
 					})
 					.on('click', '.edit', (e) => {
 						var
-							modal = new Models.Modal('#template-modals-thumbnails-edit-selection').render(),
+							data,
+							modal: Models.Modal,
 							selection = multiEdit.getSelection();
+
+						if ( selection.length === 1 ) {
+							data = selection[0].data;
+						}
+
+						modal = new Models.Modal('#template-modals-thumbnails-edit-selection', data).render();
 
 						modal.el
 							.on('submit', 'form', (e) => {
 								var
 									ids: Array<number> = [],
 									selection = multiEdit.getSelection(),
-									title = modal.el.find(':input[name="title"]').val(),
+									title = helpers.htmlEncode(modal.el.find(':input[name="title"]').val()),
 									thumbCrop = modal.el.find(':input[name="thumb-crop"]:checked').val();
 
 								e.preventDefault();
@@ -87,7 +94,7 @@ module Shot {
 									thumbnail.render();
 								});
 
-								$.post(SHOT.rootPath + 'ajax/saveImages', { ids: ids, title: title, thumbCrop: thumbCrop })
+								$.post(SHOT.rootPath + 'ajax/saveImages', { ids: ids, title: helpers.htmlDecode(title), thumbCrop: thumbCrop })
 									.done(() => {
 										selection.forEach((thumbnail) => {
 											thumbnail.data.pending = false;
@@ -249,6 +256,8 @@ module Shot {
 							.attr('disabled', selectedCount === thumbnails.length);
 					})
 					.on('activate', () => {
+						thumbnailGrid.addClass('multi-edit');
+
 						thumbnails.forEach((thumbnail) => {
 							thumbnail.data.draggable = true;
 
@@ -256,6 +265,8 @@ module Shot {
 						});
 					})
 					.on('deactivate', () => {
+						thumbnailGrid.removeClass('multi-edit');
+
 						thumbnails.forEach((thumbnail) => {
 							thumbnail.data.draggable = false;
 
@@ -280,6 +291,7 @@ module Shot {
 				// Nav items
 				navItems.album = $(Handlebars.compile($('#template-nav-item').html())({
 					text: album.data.title,
+					url: SHOT.rootPath + 'album/grid/' + album.data.id,
 					icon: 'folder',
 					left: true,
 					path: SHOT.rootPath + 'album/grid/' + album.data.id
@@ -428,22 +440,22 @@ module Shot {
 
 				navItems.editAlbum
 					.on('click', (e) => {
-						var modal = new Models.Modal('#template-modals-albums-edit').render();
+						var modal = new Models.Modal('#template-modals-albums-edit', album.data).render();
 
 						e.preventDefault();
 
 						modal.el
 							.on('submit', 'form', (e) => {
-								var title = modal.el.find(':input[name="title"]').val();
+								var title = helpers.htmlEncode(modal.el.find(':input[name="title"]').val());
 
 								e.preventDefault();
 
 								if ( title ) {
 									album.data.title = title;
 
-									navItems.album.find('.text').text(title);
+									navItems.album.find('.text').text(helpers.htmlDecode(title));
 
-									document.title = title; // TODO Add website name
+									document.title = SHOT.siteName + ' - ' + helpers.htmlDecode(title);
 
 									album.save();
 								}
@@ -500,7 +512,7 @@ module Shot {
 
 				// Nav items
 				navItems.album = $(Handlebars.compile($('#template-nav-item').html())({
-					text: album.data.title.replace(/&amp;/g, '&'),
+					text: album.data.title,
 					icon: 'folder',
 					url: SHOT.rootPath + 'album/grid/' + album.data.id,
 					left: true
@@ -534,7 +546,7 @@ module Shot {
 					}
 
 					navItems.thumbnail = $(Handlebars.compile($('#template-nav-item').html())({
-						text: image.data.title.replace(/&amp;/g, '&'),
+						text: image.data.title,
 						icon: 'picture-o',
 						url: SHOT.rootPath + 'album/carousel/' + album.data.id + '/' + image.data.id,
 						left: true
