@@ -1,7 +1,7 @@
 <?php include $this->vendorPath . $this->vendor . '/views/header.php' ?>
 
 <script>
-	xSHOT.images = <?= json_encode($this->get('images', false)) ?>;
+	SHOT.images = <?= json_encode($this->get('images', false)) ?>;
 	SHOT.albums = <?= json_encode($this->albums) ?>;
 	SHOT.album = <?= json_encode($this->album) ?>;
 </script>
