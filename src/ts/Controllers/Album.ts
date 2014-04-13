@@ -291,10 +291,10 @@ module Shot {
 				// Nav items
 				navItems.album = $(Handlebars.compile($('#template-nav-item').html())({
 					text: album.data.title,
-					url: SHOT.rootPath + 'album/grid/' + album.data.id,
+					url: SHOT.rootPath + 'album/' + album.data.id,
 					icon: 'folder',
 					left: true,
-					path: SHOT.rootPath + 'album/grid/' + album.data.id
+					path: SHOT.rootPath + 'album/' + album.data.id
 				}));
 
 				navItems.album.appendTo('.top-bar .left');
@@ -364,7 +364,7 @@ module Shot {
 
 															// Reveal the processed image
 															$(e.target).fadeIn('fast', () => {
-																thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + album.data.id + '/' + data.id;
+																thumbnail.data.link = SHOT.rootPath + 'album/' + album.data.id + '/image/' + data.id;
 																thumbnail.data.pending = false;
 
 																thumbnail.render();
@@ -471,7 +471,7 @@ module Shot {
 					SHOT.thumbnails.forEach((thumbnailData) => {
 						var thumbnail = new Models.Thumbnail(thumbnailData);
 
-						thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + album.data.id + '/' + thumbnail.data.id;
+						thumbnail.data.link = SHOT.rootPath + 'album/' + album.data.id + '/image/' + thumbnail.data.id;
 
 						thumbnailGrid.append(thumbnail.render().el);
 
@@ -508,13 +508,13 @@ module Shot {
 				carousel.render();
 
 				// Obtain image ID from URL
-				id = parseInt(location.pathname.replace(/^\/album\/carousel\/\d\/(\d)/, (match, a) => { return a; }));
+				id = parseInt(location.pathname.replace(/^\/album\/\d\/image\/(\d)/, (match, a) => { return a; }));
 
 				// Nav items
 				navItems.album = $(Handlebars.compile($('#template-nav-item').html())({
 					text: album.data.title,
 					icon: 'folder',
-					url: SHOT.rootPath + 'album/grid/' + album.data.id,
+					url: SHOT.rootPath + 'album/' + album.data.id,
 					left: true
 				}));
 
@@ -548,7 +548,7 @@ module Shot {
 					navItems.thumbnail = $(Handlebars.compile($('#template-nav-item').html())({
 						text: image.data.title,
 						icon: 'picture-o',
-						url: SHOT.rootPath + 'album/carousel/' + album.data.id + '/' + image.data.id,
+						url: SHOT.rootPath + 'album/' + album.data.id + '/image/' + image.data.id,
 						left: true
 					}));
 
@@ -558,7 +558,7 @@ module Shot {
 					if ( image.data.id !== id ) {
 						id = image.data.id;
 
-						history.pushState({ id: id }, '', '/album/carousel/' + album.data.id + '/' + id);
+						history.pushState({ id: id }, '', '/album/' + album.data.id + '/image/' + id);
 					}
 
 					$(document).foundation('interchange', 'reflow');

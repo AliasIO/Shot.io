@@ -21,7 +21,7 @@ module Shot {
 
 				imagesData.forEach((data) => {
 					data.urls = data.paths;
-					data.link = SHOT.rootPath + 'album/' + SHOT.album.id + '/' + data.id;
+					data.link = SHOT.rootPath + 'album/' + SHOT.album.id + '/image/' + data.id;
 
 					this.images.push(new Models.Image(data));
 				});

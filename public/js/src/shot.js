@@ -341,10 +341,10 @@ var Shot;
 
                 navItems.album = $(Handlebars.compile($('#template-nav-item').html())({
                     text: album.data.title,
-                    url: SHOT.rootPath + 'album/grid/' + album.data.id,
+                    url: SHOT.rootPath + 'album/' + album.data.id,
                     icon: 'folder',
                     left: true,
-                    path: SHOT.rootPath + 'album/grid/' + album.data.id
+                    path: SHOT.rootPath + 'album/' + album.data.id
                 }));
 
                 navItems.album.appendTo('.top-bar .left');
@@ -401,7 +401,7 @@ var Shot;
                                             thumbnail.el.find('.processing').fadeOut('fast');
 
                                             $(e.target).fadeIn('fast', function () {
-                                                thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + album.data.id + '/' + data.id;
+                                                thumbnail.data.link = SHOT.rootPath + 'album/' + album.data.id + '/image/' + data.id;
                                                 thumbnail.data.pending = false;
 
                                                 thumbnail.render();
@@ -497,7 +497,7 @@ var Shot;
                     SHOT.thumbnails.forEach(function (thumbnailData) {
                         var thumbnail = new Shot.Models.Thumbnail(thumbnailData);
 
-                        thumbnail.data.link = SHOT.rootPath + 'album/carousel/' + album.data.id + '/' + thumbnail.data.id;
+                        thumbnail.data.link = SHOT.rootPath + 'album/' + album.data.id + '/image/' + thumbnail.data.id;
 
                         thumbnailGrid.append(thumbnail.render().el);
 
@@ -525,14 +525,14 @@ var Shot;
 
                 carousel.render();
 
-                id = parseInt(location.pathname.replace(/^\/album\/carousel\/\d\/(\d)/, function (match, a) {
+                id = parseInt(location.pathname.replace(/^\/album\/\d\/image\/(\d)/, function (match, a) {
                     return a;
                 }));
 
                 navItems.album = $(Handlebars.compile($('#template-nav-item').html())({
                     text: album.data.title,
                     icon: 'folder',
-                    url: SHOT.rootPath + 'album/grid/' + album.data.id,
+                    url: SHOT.rootPath + 'album/' + album.data.id,
                     left: true
                 }));
 
@@ -562,7 +562,7 @@ var Shot;
                     navItems.thumbnail = $(Handlebars.compile($('#template-nav-item').html())({
                         text: image.data.title,
                         icon: 'picture-o',
-                        url: SHOT.rootPath + 'album/carousel/' + album.data.id + '/' + image.data.id,
+                        url: SHOT.rootPath + 'album/' + album.data.id + '/image/' + image.data.id,
                         left: true
                     }));
 
@@ -571,7 +571,7 @@ var Shot;
                     if (image.data.id !== id) {
                         id = image.data.id;
 
-                        history.pushState({ id: id }, '', '/album/carousel/' + album.data.id + '/' + id);
+                        history.pushState({ id: id }, '', '/album/' + album.data.id + '/image/' + id);
                     }
 
                     $(document).foundation('interchange', 'reflow');
@@ -810,7 +810,7 @@ var Shot;
                             album = new Shot.Models.Album({ title: title });
 
                             album.save().done(function () {
-                                album.data.link = SHOT.rootPath + 'album/grid/' + album.data.id;
+                                album.data.link = SHOT.rootPath + 'album/' + album.data.id;
                                 album.data.pending = false;
 
                                 album.render();
@@ -854,7 +854,7 @@ var Shot;
                     SHOT.albums.forEach(function (albumData) {
                         var album = new Shot.Models.Album(albumData);
 
-                        album.data.link = SHOT.rootPath + 'album/grid/' + album.data.id;
+                        album.data.link = SHOT.rootPath + 'album/' + album.data.id;
 
                         thumbnailGrid.append(album.render().el);
 
@@ -1147,7 +1147,7 @@ var Shot;
 
                 imagesData.forEach(function (data) {
                     data.urls = data.paths;
-                    data.link = SHOT.rootPath + 'album/' + SHOT.album.id + '/' + data.id;
+                    data.link = SHOT.rootPath + 'album/' + SHOT.album.id + '/image/' + data.id;
 
                     _this.images.push(new Shot.Models.Image(data));
                 });
@@ -1369,6 +1369,8 @@ var Shot;
                     });
 
                     el = $('<img/>');
+
+                    console.log(this.data);
 
                     el.prop('src', this.data.url).on('load', function (e) {
                         _this.loaded = true;

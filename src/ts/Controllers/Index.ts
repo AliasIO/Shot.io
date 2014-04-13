@@ -218,7 +218,7 @@ module Shot {
 									album
 										.save()
 										.done(() => {
-											album.data.link = SHOT.rootPath + 'album/grid/' + album.data.id;
+											album.data.link = SHOT.rootPath + 'album/' + album.data.id;
 											album.data.pending = false;
 
 											album.render();
@@ -267,7 +267,7 @@ module Shot {
 					SHOT.albums.forEach((albumData) => {
 						var album = new Models.Album(albumData);
 
-						album.data.link = SHOT.rootPath + 'album/grid/' + album.data.id;
+						album.data.link = SHOT.rootPath + 'album/' + album.data.id;
 
 						thumbnailGrid.append(album.render().el);
 
