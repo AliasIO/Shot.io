@@ -12,6 +12,7 @@ module Shot {
 					helpers = new Helpers(),
 					thumbnailGrid = $('.thumbnail-grid'),
 					thumbnails: Array<Models.Thumbnail> = [],
+					placeholder = $('.page-placeholder'),
 					album = new Models.Album(SHOT.album),
 					navItems: { album: JQuery; editAlbum: JQuery; editThumbnails: JQuery; upload: JQuery } = {
 						album: null,
@@ -338,6 +339,8 @@ module Shot {
 										thumbnail.data.formData.append('image', file);
 										thumbnail.data.formData.append('albumId', album.data.id);
 
+										placeholder.hide();
+
 										thumbnailGrid.append(thumbnail.el);
 
 										$(thumbnail).on('delete', () => {
@@ -467,7 +470,9 @@ module Shot {
 					})
 					.appendTo('.top-bar .right');
 
-				if ( SHOT.thumbnails ) {
+				if ( SHOT.thumbnails.length ) {
+					placeholder.hide();
+
 					SHOT.thumbnails.forEach((thumbnailData) => {
 						var thumbnail = new Models.Thumbnail(thumbnailData);
 

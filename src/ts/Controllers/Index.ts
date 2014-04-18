@@ -11,6 +11,7 @@ module Shot {
 				var
 					helpers = new Helpers(),
 					thumbnailGrid = $('.thumbnail-grid'),
+					placeholder = $('.page-placeholder'),
 					albums: Array<Models.Album> = [],
 					navItems: { createAlbum: JQuery; editAlbums: JQuery } = { createAlbum: null, editAlbums: null },
 					editAlbums: Models.Dock,
@@ -230,6 +231,8 @@ module Shot {
 											album.render();
 										});
 
+									placeholder.hide();
+
 									thumbnailGrid.append(album.render().el);
 
 									albums.push(album);
@@ -263,7 +266,9 @@ module Shot {
 					})
 					.appendTo('.top-bar .right');
 
-				if ( SHOT.albums ) {
+				if ( SHOT.albums.length ) {
+					placeholder.hide();
+
 					SHOT.albums.forEach((albumData) => {
 						var album = new Models.Album(albumData);
 

@@ -7,6 +7,10 @@
 <div class="row">
 	<div class="large-12 columns">
 		<ul class="thumbnail-grid"></ul>
+
+		<p class="page-placeholder">
+			No albums have been created yet
+		</p>
 	</div>
 </div>
 

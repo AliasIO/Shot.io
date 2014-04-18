@@ -46,10 +46,8 @@ class Album extends \Shot\Abstracts\Model
 	 */
 	public function save()
 	{
-		$dbh = $this->app->getLibrary('pdo')->getHandle();
-
 		if ( $this->id ) {
-			$sth = $dbh->prepare('
+			$sth = $this->dbh->prepare('
 				UPDATE albums SET
 					title = :title,
 					sort_order = :sort_order
@@ -64,7 +62,7 @@ class Album extends \Shot\Abstracts\Model
 
 			$sth->execute();
 		} else {
-			$sth = $dbh->prepare('
+			$sth = $this->dbh->prepare('
 				INSERT INTO albums (
 					title,
 					sort_order
@@ -79,7 +77,7 @@ class Album extends \Shot\Abstracts\Model
 
 			$sth->execute();
 
-			$this->id = $dbh->lastInsertId();
+			$this->id = $this->dbh->lastInsertId();
 		}
 
 		return $this;
@@ -95,10 +93,8 @@ class Album extends \Shot\Abstracts\Model
 			return;
 		}
 
-		$dbh = $this->app->getLibrary('pdo')->getHandle();
-
 		if ( $this->id ) {
-			$sth = $dbh->prepare('
+			$sth = $this->dbh->prepare('
 				DELETE
 				FROM albums WHERE
 					id = :id

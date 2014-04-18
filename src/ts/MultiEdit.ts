@@ -14,7 +14,7 @@ module Shot {
 
 			$(editable).on('click', (e) => {
 				if ( this.active ) {
-					e.originalEvent.preventDefault();
+					e.shotOriginalEvent.preventDefault();
 
 					editable.select(!editable.isSelected());
 

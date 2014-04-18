@@ -13220,7 +13220,7 @@ var Shot;
                 };
             }
             Album.prototype.grid = function () {
-                var helpers = new Shot.Helpers(), thumbnailGrid = $('.thumbnail-grid'), thumbnails = [], album = new Shot.Models.Album(SHOT.album), navItems = {
+                var helpers = new Shot.Helpers(), thumbnailGrid = $('.thumbnail-grid'), thumbnails = [], placeholder = $('.page-placeholder'), album = new Shot.Models.Album(SHOT.album), navItems = {
                     album: null,
                     editAlbum: null,
                     editThumbnails: null,
@@ -13485,6 +13485,8 @@ var Shot;
                                 thumbnail.data.formData.append('image', file);
                                 thumbnail.data.formData.append('albumId', album.data.id);
 
+                                placeholder.hide();
+
                                 thumbnailGrid.append(thumbnail.el);
 
                                 $(thumbnail).on('delete', function () {
@@ -13597,7 +13599,9 @@ var Shot;
                     helpers.showModal(modal);
                 }).appendTo('.top-bar .right');
 
-                if (SHOT.thumbnails) {
+                if (SHOT.thumbnails.length) {
+                    placeholder.hide();
+
                     SHOT.thumbnails.forEach(function (thumbnailData) {
                         var thumbnail = new Shot.Models.Thumbnail(thumbnailData);
 
@@ -13752,7 +13756,7 @@ var Shot;
             function Index() {
             }
             Index.prototype.index = function () {
-                var helpers = new Shot.Helpers(), thumbnailGrid = $('.thumbnail-grid'), albums = [], navItems = { createAlbum: null, editAlbums: null }, editAlbums, multiEdit = new Shot.MultiEdit(), dragDrop = new Shot.DragDrop();
+                var helpers = new Shot.Helpers(), thumbnailGrid = $('.thumbnail-grid'), placeholder = $('.page-placeholder'), albums = [], navItems = { createAlbum: null, editAlbums: null }, editAlbums, multiEdit = new Shot.MultiEdit(), dragDrop = new Shot.DragDrop();
 
                 editAlbums = new Shot.Models.Dock('#template-dock-albums').render();
 
@@ -13927,6 +13931,8 @@ var Shot;
                                 album.render();
                             });
 
+                            placeholder.hide();
+
                             thumbnailGrid.append(album.render().el);
 
                             albums.push(album);
@@ -13956,7 +13962,9 @@ var Shot;
                     editAlbums.toggle();
                 }).appendTo('.top-bar .right');
 
-                if (SHOT.albums) {
+                if (SHOT.albums.length) {
+                    placeholder.hide();
+
                     SHOT.albums.forEach(function (albumData) {
                         var album = new Shot.Models.Album(albumData);
 
@@ -14706,7 +14714,7 @@ var Shot;
 
             $(editable).on('click', function (e) {
                 if (_this.active) {
-                    e.originalEvent.preventDefault();
+                    e.shotOriginalEvent.preventDefault();
 
                     editable.select(!editable.isSelected());
 

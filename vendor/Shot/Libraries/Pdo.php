@@ -12,13 +12,6 @@ class Pdo extends \Swiftlet\Abstracts\Library
 	public function getHandle()
 	{
 		if ( !$this->handle ) {
-			if ( !file_exists('db/db.sdb') ) {
-				//header('Location: ' . $this->app->getRootPath() . 'install');
-				exit('not installed');
-
-				exit;
-			}
-
 			try {
 				$this->handle = new \PDO('sqlite:db/db.sdb');
 			} catch ( \PDOException $e ) {

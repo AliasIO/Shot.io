@@ -31,7 +31,9 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 				$id    = !empty($_POST['id'])    ? (int) $_POST['id']    : null;
 				$title = !empty($_POST['title']) ?       $_POST['title'] : '';
 
-				$album = $this->app->getModel('album');
+				$dbh = $this->app->getLibrary('pdo')->getHandle();
+
+				$album = $this->app->getModel('album')->setDatabaseHandle($dbh);
 
 				if ( $id ) {
 					$album->load($id);
@@ -70,6 +72,8 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 				}
 
 				if ( !empty($_FILES) ) {
+					$dbh = $this->app->getLibrary('pdo')->getHandle();
+
 					foreach ( $_FILES as $file ) {
 						switch ( $file['error'] ) {
 							case UPLOAD_ERR_INI_SIZE:
@@ -106,9 +110,9 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 
 						move_uploaded_file($file['tmp_name'], \Shot\Models\Image::$imagePath . $filename);
 
-						$album = $this->app->getModel('album')->load($albumId);
+						$album = $this->app->getModel('album')->setDatabaseHandle($dbh)->load($albumId);
 
-						$image = $this->app->getModel('image');
+						$image = $this->app->getModel('image')->setDatabaseHandle($dbh);
 
 						$image
 							->setTitle($title ? $title : basename($file['name']))
@@ -148,9 +152,11 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 			$title = !empty($_POST['title']) ? $_POST['title'] : '';
 
 			if ( is_array($ids) && $ids ) {
+				$dbh = $this->app->getLibrary('pdo')->getHandle();
+
 				foreach ( $ids as $id ) {
 					try {
-						$album = $this->app->getModel('album')->load($id);
+						$album = $this->app->getModel('album')->setDatabaseHandle($dbh)->load($id);
 
 						if ( $title ) {
 							$album->setTitle($title);
@@ -214,7 +220,7 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 
 				foreach ( $ids as $id ) {
 					try {
-						$image = $this->app->getModel('image')->load($id);
+						$image = $this->app->getModel('image')->setDatabaseHandle($dbh)->load($id);
 
 						if ( $title ) {
 							$image->setTitle($title);
@@ -336,9 +342,11 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 			$ids = !empty($_POST['ids']) ? $_POST['ids'] : array();
 
 			if ( is_array($ids) && $ids ) {
+				$dbh = $this->app->getLibrary('pdo')->getHandle();
+
 				foreach ( $ids as $id ) {
 					try {
-						$album = $this->app->getModel('album')->load($id);
+						$album = $this->app->getModel('album')->setDatabaseHandle($dbh)->load($id);
 
 						$album->delete();
 					} catch ( \Swiftlet\Exception $e ) { }
@@ -360,9 +368,11 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 			$ids = !empty($_POST['ids']) ? $_POST['ids'] : array();
 
 			if ( is_array($ids) && $ids ) {
+				$dbh = $this->app->getLibrary('pdo')->getHandle();
+
 				foreach ( $ids as $id ) {
 					try {
-						$image = $this->app->getModel('image')->load($id);
+						$image = $this->app->getModel('image')->setDatabaseHandle($dbh)->load($id);
 
 						$image->delete();
 					} catch ( \Swiftlet\Exception $e ) { }

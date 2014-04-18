@@ -9,6 +9,10 @@
 <div class="row">
 	<div class="large-12 columns">
 		<ul class="thumbnail-grid"></ul>
+
+		<p class="page-placeholder">
+			No images have been added yet
+		</p>
 	</div>
 </div>
 
