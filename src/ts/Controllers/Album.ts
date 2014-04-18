@@ -249,11 +249,11 @@ module Shot {
 
 						editThumbnails.el
 							.find('.select-none, .edit, .albums, .delete')
-							.attr('disabled', !selectedCount);
+							.prop('disabled', !selectedCount);
 
 						editThumbnails.el
 							.find('.select-all')
-							.attr('disabled', selectedCount === thumbnails.length);
+							.prop('disabled', selectedCount === thumbnails.length);
 					})
 					.on('activate', () => {
 						thumbnailGrid.addClass('multi-edit');
@@ -497,6 +497,8 @@ module Shot {
 						exif: null
 					};
 
+				Foundation.libs.interchange.events(); // Workaround for apparent Foundation Interchange bug
+
 				$(document).foundation('interchange', {
 					named_queries: {
 						'1600': 'only screen and (min-width: 1024px)',
@@ -638,7 +640,7 @@ module Shot {
 
 					image.on('load', (e: any) => {
 						var
-							canvas = $('<canvas/>').get(0),
+							canvas = <HTMLCanvasElement> $('<canvas/>').get(0),
 							size = {
 								x: e.target.width  < e.target.height ? thumbnailSize : e.target.width  * thumbnailSize / e.target.height,
 								y: e.target.height < e.target.width  ? thumbnailSize : e.target.height * thumbnailSize / e.target.width

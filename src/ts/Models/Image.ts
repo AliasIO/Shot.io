@@ -51,8 +51,6 @@ module Shot {
 					// Load actual image
 					el = $('<img/>');
 
-					console.log(this.data);
-
 					el
 						.prop('src', this.data.url)
 						.on('load', (e) => {

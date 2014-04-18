@@ -8,7 +8,7 @@ module.exports = function(grunt) {
 			},
 			js: {
 				files: ['public/js/src/**/*.js'],
-				tasks: ['uglify']
+				tasks: ['concat', 'uglify']
 			},
 			sass: {
 				files: ['src/sass/**/*.sass', 'src/sass/**/*.scss'],
@@ -20,22 +20,36 @@ module.exports = function(grunt) {
 				src: ['src/ts/**/*.ts'],
 				dest: 'public/js/src/shot.js',
 				options: {
-					base_path: 'scr/ts',
+					basepath: 'scr/ts',
 					module: 'amd',
 					target: 'es5'
 				}
 			}
 		},
+		concat: {
+			options: {
+				separator: ';',
+			},
+			dist: {
+				dest: 'public/js/src/<%= pkg.name %>.js',
+				src: [
+					'bower_components/jquery/dist/jquery.js',
+					'bower_components/jquery-easing-original/jquery.easing.1.3.js',
+					'bower_components/foundation/js/foundation/foundation.js',
+					'bower_components/foundation/js/foundation/foundation.interchange.js',
+					'bower_components/handlebars/handlebars.js',
+					'public/js/src/**/*.js'
+				]
+			}
+		},
 		uglify: {
 			my_target: {
 				options: {
-					//sourceMap: 'public/js/<%= pkg.name %>.map',
-					//sourceMapPrefix: 1
+					sourceMap: 'public/js/<%= pkg.name %>.map'
 				},
 				files: {
 					'public/js/<%= pkg.name %>.min.js': [
-						'public/js/src/lib/jquery.js',
-						'public/js/src/**/*.js'
+						'public/js/src/<%= pkg.name %>.js'
 					]
 				}
 			}
@@ -55,9 +69,10 @@ module.exports = function(grunt) {
 	});
 
 	grunt.loadNpmTasks('grunt-contrib-watch');
+	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-compass');
 	grunt.loadNpmTasks('grunt-typescript');
 
-	grunt.registerTask('default', ['typescript', 'uglify', 'compass', 'watch']);
+	grunt.registerTask('default', ['typescript', 'concat', 'uglify', 'compass', 'watch']);
 };

@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8">
 
-		<title><?= null /*$this->htmlEncode($this->app->getConfig('siteName')) . ( $this->app->getControllerName() == 'Index' ? '' : ' - ' . $this->pageTitle )*/ ?></title>
+		<title><?= ( $this->controller == 'Index' ? '' : $this->pageTitle . ' - ' ) . $this->siteName ?></title>
 
 		<meta http-equiv="X-UA-Compatible" content="IE=Edge">
 
@@ -14,7 +14,7 @@
 
 		<script>
 			var SHOT = {
-				siteName: '<?= null //$this->htmlEncode($this->app->getConfig('siteName')) ?>',
+				siteName: '<?= $this->siteName ?>',
 				rootPath: '<?= $this->getRootPath() ?>',
 				controller: '<?= $this->controller ?>',
 				action: '<?= $this->action ?>'
@@ -25,7 +25,7 @@
 		<nav class="top-bar">
 			<ul class="title-area">
 				<li class="name">
-					<h1><a href="<?= $this->getRootPath() ?>"><i class="fa fa-camera"></i> <?= null;// $this->htmlEncode($this->app->getConfig('siteName')) ?></a></h1>
+					<h1><a href="<?= $this->getRootPath() ?>"><i class="fa fa-camera"></i> <?= $this->siteName ?></a></h1>
 				</li>
 				<li class="toggle-topbar menu-icon"><a href="#"><span></span></a></li>
 			</ul>

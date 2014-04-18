@@ -27,6 +27,7 @@ Stack
 
 * [PHP](http://php.net)
 * [Swiftlet](http://swiftlet.org)
+* [SQLite](https://sqlite.org)
 
 **Frontend**
 
@@ -34,17 +35,22 @@ Stack
 * [SASS](http://sass-lang.com)
 * [Foundation](http://foundation.zurb.com)
 * [jQuery](http://jquery.com)
-* [Mustache](https://github.com/janl/mustache.js)
+* [Handlebars](http://handlebarsjs.com)
 
 
 Development
 -----------
 
-Install [Node.js](http://nodejs.org/) first.
+* [Node.js](http://nodejs.org)
+* [npm](https://www.npmjs.org)
+* [Grunt](http://gruntjs.com)
+* [Bower](http://bower.io)
+
+Install [Node.js](http://nodejs.org) first.
 
 ```shell
 $ git clone git@github.com:ElbertF/Shot.io.git shot.io
 $ cd shot.io
-$ npm install -g grunt-cli
+$ sudo npm install -g grunt-cli bower
 $ npm install
 ```

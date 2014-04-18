@@ -151,11 +151,11 @@ module Shot {
 
 						editAlbums.el
 							.find('.select-none, .edit, .delete')
-							.attr('disabled', !selectedCount);
+							.prop('disabled', !selectedCount);
 
 						editAlbums.el
 							.find('.select-all')
-							.attr('disabled', selectedCount === albums.length);
+							.prop('disabled', selectedCount === albums.length);
 					})
 					.on('activate', () => {
 						thumbnailGrid.addClass('multi-edit');

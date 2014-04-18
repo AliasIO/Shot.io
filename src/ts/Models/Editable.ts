@@ -22,7 +22,7 @@ module Shot {
 					} else {
 						var event = $.Event('click');
 
-						event.originalEvent = e;
+						event.shotOriginalEvent = e;
 
 						$(this).trigger(event);
 					}

@@ -4,7 +4,7 @@ interface JQuery {
 }
 
 interface BaseJQueryEventObject {
-	originalEvent: any;
+	shotOriginalEvent: any;
 	draggable: any;
 }
 
@@ -12,12 +12,14 @@ interface SHOT {
 	action: string;
 	app: Shot.App;
 	album: { id: number };
-	albums: Array;
+	albums: Array<any>;
 	controller: string;
-	images: Array;
+	images: Array<any>;
 	rootPath: string;
-	thumbnails: Array;
+	thumbnails: Array<any>;
 	siteName: string;
 }
 
 declare var SHOT: SHOT;
+
+declare var Foundation;

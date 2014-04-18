@@ -24,9 +24,8 @@ class Album extends \Swiftlet\Abstracts\Controller
 	 */
 	public function grid(array $args = array())
 	{
-		$this->view->controller = 'Album';
-		$this->view->action     = 'grid';
-		$this->view->name       = 'album/grid';
+		$this->view->action = 'grid';
+		$this->view->name   = 'album/grid';
 
 		$albumId = $args['album_id'];
 
@@ -131,9 +130,8 @@ class Album extends \Swiftlet\Abstracts\Controller
 	{
 		$this->grid($args);
 
-		$this->view->controller = 'Album';
-		$this->view->action     = 'carousel';
-		$this->view->name       = 'album/carousel';
+		$this->view->action = 'carousel';
+		$this->view->name   = 'album/carousel';
 
 		$this->view->images = $this->view->get('thumbnails', false);
 	}

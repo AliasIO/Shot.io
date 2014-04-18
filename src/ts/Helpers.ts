@@ -56,7 +56,7 @@ module Shot {
 		/**
 		 * Remove item from array
 		 */
-		arrayPull(arr: Array, item): Array {
+		arrayPull(arr: Array<any>, item): Array<any> {
 			var i = 0;
 
 			for ( ; i < arr.length; i ++ ) {
