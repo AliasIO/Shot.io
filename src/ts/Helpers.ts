@@ -6,7 +6,7 @@ module Shot {
 		/**
 		 * Add modal to DOM
 		 */
-		showModal(modal: Models.Modal): void {
+		showModal(modal: Models.Modal): Helpers {
 			modal.el
 				.on('click', (e) => {
 					if ( !$(e.target).closest('.modal-content').length ) {
@@ -20,6 +20,31 @@ module Shot {
 				.show()
 				.find('.modal-content')
 				.css({ marginTop: $(document).scrollTop() + 'px' });
+
+			return this;
+		}
+
+		/**
+		 * Add notice to DOM
+		 */
+		showNotice(notice: Models.Notice): Helpers {
+			notice.el
+				.on('click', (e) => {
+					notice.el.fadeOut('fast', function() {
+						notice.close();
+					});
+				})
+				.css({ opacity: 0, marginTop: 10 })
+				.appendTo('#notices')
+				.animate({ opacity: 1, marginTop: 0 }, 'fast')
+
+			setTimeout(function() {
+				notice.el.fadeOut('fast', function() {
+					notice.close();
+				});
+			}, 10000);
+
+			return this;
 		}
 
 		initDock(dock: Models.Dock): void {

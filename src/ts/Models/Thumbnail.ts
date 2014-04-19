@@ -70,7 +70,7 @@ module Shot {
 					})
 					.done((data) => {
 						this.data.id = data.id;
-						this.data.path = data.path;
+						this.data.path = SHOT.rootPath + data.path;
 						this.data.pending = false;
 						this.data.error = false;
 

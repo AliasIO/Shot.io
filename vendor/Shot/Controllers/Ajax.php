@@ -77,7 +77,7 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 					foreach ( $_FILES as $file ) {
 						switch ( $file['error'] ) {
 							case UPLOAD_ERR_INI_SIZE:
-								throw new \Swiftlet\Exception('The file is too big');
+								throw new \Swiftlet\Exception('The file is too big (' . ini_get('upload_max_filesize') . ' limit)');
 
 								break;
 							case UPLOAD_ERR_PARTIAL:

@@ -167,13 +167,13 @@ li
 	position: fixed
 	right: 0
 	top: 0
-	z-index: 99
+	z-index: 98
 
 .modal-wrap
 	padding-bottom: 100px
 	position: absolute
 	top: 100px
-	z-index: 99
+	z-index: 98
 	width: 100%
 
 .modal-content
@@ -492,3 +492,50 @@ li
 	font-size: 30px
 	margin-top: 100px
 	text-align: center
+
+#notices
+	box-sizing: border-box
+	padding: 0 40px
+	position: fixed
+	right: 0
+	top: 85px
+	width: 100%
+
+@media #{$small}
+	#notices
+		width: 400px
+		z-index: 99
+
+.notice
+	background-color: lighten($secondary-color, 30%)
+	+border-radius(2px)
+	+box-shadow(0 0 5px rgba(0, 0, 0, .5))
+	cursor: pointer
+	line-height: 1.5em
+	margin-bottom: .5em
+	padding: 1em 1.25em
+
+	i
+		display: none
+		margin-right: 5px
+
+	&.type-success
+		background: $success-color
+
+		i.icon-success
+			display: inline
+
+	&.type-notice i.icon-notice
+		display: inline
+
+	&.type-warn
+		background: $alert-color
+
+		i.icon-warn
+			display: inline
+
+	&.type-error
+		background: $alert-color
+
+		i.icon-error
+			display: inline

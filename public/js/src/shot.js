@@ -13476,7 +13476,7 @@ var Shot;
                         e.preventDefault();
 
                         $.each(e.target.files, function (i, file) {
-                            var thumbnail, progressBar;
+                            var notice, thumbnail, progressBar;
 
                             if (file.name && $.inArray(file.type, fileTypes) !== -1) {
                                 thumbnail = new Shot.Models.Thumbnail({ title: file.name.replace(/\..{1,4}$/, ''), file: file, formData: new FormData() }).render();
@@ -13512,17 +13512,21 @@ var Shot;
 
                                                 thumbnail.render();
                                             });
-                                        }).prependTo(thumbnail.el.find('.container')).prop('src', data.path);
+                                        }).prependTo(thumbnail.el.find('.container')).prop('src', SHOT.rootPath + data.path);
                                     });
                                 }).progress(function (data) {
                                     progressBar.set(data);
                                 }).fail(function (e) {
+                                    notice = new Shot.Models.Notice(e.responseJSON.error, 'error').render();
+
                                     thumbnail.data.pending = false;
                                     thumbnail.data.error = true;
 
                                     thumbnail.render();
 
                                     progressBar.set(0);
+
+                                    helpers.showNotice(notice);
                                 });
 
                                 thumbnail.el.find('.container').append(progressBar.el);
@@ -13532,6 +13536,10 @@ var Shot;
                                 thumbnails.push(thumbnail);
                                 multiEdit.push(thumbnail);
                                 dragDrop.push(thumbnail);
+                            } else {
+                                notice = new Shot.Models.Notice('Invalid file type', 'warn').render();
+
+                                helpers.showNotice(notice);
                             }
                         });
 
@@ -14130,6 +14138,24 @@ var Shot;
             }).on('click', '.cancel', function (e) {
                 modal.el.remove();
             }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
+
+            return this;
+        };
+
+        Helpers.prototype.showNotice = function (notice) {
+            notice.el.on('click', function (e) {
+                notice.el.fadeOut('fast', function () {
+                    notice.close();
+                });
+            }).css({ opacity: 0, marginTop: 10 }).appendTo('#notices').animate({ opacity: 1, marginTop: 0 }, 'fast');
+
+            setTimeout(function () {
+                notice.el.fadeOut('fast', function () {
+                    notice.close();
+                });
+            }, 10000);
+
+            return this;
         };
 
         Helpers.prototype.initDock = function (dock) {
@@ -14464,7 +14490,7 @@ var Shot;
 
                     this.el = el;
                 } else {
-                    data.url = this.data.paths.preview;
+                    data.url = SHOT.rootPath + this.data.paths.preview;
 
                     this.el = $(Handlebars.compile(this.template)(data));
 
@@ -14589,6 +14615,37 @@ var Shot;
 var Shot;
 (function (Shot) {
     (function (Models) {
+        var Notice = (function () {
+            function Notice(text, type, callback) {
+                this.text = text;
+                this.type = type;
+                this.callback = callback;
+                this.template = $('#template-notice').html();
+
+                this.type = type || 'notice';
+
+                this.callback = typeof callback === 'function' ? callback : null;
+            }
+            Notice.prototype.render = function () {
+                this.el = $(Handlebars.compile(this.template)({ text: this.text, type: this.type }));
+
+                return this;
+            };
+
+            Notice.prototype.close = function () {
+                this.el.remove();
+
+                this.callback();
+            };
+            return Notice;
+        })();
+        Models.Notice = Notice;
+    })(Shot.Models || (Shot.Models = {}));
+    var Models = Shot.Models;
+})(Shot || (Shot = {}));
+var Shot;
+(function (Shot) {
+    (function (Models) {
         var ProgressBar = (function () {
             function ProgressBar() {
                 this.template = $('#template-progressbar').html();
@@ -14680,7 +14737,7 @@ var Shot;
                         }
                     }).done(function (data) {
                         _this.data.id = data.id;
-                        _this.data.path = data.path;
+                        _this.data.path = SHOT.rootPath + data.path;
                         _this.data.pending = false;
                         _this.data.error = false;
 

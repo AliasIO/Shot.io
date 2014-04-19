@@ -32,7 +32,7 @@ module Shot {
 
 					this.el = el;
 				} else {
-					data.url = this.data.paths.preview;
+					data.url = SHOT.rootPath + this.data.paths.preview;
 
 					this.el = $(Handlebars.compile(this.template)(data));
 

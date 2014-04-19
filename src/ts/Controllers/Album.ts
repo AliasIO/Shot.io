@@ -329,6 +329,7 @@ module Shot {
 
 								$.each(e.target.files, (i, file) => {
 									var
+										notice,
 										thumbnail,
 										progressBar;
 
@@ -374,19 +375,23 @@ module Shot {
 															});
 														})
 														.prependTo(thumbnail.el.find('.container'))
-														.prop('src', data.path);
+														.prop('src', SHOT.rootPath + data.path);
 												});
 											})
 											.progress((data) => {
 												progressBar.set(data);
 											})
 											.fail((e) => {
+												notice = new Models.Notice(e.responseJSON.error, 'error').render();
+
 												thumbnail.data.pending = false;
 												thumbnail.data.error = true;
 
 												thumbnail.render();
 
 												progressBar.set(0);
+
+												helpers.showNotice(notice);
 											});
 
 										thumbnail.el.find('.container').append(progressBar.el);
@@ -396,6 +401,10 @@ module Shot {
 										thumbnails.push(thumbnail);
 										multiEdit.push(thumbnail);
 										dragDrop.push(thumbnail);
+									} else {
+										notice = new Models.Notice('Invalid file type', 'warn').render();
+
+										helpers.showNotice(notice);
 									}
 								});
 

@@ -38,6 +38,7 @@ module.exports = function(grunt) {
 					'bower_components/foundation/js/foundation/foundation.js',
 					'bower_components/foundation/js/foundation/foundation.interchange.js',
 					'bower_components/handlebars/handlebars.js',
+					'bower_components/swipe.jquery.js/swipe.jquery.js',
 					'public/js/src/**/*.js'
 				]
 			}
@@ -61,8 +62,8 @@ module.exports = function(grunt) {
 					outputStyle: 'compressed',
 					sassDir: 'src/sass',
 					cssDir: 'public/css',
-					imagesDir: 'public/img',
-					httpImagesPath: '/img'
+					imagesDir: 'public/images',
+					httpImagesPath: '/images'
 				}
 			}
 		}

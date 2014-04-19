@@ -1,5 +1,5 @@
 bower_components
-db/db.sdb
+db/db*
 log/exceptions.log
 node_modules
 public/photos/**/*.jpg
