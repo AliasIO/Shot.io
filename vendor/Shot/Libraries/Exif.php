@@ -5,42 +5,42 @@ namespace Shot\Libraries;
 class Exif extends \Swiftlet\Abstracts\Library
 {
 	protected $fields = array(
-		'Make'                  => array('type' => 'text',   'desc' => 'Camera Make'),
-		'Model'                 => array('type' => 'text',   'desc' => 'Camera Model'),
-		'ImageType'             => array('type' => 'text',   'desc' => 'Photo Type'),
-		'ImageDescription'      => array('type' => 'text',   'desc' => 'Photo Description'),
-		'FileSize'              => array('type' => 'number', 'desc' => 'File Size'),
-		'DateTime'              => array('type' => 'date',   'desc' => 'Date Photo Modified'),
-		'DateTimeOriginal'      => array('type' => 'date',   'desc' => 'Date Photo Taken'),
-		'DateTimeDigitized'     => array('type' => 'date',   'desc' => 'Date Photo Digitized'),
-		'ExifImageWidth'        => array('type' => 'number', 'desc' => 'Width'),
-		'ExifImageLength'       => array('type' => 'number', 'desc' => 'Height'),
-		'XResolution'           => array('type' => 'number', 'desc' => 'X Resolution'),
-		'YResolution'           => array('type' => 'number', 'desc' => 'Y Resolution'),
-		'ResolutionUnit'        => array('type' => 'text',   'desc' => 'Resolution Unit'),
-		'ShutterSpeedValue'     => array('type' => 'number', 'desc' => 'Shutter Speed'),
-		'ExposureTime'          => array('type' => 'number', 'desc' => 'Exposure'),
-		'FocalLength'           => array('type' => 'number', 'desc' => 'Focal Length'),
-		'FocalLengthIn35mmFilm' => array('type' => 'number', 'desc' => 'Focal Length (35mm equiv)'),
-		'ApertureValue'         => array('type' => 'number', 'desc' => 'Aperture'),
-		'FNumber'               => array('type' => 'number', 'desc' => 'F-Number'),
-		'ISOSpeedRatings'       => array('type' => 'number', 'desc' => 'ISO Setting'),
-		'ExposureBiasValue'     => array('type' => 'number', 'desc' => 'Exposure Bias'),
-		'ExposureMode'          => array('type' => 'number', 'desc' => 'Exposure Mode'),
-		'ExposureProgram'       => array('type' => 'number', 'desc' => 'Exposure Program'),
-		'MeteringMode'          => array('type' => 'number', 'desc' => 'Metering Mode'),
-		'Flash'                 => array('type' => 'number', 'desc' => 'Flash Setting'),
-		//'UserComment'           => array('type' => 'text',   'desc' => 'User Comment'),
-		'ColorSpace'            => array('type' => 'number', 'desc' => 'Color Space'),
-		'SensingMethod'         => array('type' => 'number', 'desc' => 'Sensing Method'),
-		'WhiteBalance'          => array('type' => 'number', 'desc' => 'White Balance'),
-		'Orientation'           => array('type' => 'number', 'desc' => 'Camera Orientation'),
-		'Copyright'             => array('type' => 'text',   'desc' => 'Copyright'),
-		'Artist'                => array('type' => 'text',   'desc' => 'Artist'),
-		'GPSLatitude'           => array('type' => 'gps',    'desc' => 'Latitude'),
-		'GPSLongitude'          => array('type' => 'gps',    'desc' => 'Longitude'),
-		'LightSource'           => array('type' => 'number', 'desc' => 'Light source'),
-		'FileSource'            => array('type' => 'number', 'desc' => 'File source')
+		'Make'                  => array('type' => 'text',   'group' => 'Camera',   'desc' => 'Make'),
+		'Model'                 => array('type' => 'text',   'group' => 'Camera',   'desc' => 'Model'),
+		'DateTimeOriginal'      => array('type' => 'date',   'group' => 'Dates',    'desc' => 'Taken'),
+		'DateTimeDigitized'     => array('type' => 'date',   'group' => 'Dates',    'desc' => 'Digitized'),
+		'DateTime'              => array('type' => 'date',   'group' => 'Dates',    'desc' => 'Modified'),
+		'Artist'                => array('type' => 'text',   'group' => 'Image',    'desc' => 'Artist'),
+		'Copyright'             => array('type' => 'text',   'group' => 'Image',    'desc' => 'Copyright'),
+		'ColorSpace'            => array('type' => 'number', 'group' => 'Image',    'desc' => 'Color Space'),
+		'ImageDescription'      => array('type' => 'text',   'group' => 'Image',    'desc' => 'Description'),
+		//'UserComment'           => array('type' => 'text', 'group' => 'Image',      'desc' => 'User Comment'),
+		'FileSize'              => array('type' => 'number', 'group' => 'Image',    'desc' => 'File Size'),
+		'FileSource'            => array('type' => 'number', 'group' => 'Image',    'desc' => 'File source'),
+		'ImageType'             => array('type' => 'text',   'group' => 'Image',    'desc' => 'Type'),
+		'ExifImageWidth'        => array('type' => 'number', 'group' => 'Image',    'desc' => 'Width'),
+		'ExifImageLength'       => array('type' => 'number', 'group' => 'Image',    'desc' => 'Height'),
+		'XResolution'           => array('type' => 'number', 'group' => 'Image',    'desc' => 'X Resolution'),
+		'YResolution'           => array('type' => 'number', 'group' => 'Image',    'desc' => 'Y Resolution'),
+		'ResolutionUnit'        => array('type' => 'text',   'group' => 'Image',    'desc' => 'Resolution Unit'),
+		'ApertureValue'         => array('type' => 'number', 'group' => 'Settings', 'desc' => 'Aperture'),
+		'Orientation'           => array('type' => 'number', 'group' => 'Settings', 'desc' => 'Camera Orientation'),
+		'ExposureTime'          => array('type' => 'number', 'group' => 'Settings', 'desc' => 'Exposure'),
+		'ExposureBiasValue'     => array('type' => 'number', 'group' => 'Settings', 'desc' => 'Exposure Bias'),
+		'ExposureMode'          => array('type' => 'number', 'group' => 'Settings', 'desc' => 'Exposure Mode'),
+		'ExposureProgram'       => array('type' => 'number', 'group' => 'Settings', 'desc' => 'Exposure Program'),
+		'Flash'                 => array('type' => 'number', 'group' => 'Settings', 'desc' => 'Flash Setting'),
+		'FocalLength'           => array('type' => 'number', 'group' => 'Settings', 'desc' => 'Focal Length'),
+		'FocalLengthIn35mmFilm' => array('type' => 'number', 'group' => 'Settings', 'desc' => 'Focal Length (35mm equiv)'),
+		'FNumber'               => array('type' => 'number', 'group' => 'Settings', 'desc' => 'F-Stop'),
+		'ISOSpeedRatings'       => array('type' => 'number', 'group' => 'Settings', 'desc' => 'ISO'),
+		'LightSource'           => array('type' => 'number', 'group' => 'Settings', 'desc' => 'Light source'),
+		'MeteringMode'          => array('type' => 'number', 'group' => 'Settings', 'desc' => 'Metering Mode'),
+		'ShutterSpeedValue'     => array('type' => 'number', 'group' => 'Settings', 'desc' => 'Shutter Speed'),
+		'SensingMethod'         => array('type' => 'number', 'group' => 'Settings', 'desc' => 'Sensing Method'),
+		'WhiteBalance'          => array('type' => 'number', 'group' => 'Settings', 'desc' => 'White Balance'),
+		'GPSLatitude'           => array('type' => 'gps',    'group' => 'Location', 'desc' => 'Latitude'),
+		'GPSLongitude'          => array('type' => 'gps',    'group' => 'Location', 'desc' => 'Longitude'),
 		);
 
 	/**
@@ -51,19 +51,21 @@ class Exif extends \Swiftlet\Abstracts\Library
 	{
 		$exif = array();
 
-		foreach ( $properties as $property => $value ) {
-			if ( strpos($property, 'exif:') === 0 ) {
-				list(, $field) = explode('exif:', $property);
+		foreach ( $this->fields as $name => $field ) {
+			if ( isset($properties['exif:' . $name]) ) {
+				$value = trim($this->formatValue($name, $properties['exif:' . $name]));
 
-				if ( isset($this->fields[$field]) ) {
-					$value = trim($this->formatValue($field, $value));
+				if ( !isset($exif[$field['group']]) ) {
+					$exif[$field['group']] = array();
+				}
 
-					$exif[$this->fields[$field]['desc']] = $value ?: '-';
+				if ( $value != 'Unknown' ) {
+					$exif[$field['group']][$field['desc']] = $value;
 				}
 			}
 		}
 
-		ksort($exif);
+		//ksort($exif);
 
 		return $exif;
 	}
@@ -172,7 +174,7 @@ class Exif extends \Swiftlet\Abstracts\Library
 					$value = round($value, 1);
 				}
 
-				return 'f/' . $value;
+				return 'ƒ/' . $value;
 
 			case 'FocalLength':
 				if ( strpos($value, '/') !== false ) {
@@ -188,11 +190,11 @@ class Exif extends \Swiftlet\Abstracts\Library
 					list($n, $d) = explode('/', $value, 2);
 
 					if ( $d ) {
-						return 'f/' . round($n / $d, 1);
+						return 'ƒ/' . round($n / $d, 1);
 					}
 				}
 
-				return 'f/' . $value;
+				return 'ƒ/' . $value;
 
 			case 'ExposureBiasValue':
 				if ( strpos($value, '/') !== false ) {

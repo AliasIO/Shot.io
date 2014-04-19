@@ -23,3 +23,4 @@ interface SHOT {
 declare var SHOT: SHOT;
 
 declare var Foundation;
+declare var FastClick;

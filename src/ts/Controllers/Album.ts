@@ -546,7 +546,43 @@ module Shot {
 
 				navItems.exif
 					.on('click', (e) => {
-						var modal = new Models.Modal('#template-modals-images-exif', { exif: carousel.getCurrent().data.exif }).render();
+						var
+							exif = {},
+							group,
+							icon,
+							modal;
+
+						for ( group in carousel.getCurrent().data.exif ) {
+							switch ( group ) {
+								case 'Camera':
+									icon = 'camera';
+
+									break;
+								case 'Dates':
+									icon = 'calendar';
+
+									break;
+								case 'Image':
+									icon = 'picture-o';
+
+									break;
+								case 'Location':
+									icon = 'map-marker';
+
+									break;
+								case 'Settings':
+									icon = 'cog';
+
+									break;
+							}
+
+							exif[group] = {
+								icon: icon,
+								data: carousel.getCurrent().data.exif[group]
+							};
+						}
+
+						modal = new Models.Modal('#template-modals-images-exif', { exif: exif }).render();
 
 						helpers.showModal(modal);
 

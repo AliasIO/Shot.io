@@ -11,13 +11,16 @@
 								<div class="row">
 									<div class="large-12 small-12 columns">
 										{{#if exif}}
+										{{#each exif}}
+										<h6><i class="fa fa-{{icon}}"></i> {{@key}}</h6>
+
 										<table>
 											<tbody>
-												{{#each exif}}
+												{{#each this.data}}
 												<tr>
-													<th>
+													<td style="width: 40%;">
 														{{@key}}
-													</th>
+													</td>
 													<td>
 														{{this}}
 													</td>
@@ -25,6 +28,7 @@
 												{{/each}}
 											</tbody>
 										</table>
+										{{/each}}
 										{{else}}
 										<p>
 											No Exif data available.

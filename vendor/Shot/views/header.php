@@ -22,7 +22,7 @@
 		</script>
 	</head>
 	<body>
-		<nav class="top-bar">
+		<nav class="top-bar" data-topbar>
 			<ul class="title-area">
 				<li class="name">
 					<h1><a href="<?= $this->getRootPath() ?>"><i class="fa fa-camera"></i> <?= $this->siteName ?></a></h1>

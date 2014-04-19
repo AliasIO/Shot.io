@@ -15,8 +15,6 @@ module Shot {
 		constructor() {
 			$(document).foundation();
 
-			//FastClick.attach(document);
-
 			// Prevent dragging of ghost image in Firefox
 			$(document).on('dragstart', 'img, a', (e) => {
 				e.preventDefault();

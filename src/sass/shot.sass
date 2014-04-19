@@ -115,6 +115,9 @@ a
 h1, h2, h3, h4, h5, h6
 	color: $body-font-color
 
+h6
+	font-size: 13px
+
 form
 	margin: 0 auto
 
@@ -133,12 +136,17 @@ input
 	border-width: 0 1px 1px 0
 
 table
+	color: $form-label-font-color
 	font-size: 13px
 	line-height: 1.5em
+	margin-bottom: 1.25em
 	width: 100%
 
 	th
 		text-align: left
+
+	td
+		padding-right: 1em
 
 code
 	color: $body-font-color
@@ -416,9 +424,6 @@ li
 
 			.drag-handle
 				cursor: move !important
-
-	img, canvas
-		position: absolute
 
 	canvas
 		height: auto
