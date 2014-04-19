@@ -31,6 +31,7 @@ CREATE TABLE albums (
 	title          TEXT    NOT NULL,
 	cover_image_id INTEGER     NULL,
 	sort_order     INTEGER NOT NULL DEFAULT 0,
+	system         TEXT        NULL,
 	created_at     INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
 	updated_at     INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
 	FOREIGN KEY(cover_image_id) REFERENCES images(id) ON DELETE SET NULL
@@ -56,6 +57,17 @@ BEGIN
 	WHERE 
 		id = OLD.id;
 END;
+
+INSERT INTO albums (
+	title,
+	system
+) VALUES (
+	'All images',
+	'all'
+), (
+	'Unsorted',
+	'orphans'
+);
 
 DROP TABLE IF EXISTS albums_images;
 

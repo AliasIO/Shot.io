@@ -20,7 +20,13 @@
 				<div class="bar-wrap">
 					<ul class="bar">
 						<li class="title">
-							<i class="fa fa-folder"></i> {{{title}}}
+							{{#if system}}
+							<i class="fa fa-lock"></i>
+							<strong>Admin:</strong>
+							{{else}}
+							<i class="fa fa-folder"></i>
+							{{/if}}
+							{{{title}}}
 						</li>
 						{{#if pending}}
 						<li class="icon" title="Processing changes...">

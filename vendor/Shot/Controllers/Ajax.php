@@ -110,6 +110,8 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 
 						move_uploaded_file($file['tmp_name'], \Shot\Models\Image::$imagePath . $filename);
 
+						$albumAll = $this->app->getModel('album')->setDatabaseHandle($dbh)->loadSystem('all');
+
 						$album = $this->app->getModel('album')->setDatabaseHandle($dbh)->load($albumId);
 
 						$image = $this->app->getModel('image')->setDatabaseHandle($dbh);
@@ -120,6 +122,7 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 							->save();
 
 						$album->addImage($image);
+						$albumAll->addImage($image);
 
 						echo json_encode(array(
 							'id'   => (int) $image->getId(),
@@ -195,8 +198,16 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 						DELETE
 						FROM albums_images
 						WHERE
-							album_id = :album_id AND
-							image_id IN ( ' . join(', ', $ids) . ' )
+							image_id IN (
+								SELECT
+									albums_images.image_id
+								FROM       albums_images
+								INNER JOIN albums        ON albums.id = albums_images.album_id
+								WHERE
+									albums.system IS NULL AND
+									albums.id = :album_id AND
+									image_id IN ( ' . join(', ', $ids) . ' )
+							)
 						');
 
 					$sth->bindParam('album_id', $albumsRemove, \PDO::PARAM_INT);
@@ -205,12 +216,20 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 				}
 
 				if ( $albumsRemoveOther ) {
-					$sth = $dbh->prepare($sql='
+					$sth = $dbh->prepare('
 						DELETE
 						FROM albums_images
 						WHERE
-							album_id != :album_id AND
-							image_id IN ( ' . join(', ', $ids) . ' )
+							image_id IN (
+								SELECT
+									albums_images.image_id
+								FROM       albums_images
+								INNER JOIN albums        ON albums.id = albums_images.album_id
+								WHERE
+									albums.system IS NULL AND
+									albums.id != :album_id AND
+									image_id IN ( ' . join(', ', $ids) . ' )
+								)
 						');
 
 					$sth->bindParam('album_id', $albumsRemoveOther, \PDO::PARAM_INT);
@@ -254,6 +273,77 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 						}
 					} catch ( \Swiftlet\Exception $e ) { }
 				}
+
+				// Remove non-orphaned images from orphans
+				$album = $this->app->getModel('album')->setDatabaseHandle($dbh)->loadSystem('orphans');
+
+				$albumId = $album->getId();
+
+				$sth = $dbh->prepare('
+					DELETE
+					FROM albums_images
+					WHERE
+						albums_images.album_id = :album_id AND
+						image_id IN (
+							SELECT
+								image_id
+							FROM albums_images
+							INNER JOIN albums ON albums.id = albums_images.album_id AND albums.system IS NULL
+						)
+					');
+
+				$sth->bindParam('album_id', $albumId, \PDO::PARAM_INT);
+
+				$sth->execute();
+
+				// Add orphaned images to orphans
+				$sth = $dbh->prepare('
+					INSERT OR IGNORE INTO albums_images (
+						album_id,
+						image_id
+					)
+					SELECT
+						:album_id,
+						images.id
+					FROM      images
+					LEFT JOIN albums_images ON albums_images.image_id =        images.id
+					LEFT JOIN albums        ON        albums.id       = albums_images.album_id AND albums.system IS NULL
+					GROUP BY images.id
+					HAVING
+						COUNT(albums.id) = 0
+						');
+
+				$sth->bindParam('album_id', $albumId, \PDO::PARAM_INT);
+
+				$sth->execute();
+
+				// Add all images to all
+				$album = $this->app->getModel('album')->setDatabaseHandle($dbh)->loadSystem('all');
+
+				$albumId = $album->getId();
+
+				$sth = $dbh->prepare('
+					INSERT INTO albums_images (
+						album_id,
+						image_id
+					)
+					SELECT
+						:album_id,
+						images.id
+					FROM images
+					WHERE
+						id NOT IN (
+							SELECT
+								albums_images.image_id
+							FROM albums_images
+							WHERE
+								albums_images.album_id = :album_id
+							)
+					');
+
+				$sth->bindParam('album_id', $albumId, \PDO::PARAM_INT);
+
+				$sth->execute();
 			}
 
 			exit('{}');

@@ -44,9 +44,10 @@ class Index extends \Swiftlet\Abstracts\Controller
 			$album = $this->app->getModel('album')->setDatabaseHandle($dbh)->load($result->id);
 
 			$albums[] = (object) array(
-				'id'    => (int) $album->getId(),
-				'title' => $album->getTitle(),
-				'path'  => $album->getFilePath()
+				'id'     => (int) $album->getId(),
+				'system' => $album->getSystem(),
+				'title'  => $album->getTitle(),
+				'path'   => $album->getFilePath()
 				);
 		}
 

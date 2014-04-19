@@ -16,6 +16,12 @@ class Album extends \Shot\Abstracts\Model
 	protected $id;
 
 	/**
+	 * System name
+	 * @var string
+	 */
+	protected $system;
+
+	/**
 	 * Filename
 	 * @var string
 	 */
@@ -89,22 +95,20 @@ class Album extends \Shot\Abstracts\Model
 	 */
 	public function delete()
 	{
-		if ( !$this->id ) {
+		if ( !$this->id || $this->system ) {
 			return;
 		}
 
-		if ( $this->id ) {
-			$sth = $this->dbh->prepare('
-				DELETE
-				FROM albums WHERE
-					id = :id
-				LIMIT 1
-				');
+		$sth = $this->dbh->prepare('
+			DELETE
+			FROM albums WHERE
+				id = :id
+			LIMIT 1
+			');
 
-			$sth->bindParam('id', $this->id, \PDO::PARAM_INT);
+		$sth->bindParam('id', $this->id, \PDO::PARAM_INT);
 
-			$sth->execute();
-		}
+		$sth->execute();
 
 		$this->id = null;
 	}
@@ -115,6 +119,28 @@ class Album extends \Shot\Abstracts\Model
 	 */
 	public function load($id)
 	{
+		$this->loadBy('id', (int) $id);
+
+		return $this;
+	}
+
+	/**
+	 * Load a system album
+	 * @param string $name
+	 */
+	public function loadSystem($name)
+	{
+		$this->loadBy('system', $name);
+
+		return $this;
+	}
+
+	/**
+	 * Load an album by attribute
+	 * @param mixed $value
+	 */
+	private function loadBy($attribute, $value)
+	{
 		$sth = $this->dbh->prepare('
 			SELECT
 				albums.*,
@@ -124,11 +150,11 @@ class Album extends \Shot\Abstracts\Model
 			LEFT JOIN albums_images ON albums.id = albums_images.album_id
 			LEFT JOIN images ON albums_images.image_id = images.id AND albums.cover_image_id = images.id
 			WHERE
-				albums.id = :id
+				albums.' . $attribute . ' = :' . $attribute . '
 			LIMIT 1
 			');
 
-		$sth->bindParam('id', $id, \PDO::PARAM_INT);
+		$sth->bindParam($attribute, $value);
 
 		$sth->execute();
 
@@ -139,6 +165,7 @@ class Album extends \Shot\Abstracts\Model
 		}
 
 		$this->id        = $result->id;
+		$this->system    = $result->system;
 		$this->title     = $result->title;
 		$this->filename  = $result->filename;
 		$this->thumbCrop = $result->thumb_crop;
@@ -159,7 +186,7 @@ class Album extends \Shot\Abstracts\Model
 				LIMIT 1
 				');
 
-			$sth->bindParam('id', $id, \PDO::PARAM_INT);
+			$sth->bindParam('id', $this->id, \PDO::PARAM_INT);
 
 			$sth->execute();
 
@@ -204,6 +231,14 @@ class Album extends \Shot\Abstracts\Model
 	public function getId()
 	{
 		return $this->id;
+	}
+
+	/**
+	 * Get system name
+	 */
+	public function getSystem()
+	{
+		return $this->system;
 	}
 
 	/**

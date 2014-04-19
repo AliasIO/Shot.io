@@ -24,7 +24,7 @@
 
 								<div class="row">
 									<div class="large-12 columns">
-										<label><input type="checkbox" name="remove"> This album ({{{album.title}}})</label>
+										<label><input type="checkbox" name="remove"> Current album ({{{album.title}}})</label>
 										<label><input type="checkbox" name="remove_other"> All other albums</label>
 									</div>
 								</div>
