@@ -336,15 +336,17 @@ li
 				margin: 0
 				position: absolute
 				table-layout: fixed
+				+text-shadow(1px 1px 0 rgba(255, 255, 255, .1))
 				width: 100%
 
 				&:before
+					+transition(opacity .15s ease-in-out)
 					background: #fff
 					bottom: 0
 					content: ''
 					display: block
 					left: 0
-					+opacity(.5)
+					+opacity(.3)
 					position: absolute
 					right: 0
 					top: 0
@@ -372,6 +374,10 @@ li
 						cursor: grab
 						cursor: -moz-grab
 						cursor: -webkit-grab
+
+		&:hover
+			.bar:before
+				+opacity(.7)
 
 		&.selected
 
@@ -404,6 +410,9 @@ li
 
 				.bar
 					+box-shadow(none)
+
+					&:before
+						+opacity(.3)
 
 			.drag-handle
 				cursor: move !important
