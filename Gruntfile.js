@@ -35,6 +35,7 @@ module.exports = function(grunt) {
 				src: [
 					'bower_components/jquery/dist/jquery.js',
 					'bower_components/jquery-easing-original/jquery.easing.1.3.js',
+					'bower_components/fastclick/lib/fastclick.js',
 					'bower_components/foundation/js/foundation/foundation.js',
 					'bower_components/foundation/js/foundation/foundation.topbar.js',
 					'bower_components/foundation/js/foundation/foundation.dropdown.js',
