@@ -22,6 +22,7 @@ $fieldset-bg: transparent
 $fieldset-border-color: transparent
 
 $button-med: rem-calc(12)
+$button-disabled-opacity: 0.5
 
 $legend-bg: transparent
 
@@ -94,6 +95,8 @@ body
 	color: $topbar-link-color-hover
 
 a
+	outline: none
+
 	&:active
 		background: none
 
@@ -116,6 +119,9 @@ fieldset
 
 button
 	background-image: none
+
+.button-group.even-2 li > button, .button-group.even-2 li > .button
+	border-color: lighten($secondary-color, 5%)
 
 input
 	border-width: 0 1px 1px 0
@@ -266,7 +272,7 @@ li
 			+box-shadow(none)
 
 .thumbnail-grid
-	+block-grid(5, 10px, true)
+	+block-grid(5, 15px, true)
 	margin-top: rem-calc(30) !important
 
 	li
