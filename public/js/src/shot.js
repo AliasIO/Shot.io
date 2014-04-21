@@ -15227,8 +15227,10 @@ var Shot;
                         navItems.thumbnail.remove();
                     }
 
+                    console.log(carousel.images.indexOf(image));
+
                     navItems.thumbnail = $(Handlebars.compile($('#template-nav-item').html())({
-                        text: image.data.title,
+                        text: image.data.title + ' <em>' + (carousel.images.indexOf(image) + 1) + '/' + album.data.image_count + '</em>',
                         icon: 'picture-o',
                         url: SHOT.rootPath + 'album/' + album.data.id + '/image/' + image.data.id,
                         left: true
@@ -15780,6 +15782,7 @@ var Shot;
                         title: new Shot.Helpers().htmlDecode(this.data.title)
                     }).done(function (data) {
                         _this.data.id = data.id;
+                        _this.data.image_count = 0;
                         _this.data.pending = false;
                         _this.data.error = false;
 

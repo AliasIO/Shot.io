@@ -46,6 +46,12 @@ class Album extends \Shot\Abstracts\Model
 	public $sortOrder = 0;
 
 	/**
+	 * Number of images in album
+	 * @var integer
+	 */
+	public $imageCount = 0;
+
+	/**
 	 * Save album
 	 * @return Album
 	 * @throws \Swiftlet\Exception
@@ -171,6 +177,25 @@ class Album extends \Shot\Abstracts\Model
 		$this->thumbCrop = $result->thumb_crop;
 		$this->sortOrder = $result->sort_order;
 
+		$sth = $this->dbh->prepare('
+			SELECT
+				COUNT(image_id) AS image_count
+			FROM albums_images
+			WHERE
+				album_id = :album_id
+			LIMIT 1
+			');
+
+		$sth->bindParam('album_id', $this->id, \PDO::PARAM_INT);
+
+		$sth->execute();
+
+		$result = $sth->fetchObject();
+
+		if ( $result ) {
+			$this->imageCount = $result->image_count;
+		}
+
 		// If no cover image is set get the first image in the album
 		if ( !$this->filename ) {
 			$sth = $this->dbh->prepare('
@@ -248,6 +273,14 @@ class Album extends \Shot\Abstracts\Model
 	public function getFilePath()
 	{
 		return $this->filename ? 'photos/thumb/' . $this->filename . '?' . $this->thumbCrop : null;
+	}
+
+	/**
+	 * Get the number of images
+	 */
+	public function getImageCount()
+	{
+		return $this->imageCount;
 	}
 }
 

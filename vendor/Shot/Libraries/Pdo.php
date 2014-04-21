@@ -20,6 +20,10 @@ class Pdo extends \Swiftlet\Abstracts\Library
 
 			$this->handle->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
+			$sth = $this->handle->prepare('PRAGMA foreign_keys = ON');
+
+			$sth->execute();
+
 			$sth = $this->handle->prepare('PRAGMA journal_mode=WAL');
 
 			$sth->execute();

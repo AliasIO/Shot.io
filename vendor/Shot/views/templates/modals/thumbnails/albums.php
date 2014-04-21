@@ -13,7 +13,9 @@
 								<div class="row">
 									<div class="large-12 columns">
 										{{#each albums}}
+										{{#unless system}}
 										<label><input type="checkbox" name="album[{{id}}]"> {{{title}}}</label>
+										{{/unless}}
 										{{/each}}
 									</div>
 								</div>
@@ -24,7 +26,9 @@
 
 								<div class="row">
 									<div class="large-12 columns">
+										{{#unless album.system}}
 										<label><input type="checkbox" name="remove"> Current album ({{{album.title}}})</label>
+										{{/unless}}
 										<label><input type="checkbox" name="remove_other"> All other albums</label>
 									</div>
 								</div>

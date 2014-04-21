@@ -26,7 +26,7 @@
 							{{else}}
 							<i class="fa fa-folder"></i>
 							{{/if}}
-							{{{title}}}
+							{{{title}}} ({{image_count}})
 						</li>
 						{{#if pending}}
 						<li class="icon" title="Processing changes...">

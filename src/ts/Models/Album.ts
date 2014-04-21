@@ -6,7 +6,7 @@ module Shot {
 		export class Album extends Editable {
 			private template: string;
 
-			constructor(public data: { id?: number; title?: string; link?: string; pending?: boolean; error?: boolean; draggable?: boolean }) {
+			constructor(public data: { id?: number; title?: string; image_count?: number; link?: string; pending?: boolean; error?: boolean; draggable?: boolean }) {
 				super();
 
 				if ( !this.data.id ) {
@@ -52,6 +52,7 @@ module Shot {
 				})
 				.done((data) => {
 					this.data.id = data.id;
+					this.data.image_count = 0;
 					this.data.pending = false;
 					this.data.error = false;
 

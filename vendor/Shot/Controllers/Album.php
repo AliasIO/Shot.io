@@ -47,6 +47,7 @@ class Album extends \Swiftlet\Abstracts\Controller
 		$sth = $dbh->prepare('
 			SELECT
 				id,
+				system,
 				title
 			FROM albums
 			ORDER BY sort_order ASC, id ASC
@@ -60,8 +61,9 @@ class Album extends \Swiftlet\Abstracts\Controller
 
 		foreach ( $results as $result ) {
 			$albums[] = (object) array(
-				'id'    => (int) $result->id,
-				'title' => $result->title
+				'id'     => (int) $result->id,
+				'system' => $result->system,
+				'title'  => $result->title
 			);
 		}
 
@@ -118,8 +120,10 @@ class Album extends \Swiftlet\Abstracts\Controller
 		$this->view->thumbnails = $thumbnails;
 
 		$this->view->album = (object) array(
-			'title' => $album->getTitle(),
-			'id'    => (int) $album->getId()
+			'id'          => (int) $album->getId(),
+			'system'      => $album->getSystem(),
+			'title'       => $album->getTitle(),
+			'image_count' => $album->getImageCount()
 			);
 	}
 

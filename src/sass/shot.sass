@@ -94,8 +94,14 @@ body
 .top-bar
 	z-index: 98
 
-.top-bar-section ul li:first-child.divider
-	display: none
+.top-bar-section
+
+	ul li:first-child.divider
+		display: none
+
+	em
+		font-style: normal
+		font-weight: normal
 
 @media #{$small}
 	.top-bar-section ul li:first-child.divider
@@ -322,11 +328,11 @@ li
 					width: 0
 
 			.selection
+				+transition(opacity .15s ease-in-out)
 				border: 2px solid #fff
 				bottom: 0
-				display: none
 				left: 0
-				opacity: .9
+				+opacity(0)
 				position: absolute
 				right: 0
 				top: 0
@@ -390,13 +396,13 @@ li
 		&.selected
 
 			.selection
-				display: block
+				+opacity(.9)
 
 			.bar
 				+box-shadow(none)
 
 				&:before
-					opacity: .9 !important
+					+opacity(.9)
 
 		&.drop-target
 
@@ -411,19 +417,8 @@ li
 					position: absolute
 					width: 100%
 
-		&.draggable
-
-			.container
-				+box-shadow(0 0 50px rgba(0, 0, 0, .5))
-
-				.bar
-					+box-shadow(none)
-
-					&:before
-						+opacity(.3)
-
-			.drag-handle
-				cursor: move !important
+	img, canvas
+		position: absolute
 
 	canvas
 		height: auto
@@ -444,11 +439,35 @@ li
 
 	&.multi-edit
 
-		.container
-			cursor: default
+		li
 
-			a
+			.container
 				cursor: default
+
+				a
+					cursor: default
+
+			&:hover
+
+				.selection
+					+opacity(.9)
+
+			&.draggable
+
+				.drag-handle
+					cursor: move !important
+
+				.container
+					+box-shadow(0 0 50px rgba(0, 0, 0, .5))
+
+					.selection
+						+opacity(0)
+
+					.bar
+						+box-shadow(none)
+
+						&:before
+							+opacity(.3)
 
 @media #{$screen}
 	.thumbnail-grid
