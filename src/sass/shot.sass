@@ -1,24 +1,27 @@
+@import "compass"
+
+@import "foundation/_functions"
+@import "foundation/_settings"
+
+@import "font-awesome/font-awesome"
+
 $primary-color: #ce4b3e
 $secondary-color: #252833
 
 $body-bg: darken($secondary-color, 10%) !default
 $body-font-color: #fff !default
 
-//$base-font-size: 16px
-
-//$em-base: $base-font-size
-
 $topbar-bg: $secondary-color
 $topbar-link-color-hover: #fff
-$topbar-breakpoint: 768px
-$topbar-transition-speed: 0
+$topbar-link-bg-hover: $secondary-color
+$topbar-divider-border-bottom: solid 1px lighten($topbar-bg, 5%)
 
 $form-label-font-color: darken($body-font-color, 30%)
 
-// $fieldset-bg: $secondary-color
-// $fieldset-border-color: lighten($secondary-color, 10%)
 $fieldset-bg: transparent
 $fieldset-border-color: transparent
+
+$button-med: rem-calc(12)
 
 $legend-bg: transparent
 
@@ -30,51 +33,17 @@ $form-label-bottom-margin: .5em
 
 $shiny-edge-color: rgba(#fff, .3)
 
-$thumbnail-size: emCalc(480px)
-
-@import "compass"
-
-@import "settings"
-
-@import "normalize"
+$thumbnail-size: rem-calc(480px)
 
 @import "foundation/components/global"
 @import "foundation/components/grid"
-// @import "foundation/components/visibility"
 @import "foundation/components/block-grid"
 @import "foundation/components/type"
 @import "foundation/components/buttons"
 @import "foundation/components/forms"
-@import "foundation/components/custom-forms"
 @import "foundation/components/button-groups"
-// @import "foundation/components/dropdown-buttons" // *requires components/buttons
-// @import "foundation/components/split-buttons" // *requires components/buttons
-// @import "foundation/components/flex-video"
-// @import "foundation/components/section"
 @import "foundation/components/top-bar"
-// @import "foundation/components/orbit"
-// @import "foundation/components/reveal"
-// @import "foundation/components/joyride"
-// @import "foundation/components/clearing"
-// @import "foundation/components/alert-boxes"
-// @import "foundation/components/breadcrumbs"
-// @import "foundation/components/keystrokes"
 @import "foundation/components/labels"
-// @import "foundation/components/inline-lists"
-// @import "foundation/components/pagination"
-// @import "foundation/components/panels"
-// @import "foundation/components/pricing-tables"
-// @import "foundation/components/progress-bars"
-// @import "foundation/components/side-nav"
-// @import "foundation/components/sub-nav"
-// @import "foundation/components/switch"
-// @import "foundation/components/magellan"
-// @import "foundation/components/tables"
-// @import "foundation/components/thumbs"
-// @import "foundation/components/tooltips"
-// @import "foundation/components/dropdown"
-
-@import "font-awesome/font-awesome"
 
 .foundation-data-attribute-namespace
 	font-family: false
@@ -91,8 +60,18 @@ body
 	min-height: 100%
 	padding-bottom: 100px
 
+@media #{$small}
+	body
+		padding-top: 45px
+
 .top-bar
 	z-index: 98
+
+@media #{$small}
+	.top-bar
+		position: fixed
+		top: 0
+		width: 100%
 
 .top-bar-section
 
@@ -288,6 +267,7 @@ li
 
 .thumbnail-grid
 	+block-grid(5, 10px, true)
+	margin-top: rem-calc(30) !important
 
 	li
 
