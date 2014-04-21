@@ -43,11 +43,23 @@ class Index extends \Swiftlet\Abstracts\Controller
 		foreach ( $results as $result ) {
 			$album = $this->app->getModel('album')->setDatabaseHandle($dbh)->load($result->id);
 
+			$path = null;
+
+			$coverImageId = $album->getCoverImageId();
+
+			if ( $coverImageId ) {
+				$coverImage = $this->app->getModel('image')->setDatabaseHandle($dbh)->load($coverImageId);
+
+				if ( $coverImage ) {
+					$path = $coverImage->getFilePath('thumb');
+				}
+			}
+
 			$albums[] = (object) array(
 				'id'          => (int) $album->getId(),
 				'system'      => $album->getSystem(),
 				'title'       => $album->getTitle(),
-				'path'        => $album->getFilePath(),
+				'path'        => $path,
 				'image_count' => $album->getImageCount()
 				);
 		}

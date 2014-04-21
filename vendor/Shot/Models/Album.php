@@ -22,18 +22,6 @@ class Album extends \Shot\Abstracts\Model
 	protected $system;
 
 	/**
-	 * Filename
-	 * @var string
-	 */
-	protected $filename;
-
-	/**
-	 * Thumbnail crop position
-	 * @var string
-	 */
-	protected $thumbCrop;
-
-	/**
 	 * Title
 	 * @var string
 	 */
@@ -62,15 +50,17 @@ class Album extends \Shot\Abstracts\Model
 			$sth = $this->dbh->prepare('
 				UPDATE albums SET
 					title = :title,
+					cover_image_id = :cover_image_id,
 					sort_order = :sort_order
 				WHERE
 					id = :id
 				LIMIT 1
 				');
 
-			$sth->bindParam('title',      $this->title);
-			$sth->bindParam('sort_order', $this->sortOrder, \PDO::PARAM_INT);
-			$sth->bindParam('id',         $this->id,        \PDO::PARAM_INT);
+			$sth->bindParam('title',          $this->title);
+			$sth->bindParam('cover_image_id', $this->coverImageId, \PDO::PARAM_INT);
+			$sth->bindParam('sort_order',     $this->sortOrder,    \PDO::PARAM_INT);
+			$sth->bindParam('id',             $this->id,           \PDO::PARAM_INT);
 
 			$sth->execute();
 		} else {
@@ -149,12 +139,14 @@ class Album extends \Shot\Abstracts\Model
 	{
 		$sth = $this->dbh->prepare('
 			SELECT
-				albums.*,
-				images.filename,
-				images.thumb_crop
-			FROM      albums
-			LEFT JOIN albums_images ON albums.id = albums_images.album_id
-			LEFT JOIN images ON albums_images.image_id = images.id AND albums.cover_image_id = images.id
+				albums.id,
+				albums.title,
+				albums.sort_order,
+				albums.system,
+				images.id AS cover_image_id -- Ensure the cover image is still in the album
+			FROM albums
+			LEFT JOIN albums_images ON albums_images.album_id =        albums.id       AND albums.cover_image_id = albums_images.image_id
+			LEFT JOIN images        ON        images.id       = albums_images.image_id
 			WHERE
 				albums.' . $attribute . ' = :' . $attribute . '
 			LIMIT 1
@@ -170,12 +162,11 @@ class Album extends \Shot\Abstracts\Model
 			throw new \Swiftlet\Exception('Album does not exist', self::EXCEPTION_NOT_FOUND);
 		}
 
-		$this->id        = $result->id;
-		$this->system    = $result->system;
-		$this->title     = $result->title;
-		$this->filename  = $result->filename;
-		$this->thumbCrop = $result->thumb_crop;
-		$this->sortOrder = $result->sort_order;
+		$this->id           = $result->id;
+		$this->system       = $result->system;
+		$this->title        = $result->title;
+		$this->coverImageId = $result->cover_image_id;
+		$this->sortOrder    = $result->sort_order;
 
 		$sth = $this->dbh->prepare('
 			SELECT
@@ -197,12 +188,10 @@ class Album extends \Shot\Abstracts\Model
 		}
 
 		// If no cover image is set get the first image in the album
-		if ( !$this->filename ) {
+		if ( !$this->coverImageId ) {
 			$sth = $this->dbh->prepare('
 				SELECT
-					images.id,
-					images.filename,
-					images.thumb_crop
+					images.id
 				FROM       albums_images
 				INNER JOIN images ON albums_images.image_id = images.id
 				WHERE
@@ -218,8 +207,7 @@ class Album extends \Shot\Abstracts\Model
 			$result = $sth->fetchObject();
 
 			if ( $result ) {
-				$this->filename  = $result->filename;
-				$this->thumbCrop = $result->thumb_crop;
+				$this->coverImageId = $result->id;
 			}
 		}
 
@@ -267,12 +255,24 @@ class Album extends \Shot\Abstracts\Model
 	}
 
 	/**
-	 * Get file path
-	 * @return string
+	 * Get cover image ID
+	 * @return int
 	 */
-	public function getFilePath()
+	public function getCoverImageId()
 	{
-		return $this->filename ? 'photos/thumb/' . $this->filename . '?' . $this->thumbCrop : null;
+		return $this->coverImageId;
+	}
+
+	/**
+	 * Set cover image
+	 * @param \Shot\Models\Image $image
+	 * @return Album
+	 */
+	public function setCoverImage(\Shot\Models\Image $image)
+	{
+		$this->coverImageId = $image->getId();
+
+		return $this;
 	}
 
 	/**

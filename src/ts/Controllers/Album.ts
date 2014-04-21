@@ -452,15 +452,25 @@ module Shot {
 
 				navItems.editAlbum
 					.on('click', (e) => {
-						var modal = new Models.Modal('#template-modals-albums-edit', album.data).render();
+						var data = $.extend({ images: [] }, album.data);
+
+						thumbnails.forEach(function(thumbnail) {
+							data.images.push(thumbnail.data);
+						});
+
+						var modal = new Models.Modal('#template-modals-albums-edit', data).render();
 
 						e.preventDefault();
 
 						modal.el
 							.on('submit', 'form', (e) => {
-								var title = helpers.htmlEncode(modal.el.find(':input[name="title"]').val());
+								var
+									title = helpers.htmlEncode(modal.el.find(':input[name="title"]').val()),
+									cover_image_id = modal.el.find(':input[name="cover"]').val();
 
 								e.preventDefault();
+
+								album.data.cover_image_id = cover_image_id ? cover_image_id : null;
 
 								if ( title ) {
 									album.data.title = title;
@@ -473,7 +483,26 @@ module Shot {
 								}
 
 								modal.close();
-							});
+							})
+							.on('change', ':input[name="cover"]', (e) => {
+								var
+									preview = modal.el.find('.cover-preview'),
+									coverImageId = parseInt($(e.target).val(), 10);
+
+								preview.stop().fadeOut('fast', () => {
+									preview.html('');
+
+									thumbnails.forEach((thumbnail) => {
+										if ( thumbnail.data.id === coverImageId ) {
+											preview
+												.stop()
+												.html('<img src="' + thumbnail.data.paths.preview + '">')
+												.fadeIn('fast');
+										}
+									});
+								});
+							})
+							.trigger('change', ':input[name="cover"]');
 
 						helpers.showModal(modal);
 					})

@@ -15100,14 +15100,22 @@ var Shot;
                 }));
 
                 navItems.editAlbum.on('click', function (e) {
-                    var modal = new Shot.Models.Modal('#template-modals-albums-edit', album.data).render();
+                    var data = $.extend({ images: [] }, album.data);
+
+                    thumbnails.forEach(function (thumbnail) {
+                        data.images.push(thumbnail.data);
+                    });
+
+                    var modal = new Shot.Models.Modal('#template-modals-albums-edit', data).render();
 
                     e.preventDefault();
 
                     modal.el.on('submit', 'form', function (e) {
-                        var title = helpers.htmlEncode(modal.el.find(':input[name="title"]').val());
+                        var title = helpers.htmlEncode(modal.el.find(':input[name="title"]').val()), cover_image_id = modal.el.find(':input[name="cover"]').val();
 
                         e.preventDefault();
+
+                        album.data.cover_image_id = cover_image_id ? cover_image_id : null;
 
                         if (title) {
                             album.data.title = title;
@@ -15120,7 +15128,19 @@ var Shot;
                         }
 
                         modal.close();
-                    });
+                    }).on('change', ':input[name="cover"]', function (e) {
+                        var preview = modal.el.find('.cover-preview'), coverImageId = parseInt($(e.target).val(), 10);
+
+                        preview.stop().fadeOut('fast', function () {
+                            preview.html('');
+
+                            thumbnails.forEach(function (thumbnail) {
+                                if (thumbnail.data.id === coverImageId) {
+                                    preview.stop().html('<img src="' + thumbnail.data.paths.preview + '">').fadeIn('fast');
+                                }
+                            });
+                        });
+                    }).trigger('change', ':input[name="cover"]');
 
                     helpers.showModal(modal);
                 }).appendTo('.top-bar .right');
@@ -15779,10 +15799,10 @@ var Shot;
 
                     $.post(SHOT.rootPath + 'ajax/saveAlbum', {
                         id: this.data.id,
-                        title: new Shot.Helpers().htmlDecode(this.data.title)
+                        title: new Shot.Helpers().htmlDecode(this.data.title),
+                        cover_image_id: this.data.cover_image_id
                     }).done(function (data) {
                         _this.data.id = data.id;
-                        _this.data.image_count = 0;
                         _this.data.pending = false;
                         _this.data.error = false;
 
@@ -15799,6 +15819,7 @@ var Shot;
 
                 if (!this.data.id) {
                     this.data.pending = true;
+                    this.data.image_count = 0;
                 }
 
                 this.template = $('#template-album').html();

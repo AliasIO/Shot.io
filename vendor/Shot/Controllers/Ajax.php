@@ -28,8 +28,9 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 
 		try {
 			if ( !empty($_POST) ) {
-				$id    = !empty($_POST['id'])    ? (int) $_POST['id']    : null;
-				$title = !empty($_POST['title']) ?       $_POST['title'] : '';
+				$id           = !empty($_POST['id'])             ? (int) $_POST['id']             : null;
+				$title        = !empty($_POST['title'])          ?       $_POST['title']          : '';
+				$coverImageId = !empty($_POST['cover_image_id']) ? (int) $_POST['cover_image_id'] : null;
 
 				$dbh = $this->app->getLibrary('pdo')->getHandle();
 
@@ -39,8 +40,15 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 					$album->load($id);
 				}
 
+				$image = $this->app->getModel('image')->setDatabaseHandle($dbh);
+
+				if ( $coverImageId ) {
+					$image->load($coverImageId);
+				}
+
 				$album
 					->setTitle($title)
+					->setCoverImage($image)
 					->save();
 
 				exit(json_encode(array('id' => (int) $album->getId())));

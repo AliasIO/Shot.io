@@ -12,7 +12,28 @@
 
 								<div class="row">
 									<div class="large-12 columns">
-										<input type="text" name="title" placeholder="No change" value="{{{title}}}">
+										<input type="text" name="title" placeholder="(No change)" value="{{{title}}}">
+									</div>
+								</div>
+							</fieldset>
+
+							<fieldset>
+								<legend>Cover Image</legend>
+
+								<div class="row">
+									<div class="large-12 columns">
+										<select name="cover">
+											<option value="">Automatic</option>
+											{{#each images}}
+											<option value="{{id}}">{{{title}}}</option>
+											{{/each}}
+										</select>
+									</div>
+								</div>
+
+								<div class="row">
+									<div class="large-12 columns">
+										<div class="cover-preview"></div>
 									</div>
 								</div>
 							</fieldset>

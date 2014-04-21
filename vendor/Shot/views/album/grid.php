@@ -11,7 +11,7 @@
 		<ul class="thumbnail-grid"></ul>
 
 		<p class="page-placeholder">
-			No images have been added yet
+			This album contains no images
 		</p>
 	</div>
 </div>
