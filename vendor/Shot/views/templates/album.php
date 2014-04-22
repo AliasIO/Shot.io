@@ -11,7 +11,6 @@
 					<i class="fa fa-picture-o fa-5x"></i>
 				</div>
 				{{/if}}
-				<div class="selection"></div>
 			{{else}}
 			<div class="placeholder-thumbnail">
 				<div class="valign"></div>
@@ -46,6 +45,7 @@
 					</ul>
 				</div>
 			{{#if id}}
+				<div class="selection"></div>
 			</a>
 			{{else}}
 			</div>
