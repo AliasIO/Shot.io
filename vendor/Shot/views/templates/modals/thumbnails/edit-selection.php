@@ -18,14 +18,40 @@
 							</fieldset>
 
 							<fieldset>
-								<legend>Thumbnail</legend>
+								<legend>Location</legend>
 
 								<div class="row">
 									<div class="large-12 columns">
+										<input type="text" name="location" placeholder="No change" value="{{{location}}}">
+									</div>
+								</div>
+							</fieldset>
+
+							<fieldset>
+								<legend>Description</legend>
+
+								<div class="row">
+									<div class="large-12 columns">
+										<textarea name="description" placeholder="No change" rows="5">{{{description}}}</textarea>
+									</div>
+								</div>
+							</fieldset>
+
+							<fieldset>
+								<legend>Thumbnail</legend>
+
+								<div class="row">
+									<div class="large-6 columns">
 										<label><input type="radio" name="thumb-crop" value="smart"> Smart</label>
+									</div>
+									<div class="large-6 columns">
 										<label><input type="radio" name="thumb-crop" value="centered"> Centred</label>
-										<label><input type="radio" name="thumb-crop" value="topLeft"> Top / Left</label>
-										<label><input type="radio" name="thumb-crop" value="bottomRight"> Bottom / Right</label>
+									</div>
+									<div class="large-6 columns">
+										<label><input type="radio" name="thumb-crop" value="topLeft"> Top/Left</label>
+									</div>
+									<div class="large-6 columns">
+										<label><input type="radio" name="thumb-crop" value="bottomRight"> Bottom/Right</label>
 									</div>
 								</div>
 							</fieldset>

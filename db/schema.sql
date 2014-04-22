@@ -1,16 +1,18 @@
 DROP TABLE IF EXISTS images;
 
 CREATE TABLE images (
-	id         INTEGER PRIMARY KEY AUTOINCREMENT,
-	filename   TEXT    NOT NULL,
-	title      TEXT        NULL,
-	width      INTEGER NOT NULL,
-	height     INTEGER NOT NULL,
-	thumb_crop TEXT    NOT NULL,
-	properties TEXT        NULL,
-	taken_at   INTEGER     NULL,
-	created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
-	updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+	id          INTEGER PRIMARY KEY AUTOINCREMENT,
+	filename    TEXT    NOT NULL,
+	title       TEXT        NULL,
+	width       INTEGER NOT NULL,
+	height      INTEGER NOT NULL,
+	thumb_crop  TEXT    NOT NULL,
+	properties  TEXT        NULL,
+	description TEXT        NULL,
+	location    TEXT        NULL,
+	taken_at    INTEGER     NULL,
+	created_at  INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+	updated_at  INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
 );
 
 CREATE UNIQUE INDEX filename ON images ( filename );

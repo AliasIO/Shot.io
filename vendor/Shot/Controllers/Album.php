@@ -78,7 +78,7 @@ class Album extends \Swiftlet\Abstracts\Controller
 			ORDER BY albums_images.sort_order ASC, images.id ASC
 			');
 
-		$sth->bindParam('album_id', $albumId);
+		$sth->bindParam('album_id', $albumId, \PDO::PARAM_INT);
 
 		$sth->execute();
 
@@ -102,14 +102,16 @@ class Album extends \Swiftlet\Abstracts\Controller
 			$exif = $this->app->getLibrary('exif')->format($image->getProperties());
 
 			$thumbnails[] = (object) array(
-				'id'       => (int) $image->getId(),
-				'filename' => $image->getFilename(),
-				'title'    => $image->getTitle(),
-				'width'    => (int) $image->getWidth(),
-				'height'   => (int) $image->getHeight(),
-				'path'     => $this->view->getRootPath() . $image->getFilePath('thumb'),
-				'paths'    => $paths,
-				'exif'     => $exif
+				'id'          => (int) $image->getId(),
+				'filename'    => $image->getFilename(),
+				'title'       => $image->getTitle(),
+				'width'       => (int) $image->getWidth(),
+				'height'      => (int) $image->getHeight(),
+				'description' => $image->getDescription(),
+				'location'    => $image->getLocation(),
+				'path'        => $this->view->getRootPath() . $image->getFilePath('thumb'),
+				'paths'       => $paths,
+				'exif'        => $exif
 				);
 		}
 

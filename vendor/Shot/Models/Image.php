@@ -46,6 +46,18 @@ class Image extends \Shot\Abstracts\Model
 	protected $properties;
 
 	/**
+	 * Description
+	 * @var string
+	 */
+	public $description;
+
+	/**
+	 * Location
+	 * @var string
+	 */
+	public $location;
+
+	/**
 	 * Thumbnail crop position
 	 * @var string
 	 */
@@ -128,26 +140,30 @@ class Image extends \Shot\Abstracts\Model
 		if ( $this->id ) {
 			$sth = $this->dbh->prepare('
 				UPDATE images SET
-					filename   = :filename,
-					title      = :title,
-					width      = :width,
-					height     = :height,
-					thumb_crop = :thumb_crop,
-					properties = :properties,
-					taken_at   = :taken_at
+					filename    = :filename,
+					title       = :title,
+					width       = :width,
+					height      = :height,
+					thumb_crop  = :thumb_crop,
+					properties  = :properties,
+					description = :description,
+					location    = :location,
+					taken_at    = :taken_at
 				WHERE
 					id = :id
 				LIMIT 1
 				');
 
-			$sth->bindParam('id',         $this->id,     \PDO::PARAM_INT);
-			$sth->bindParam('filename',   $this->filename);
-			$sth->bindParam('title',      $this->title);
-			$sth->bindParam('width',      $this->width,  \PDO::PARAM_INT);
-			$sth->bindParam('height',     $this->height, \PDO::PARAM_INT);
-			$sth->bindParam('thumb_crop', $this->thumbCrop);
-			$sth->bindParam('properties', $properties);
-			$sth->bindParam('taken_at',   $this->takenAt, \PDO::PARAM_INT);
+			$sth->bindParam('id',          $this->id,     \PDO::PARAM_INT);
+			$sth->bindParam('filename',    $this->filename);
+			$sth->bindParam('title',       $this->title);
+			$sth->bindParam('width',       $this->width,  \PDO::PARAM_INT);
+			$sth->bindParam('height',      $this->height, \PDO::PARAM_INT);
+			$sth->bindParam('thumb_crop',  $this->thumbCrop);
+			$sth->bindParam('properties',  $properties);
+			$sth->bindParam('description', $this->description);
+			$sth->bindParam('location',    $this->location);
+			$sth->bindParam('taken_at',    $this->takenAt, \PDO::PARAM_INT);
 
 			$sth->execute();
 		} else {
@@ -159,6 +175,8 @@ class Image extends \Shot\Abstracts\Model
 					height,
 					thumb_crop,
 					properties,
+					description,
+					location,
 					taken_at
 				) VALUES (
 					:filename,
@@ -167,17 +185,21 @@ class Image extends \Shot\Abstracts\Model
 					:height,
 					:thumb_crop,
 					:properties,
+					:description,
+					:location,
 					:taken_at
 				)
 				');
 
-			$sth->bindParam('filename',   $this->filename);
-			$sth->bindParam('title',      $this->title);
-			$sth->bindParam('width',      $this->width,  \PDO::PARAM_INT);
-			$sth->bindParam('height',     $this->height, \PDO::PARAM_INT);
-			$sth->bindParam('thumb_crop', $this->thumbCrop);
-			$sth->bindParam('properties', $properties);
-			$sth->bindParam('taken_at',   $this->takenAt, \PDO::PARAM_INT);
+			$sth->bindParam('filename',    $this->filename);
+			$sth->bindParam('title',       $this->title);
+			$sth->bindParam('width',       $this->width,  \PDO::PARAM_INT);
+			$sth->bindParam('height',      $this->height, \PDO::PARAM_INT);
+			$sth->bindParam('thumb_crop',  $this->thumbCrop);
+			$sth->bindParam('properties',  $properties);
+			$sth->bindParam('description', $this->description);
+			$sth->bindParam('location',    $this->location);
+			$sth->bindParam('taken_at',    $this->takenAt, \PDO::PARAM_INT);
 
 			$sth->execute();
 
@@ -240,7 +262,15 @@ class Image extends \Shot\Abstracts\Model
 	{
 		$sth = $this->dbh->prepare('
 			SELECT
-				*
+				id,
+				title,
+				filename,
+				width,
+				height,
+				thumb_crop,
+				properties,
+				description,
+				location
 			FROM images
 			WHERE
 				id = :id
@@ -257,13 +287,15 @@ class Image extends \Shot\Abstracts\Model
 			throw new \Swiftlet\Exception('Image does not exist', self::EXCEPTION_NOT_FOUND);
 		}
 
-		$this->id         = $result->id;
-		$this->title      = $result->title;
-		$this->filename   = $result->filename;
-		$this->width      = $result->width;
-		$this->height     = $result->height;
-		$this->thumbCrop  = $result->thumb_crop;
-		$this->properties = unserialize($result->properties);
+		$this->id          = $result->id;
+		$this->title       = $result->title;
+		$this->filename    = $result->filename;
+		$this->width       = $result->width;
+		$this->height      = $result->height;
+		$this->thumbCrop   = $result->thumb_crop;
+		$this->properties  = @unserialize($result->properties);
+		$this->description = $result->description;
+		$this->location    = $result->location;
 
 		return $this;
 	}

@@ -9,6 +9,8 @@ module Shot {
 			constructor(public data: {
 				id?: number;
 				title?: string;
+				description?: string;
+				location?: string;
 				path?: string;
 				paths?: any;
 				link?: string;
@@ -57,6 +59,8 @@ module Shot {
 					// TODO
 				} else {
 					this.data.formData.append('title', new Helpers().htmlDecode(this.data.title));
+					this.data.formData.append('description', this.data.description);
+					this.data.formData.append('location', this.data.location);
 
 					$.ajax(SHOT.rootPath + 'ajax/saveImage', {
 						type: 'POST',

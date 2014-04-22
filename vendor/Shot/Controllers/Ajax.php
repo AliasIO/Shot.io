@@ -72,8 +72,10 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 
 		try {
 			if ( !empty($_POST) ) {
-				$albumId = !empty($_POST['albumId']) ? $_POST['albumId'] : '';
-				$title   = !empty($_POST['title'])   ? $_POST['title']   : '';
+				$albumId     = !empty($_POST['albumId'])     ? $_POST['albumId']     : null;
+				$title       = !empty($_POST['title'])       ? $_POST['title']       : '';
+				$description = !empty($_POST['description']) ? $_POST['description'] : '';
+				$location    = !empty($_POST['location'])    ? $_POST['location']    : '';
 
 				if ( !$albumId ) {
 					throw new \Swiftlet\Exception('No album ID specified');
@@ -126,6 +128,8 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 
 						$image
 							->setTitle($title ? $title : basename($file['name']))
+							->setDescription($description)
+							->setLocation($location)
 							->create($filename)
 							->save();
 
@@ -190,9 +194,11 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 		header('Content-Type: application/json');
 
 		if ( !empty($_POST) ) {
-			$ids       = !empty($_POST['ids'])       ? $_POST['ids']       : array();
-			$title     = !empty($_POST['title'])     ? $_POST['title']     : '';
-			$thumbCrop = !empty($_POST['thumbCrop']) ? $_POST['thumbCrop'] : '';
+			$ids         = !empty($_POST['ids'])         ? $_POST['ids']         : array();
+			$title       = !empty($_POST['title'])       ? $_POST['title']       : '';
+			$description = !empty($_POST['description']) ? $_POST['description'] : '';
+			$location    = !empty($_POST['location'])    ? $_POST['location']    : '';
+			$thumbCrop   = !empty($_POST['thumbCrop'])   ? $_POST['thumbCrop']   : '';
 
 			$albumsAdd         = !empty($_POST['albums']) && !empty($_POST['albums']['add'])         ?       $_POST['albums']['add']         : array();
 			$albumsRemove      = !empty($_POST['albums']) && !empty($_POST['albums']['remove'])      ? (int) $_POST['albums']['remove']      : null;
@@ -251,6 +257,14 @@ class Ajax extends \Swiftlet\Abstracts\Controller
 
 						if ( $title ) {
 							$image->setTitle($title);
+						}
+
+						if ( $description || count($ids) == 1 ) {
+							$image->setDescription($description);
+						}
+
+						if ( $location || count($ids) == 1 ) {
+							$image->setLocation($location);
 						}
 
 						if ( $thumbCrop ) {

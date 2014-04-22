@@ -78,6 +78,8 @@ module Shot {
 									ids: Array<number> = [],
 									selection = multiEdit.getSelection(),
 									title = helpers.htmlEncode(modal.el.find(':input[name="title"]').val()),
+									description = modal.el.find(':input[name="description"]').val(),
+									location = modal.el.find(':input[name="location"]').val(),
 									thumbCrop = modal.el.find(':input[name="thumb-crop"]:checked').val();
 
 								e.preventDefault();
@@ -92,10 +94,24 @@ module Shot {
 										thumbnail.data.title = title;
 									}
 
+									if ( description || ids.length === 1 ) {
+										thumbnail.data.description = description;
+									}
+
+									if ( location || ids.length === 1 ) {
+										thumbnail.data.location = location;
+									}
+
 									thumbnail.render();
 								});
 
-								$.post(SHOT.rootPath + 'ajax/saveImages', { ids: ids, title: helpers.htmlDecode(title), thumbCrop: thumbCrop })
+								$.post(SHOT.rootPath + 'ajax/saveImages', {
+									ids: ids,
+									title: helpers.htmlDecode(title),
+									description: description,
+									location: location,
+									thumbCrop: thumbCrop
+								})
 									.done(() => {
 										selection.forEach((thumbnail) => {
 											thumbnail.data.pending = false;
@@ -566,7 +582,7 @@ module Shot {
 				navItems.album.appendTo('.top-bar .left');
 
 				navItems.exif = $(Handlebars.compile($('#template-nav-item').html())({
-					text: 'Exif',
+					text: 'Meta data',
 					icon: 'info-circle',
 					right: true
 				}));
@@ -625,8 +641,6 @@ module Shot {
 					if ( navItems.thumbnail ) {
 						navItems.thumbnail.remove();
 					}
-
-					console.log(carousel.images.indexOf(image));
 
 					navItems.thumbnail = $(Handlebars.compile($('#template-nav-item').html())({
 						text: image.data.title + ' <em>' + ( carousel.images.indexOf(image) + 1 ) + '/' + album.data.image_count + '</em>',

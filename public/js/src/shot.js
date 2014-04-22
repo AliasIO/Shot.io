@@ -14783,7 +14783,7 @@ var Shot;
                     modal = new Shot.Models.Modal('#template-modals-thumbnails-edit-selection', data).render();
 
                     modal.el.on('submit', 'form', function (e) {
-                        var ids = [], selection = multiEdit.getSelection(), title = helpers.htmlEncode(modal.el.find(':input[name="title"]').val()), thumbCrop = modal.el.find(':input[name="thumb-crop"]:checked').val();
+                        var ids = [], selection = multiEdit.getSelection(), title = helpers.htmlEncode(modal.el.find(':input[name="title"]').val()), description = modal.el.find(':input[name="description"]').val(), location = modal.el.find(':input[name="location"]').val(), thumbCrop = modal.el.find(':input[name="thumb-crop"]:checked').val();
 
                         e.preventDefault();
 
@@ -14797,10 +14797,24 @@ var Shot;
                                 thumbnail.data.title = title;
                             }
 
+                            if (description || ids.length === 1) {
+                                thumbnail.data.description = description;
+                            }
+
+                            if (location || ids.length === 1) {
+                                thumbnail.data.location = location;
+                            }
+
                             thumbnail.render();
                         });
 
-                        $.post(SHOT.rootPath + 'ajax/saveImages', { ids: ids, title: helpers.htmlDecode(title), thumbCrop: thumbCrop }).done(function () {
+                        $.post(SHOT.rootPath + 'ajax/saveImages', {
+                            ids: ids,
+                            title: helpers.htmlDecode(title),
+                            description: description,
+                            location: location,
+                            thumbCrop: thumbCrop
+                        }).done(function () {
                             selection.forEach(function (thumbnail) {
                                 thumbnail.data.pending = false;
 
@@ -15195,7 +15209,7 @@ var Shot;
                 navItems.album.appendTo('.top-bar .left');
 
                 navItems.exif = $(Handlebars.compile($('#template-nav-item').html())({
-                    text: 'Exif',
+                    text: 'Meta data',
                     icon: 'info-circle',
                     right: true
                 }));
@@ -15246,8 +15260,6 @@ var Shot;
                     if (navItems.thumbnail) {
                         navItems.thumbnail.remove();
                     }
-
-                    console.log(carousel.images.indexOf(image));
 
                     navItems.thumbnail = $(Handlebars.compile($('#template-nav-item').html())({
                         text: image.data.title + ' <em>' + (carousel.images.indexOf(image) + 1) + '/' + album.data.image_count + '</em>',
@@ -16289,6 +16301,8 @@ var Shot;
                 if (this.data.id) {
                 } else {
                     this.data.formData.append('title', new Shot.Helpers().htmlDecode(this.data.title));
+                    this.data.formData.append('description', this.data.description);
+                    this.data.formData.append('location', this.data.location);
 
                     $.ajax(SHOT.rootPath + 'ajax/saveImage', {
                         type: 'POST',
