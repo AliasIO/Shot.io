@@ -1,4 +1,4 @@
-@import "compass"
+@import "bourbon"
 
 @import "foundation/_functions"
 @import "foundation/_settings"
@@ -178,7 +178,7 @@ li
 
 .modal-content
 	background: lighten($secondary-color, 10%)
-	+box-shadow(0 0 50px rgba(0, 0, 0, .5))
+	box-shadow: 0 0 50px rgba(0, 0, 0, .5)
 	margin: 0 auto
 	overflow: hidden
 	padding: 1em 2.4em 0
@@ -187,7 +187,7 @@ li
 #edit-mode
 	background: lighten($secondary-color, 5%)
 	bottom: 0
-	+box-shadow(0 0 5px rgba(0, 0, 0, .5))
+	box-shadow: 0 0 5px rgba(0, 0, 0, .5)
 	display: none
 	padding-top: 1.25em
 	position: fixed
@@ -266,11 +266,11 @@ li
 				image: image-url('checkers.png')
 				repeat: repeat
 			max-height: 100%
-			+box-shadow(0 0 5px #000)
+			box-shadow: 0 0 5px #000
 
 	&.animating
 		img
-			+box-shadow(none)
+			box-shadow: none
 
 .thumbnail-grid
 	+block-grid(5, 15px, true)
@@ -283,7 +283,7 @@ li
 				color: lighten($body-bg, 5%)
 				image: image-url('checkers.png')
 				repeat: repeat
-			+box-shadow(0 0 5px #000)
+			box-shadow: 0 0 5px #000
 			height: 0
 			padding-bottom: 100%
 			position: relative
@@ -320,7 +320,7 @@ li
 				border-bottom: none
 				bottom: 35px
 				left: 0
-				+opacity(0)
+				opacity: 0
 				position: absolute
 				right: 0
 				top: 0
@@ -333,12 +333,12 @@ li
 				bottom: 0px
 
 			.bar
-				+box-shadow(0 0 5px rgba(0, 0, 0, .5))
+				box-shadow: 0 0 5px rgba(0, 0, 0, .5)
 				display: table
 				margin: 0
 				position: absolute
 				table-layout: fixed
-				+text-shadow(1px 1px 0 rgba(255, 255, 255, .1))
+				text-shadow: 1px 1px 0 rgba(255, 255, 255, .1)
 				width: 100%
 
 				&:before
@@ -348,7 +348,7 @@ li
 					content: ''
 					display: block
 					left: 0
-					+opacity(.3)
+					opacity: .3
 					position: absolute
 					right: 0
 					top: 0
@@ -361,7 +361,7 @@ li
 					line-height: 35px
 					list-style: none
 					overflow: hidden
-					+opacity(.999)
+					opacity: .999
 					padding: 0 10px
 					text-overflow: ellipsis
 					white-space: nowrap
@@ -380,7 +380,7 @@ li
 		&:hover
 
 			.bar:before
-				+opacity(.7)
+				opacity: .7
 
 	img, canvas
 		position: absolute
@@ -414,18 +414,18 @@ li
 
 			&:hover
 				.selection
-					+opacity(.7)
+					opacity: .7
 
 			&.selected
 
 				.selection
-					+opacity(.9)
+					opacity: .9
 
 				.bar
-					+box-shadow(none)
+					box-shadow: none
 
 					&:before
-						+opacity(.9)
+						opacity: .9
 
 			&.draggable
 
@@ -433,26 +433,26 @@ li
 					cursor: move !important
 
 				.container
-					+box-shadow(0 0 50px rgba(0, 0, 0, .5))
+					box-shadow: 0 0 50px rgba(0, 0, 0, .5)
 
 					.selection
-						+opacity(0)
+						opacity: 0
 
 					.bar
-						+box-shadow(none)
+						box-shadow: none
 
 						&:before
-							+opacity(.3)
+							opacity: .3
 
 			&.drop-target
 
 				.container
 					background: none
-					+box-shadow(none)
+					box-shadow: none
 
 					div
 						border: 1px dashed lighten($secondary-color, 50%)
-						+box-shadow(0 0 50px #000 inset)
+						box-shadow: 0 0 50px #000 inset
 						height: 100%
 						position: absolute
 						width: 100%
@@ -478,7 +478,7 @@ li
 	height: 100%
 
 	img
-		+box-shadow(0 0 5px #000)
+		box-shadow: 0 0 5px #000
 		max-height: 100%
 		max-width: 100%
 
@@ -503,7 +503,7 @@ li
 		cursor: pointer
 		height: 100%
 		left: 0
-		+opacity(0)
+		opacity: 0
 		position: absolute
 		top: 0
 		width: 100%
@@ -529,8 +529,8 @@ li
 
 .notice
 	background-color: lighten($secondary-color, 30%)
-	+border-radius(2px)
-	+box-shadow(0 0 5px rgba(0, 0, 0, .5))
+	border-radius: 2px
+	box-shadow: 0 0 5px rgba(0, 0, 0, .5)
 	cursor: pointer
 	line-height: 1.5em
 	margin-bottom: .5em

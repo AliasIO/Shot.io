@@ -12,7 +12,7 @@ module.exports = function(grunt) {
 			},
 			sass: {
 				files: ['src/sass/**/*.sass', 'src/sass/**/*.scss'],
-				tasks: ['compass']
+				tasks: ['sass']
 			},
 		},
 		typescript: {
@@ -58,16 +58,21 @@ module.exports = function(grunt) {
 				}
 			}
 		},
-		compass: {
+		sass: {
 			dist: {
 				options: {
-					importPath: 'bower_components/foundation/scss',
-					outputStyle: 'compressed',
-					sassDir: 'src/sass',
-					cssDir: 'public/css',
-					imagesDir: 'public/images',
-					httpImagesPath: '/images'
-				}
+					loadPath: [
+						'bower_components/foundation/scss',
+						require('node-bourbon').includePaths
+					],
+				},
+				files: [{
+					expand: true,
+					cwd: 'src/sass',
+					src: '<%= pkg.name %>.sass',
+					dest: 'public/css',
+					ext: '.css'
+				}]
 			}
 		}
 	});
@@ -75,8 +80,8 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.loadNpmTasks('grunt-contrib-compass');
+	grunt.loadNpmTasks('grunt-contrib-sass');
 	grunt.loadNpmTasks('grunt-typescript');
 
-	grunt.registerTask('default', ['typescript', 'concat', 'uglify', 'compass', 'watch']);
+	grunt.registerTask('default', ['typescript', 'concat', 'uglify', 'sass', 'watch']);
 };
