@@ -14783,7 +14783,7 @@ var Shot;
                     modal = new Shot.Models.Modal('#template-modals-thumbnails-edit-selection', data).render();
 
                     modal.el.on('submit', 'form', function (e) {
-                        var ids = [], selection = multiEdit.getSelection(), title = helpers.htmlEncode(modal.el.find(':input[name="title"]').val()), description = modal.el.find(':input[name="description"]').val(), location = modal.el.find(':input[name="location"]').val(), thumbCrop = modal.el.find(':input[name="thumb-crop"]:checked').val();
+                        var ids = [], selection = multiEdit.getSelection(), title = helpers.htmlEncode(modal.el.find(':input[name="title"]').val()), description = modal.el.find(':input[name="description"]').val(), location = modal.el.find(':input[name="location"]').val(), thumbCrop = modal.el.find(':input[name="thumb-crop"]').val();
 
                         e.preventDefault();
 
@@ -15715,13 +15715,23 @@ var Shot;
         function Helpers() {
         }
         Helpers.prototype.showModal = function (modal) {
+            $('body').css({ overflow: 'hidden' });
+
             modal.el.on('click', function (e) {
                 if (!$(e.target).closest('.modal-content').length) {
                     modal.close();
+
+                    $('body').css({ overflow: 'auto' });
                 }
             }).on('click', '.cancel', function (e) {
-                modal.el.remove();
+                modal.close();
+
+                $('body').css({ overflow: 'auto' });
             }).appendTo('body').show().find('.modal-content').css({ marginTop: $(document).scrollTop() + 'px' });
+
+            modal.el.find('select[data-value]').each(function (i, el) {
+                $(el).val($(el).data('value'));
+            });
 
             return this;
         };

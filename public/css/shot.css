@@ -3354,7 +3354,7 @@ label {
     text-align: right; }
   label.inline {
     margin: 0 0 1rem 0;
-    padding: 0.5625rem 0; }
+    padding: 0.5rem 0; }
   label small {
     text-transform: capitalize;
     color: #c6c9d6; }
@@ -3464,7 +3464,7 @@ textarea {
   -webkit-appearance: none;
   background-color: white;
   font-family: inherit;
-  border: 1px solid #656e8c;
+  border: 0 solid #656e8c;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
   color: rgba(0, 0, 0, 0.75);
   display: block;
@@ -3568,7 +3568,7 @@ select {
   background-image: url("data:image/svg+xml;base64, PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeD0iMHB4IiB5PSIwcHgiIHdpZHRoPSI2cHgiIGhlaWdodD0iM3B4IiB2aWV3Qm94PSIwIDAgNiAzIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA2IDMiIHhtbDpzcGFjZT0icHJlc2VydmUiPjxwb2x5Z29uIHBvaW50cz0iNS45OTIsMCAyLjk5MiwzIC0wLjAwOCwwICIvPjwvc3ZnPg==");
   background-repeat: no-repeat;
   background-position: 97% center;
-  border: 1px solid #656e8c;
+  border: 0 solid #656e8c;
   padding: 0.5rem;
   font-size: 0.875rem;
   border-radius: 0;
@@ -4314,6 +4314,9 @@ a {
   a:active {
     background: none; }
 
+select {
+  -moz-appearance: window; }
+
 h1, h2, h3, h4, h5, h6 {
   color: white; }
 
@@ -4380,16 +4383,19 @@ li {
   z-index: 98; }
 
 .modal-wrap {
-  padding-bottom: 100px;
-  position: absolute;
-  top: 100px;
-  z-index: 98;
-  width: 100%; }
+  bottom: 0;
+  left: 0;
+  overflow: auto;
+  padding-top: 100px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 98; }
 
 .modal-content {
   background: #3a3f51;
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-  margin: 0 auto;
+  margin: 0 auto 55px auto;
   overflow: hidden;
   padding: 1em 2.4em 0;
   max-width: 600px; }
@@ -4433,6 +4439,20 @@ li {
     left: -100%;
     position: absolute;
     width: 300%; }
+  .carousel .image {
+    bottom: 0;
+    left: 0;
+    max-height: 100%;
+    position: absolute;
+    right: 0;
+    top: 0;
+    white-space: nowrap; }
+    .carousel .image img {
+      background-color: #1a1c24;
+      background-image: image-url("checkers.png");
+      background-repeat: repeat;
+      max-height: 100%;
+      box-shadow: 0 0 5px black; }
   .carousel .previous, .carousel .current, .carousel .next {
     position: absolute; }
   .carousel .previous, .carousel .next {
@@ -4452,20 +4472,8 @@ li {
     width: 28.66667%; }
     .carousel .current a {
       cursor: zoom-in; }
-  .carousel .image {
-    bottom: 0;
-    left: 0;
-    max-height: 100%;
-    position: absolute;
-    right: 0;
-    top: 0;
-    white-space: nowrap; }
-    .carousel .image img {
-      background-color: #1a1c24;
-      background-image: image-url("checkers.png");
-      background-repeat: repeat;
-      max-height: 100%;
-      box-shadow: 0 0 5px black; }
+    .carousel .current .description-wrap {
+      display: inherit; }
   .carousel.animating img {
     box-shadow: none; }
 

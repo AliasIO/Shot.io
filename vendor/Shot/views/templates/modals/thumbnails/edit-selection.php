@@ -41,17 +41,14 @@
 								<legend>Thumbnail</legend>
 
 								<div class="row">
-									<div class="large-6 columns">
-										<label><input type="radio" name="thumb-crop" value="smart"> Smart</label>
-									</div>
-									<div class="large-6 columns">
-										<label><input type="radio" name="thumb-crop" value="centered"> Centred</label>
-									</div>
-									<div class="large-6 columns">
-										<label><input type="radio" name="thumb-crop" value="topLeft"> Top/Left</label>
-									</div>
-									<div class="large-6 columns">
-										<label><input type="radio" name="thumb-crop" value="bottomRight"> Bottom/Right</label>
+									<div class="large-12 columns">
+										<select name="thumb-crop" data-value="{{thumb_crop}}">
+											<option value="">No change</option>
+											<option value="smart">Smart</option>
+											<option value="centered">Centred</option>
+											<option value="topLeft">Top/Left</option>
+											<option value="bottomRight">Bottom/Right</option>
+										</select>
 									</div>
 								</div>
 							</fieldset>

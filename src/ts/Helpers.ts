@@ -7,19 +7,29 @@ module Shot {
 		 * Add modal to DOM
 		 */
 		showModal(modal: Models.Modal): Helpers {
+			$('body').css({ overflow: 'hidden' });
+
 			modal.el
 				.on('click', (e) => {
 					if ( !$(e.target).closest('.modal-content').length ) {
 						modal.close();
+
+						$('body').css({ overflow: 'auto' });
 					}
 				})
 				.on('click', '.cancel', (e) => {
-					modal.el.remove();
+					modal.close();
+
+					$('body').css({ overflow: 'auto' });
 				})
 				.appendTo('body')
 				.show()
 				.find('.modal-content')
 				.css({ marginTop: $(document).scrollTop() + 'px' });
+
+			modal.el.find('select[data-value]').each((i, el) => {
+				$(el).val($(el).data('value'));
+			});
 
 			return this;
 		}
@@ -30,7 +40,7 @@ module Shot {
 		showNotice(notice: Models.Notice): Helpers {
 			notice.el
 				.on('click', (e) => {
-					notice.el.fadeOut('fast', function() {
+					notice.el.fadeOut('fast', () => {
 						notice.close();
 					});
 				})
@@ -39,7 +49,7 @@ module Shot {
 				.animate({ opacity: 1, marginTop: 0 }, 'fast')
 
 			setTimeout(function() {
-				notice.el.fadeOut('fast', function() {
+				notice.el.fadeOut('fast', () => {
 					notice.close();
 				});
 			}, 10000);

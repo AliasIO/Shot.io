@@ -80,7 +80,7 @@ module Shot {
 									title = helpers.htmlEncode(modal.el.find(':input[name="title"]').val()),
 									description = modal.el.find(':input[name="description"]').val(),
 									location = modal.el.find(':input[name="location"]').val(),
-									thumbCrop = modal.el.find(':input[name="thumb-crop"]:checked').val();
+									thumbCrop = modal.el.find(':input[name="thumb-crop"]').val();
 
 								e.preventDefault();
 

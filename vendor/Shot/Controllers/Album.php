@@ -109,6 +109,7 @@ class Album extends \Swiftlet\Abstracts\Controller
 				'height'      => (int) $image->getHeight(),
 				'description' => $image->getDescription(),
 				'location'    => $image->getLocation(),
+				'thumb_crop'  => $image->getThumbCrop(),
 				'path'        => $this->view->getRootPath() . $image->getFilePath('thumb'),
 				'paths'       => $paths,
 				'exif'        => $exif

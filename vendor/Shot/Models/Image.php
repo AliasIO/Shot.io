@@ -346,6 +346,15 @@ class Image extends \Shot\Abstracts\Model
 	}
 
 	/**
+	 * Get thumbnail cropping
+	 * @return string
+	 */
+	public function getThumbCrop()
+	{
+		return $this->thumbCrop;
+	}
+
+	/**
 	 * Get file path
 	 * @param mixed $size
 	 * @return string
